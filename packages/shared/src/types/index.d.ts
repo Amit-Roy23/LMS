@@ -1,0 +1,383 @@
+import { Role, UserStatus, DeliveryMode, BatchStatus, CourseStatus, CourseLevel, ModuleStatus, QuestionType, SubmissionStatus, EnrollmentStatus, PaymentStatus, AccessStatus, LiveProvider, LiveSessionStatus, AttendanceStatus, InquiryStatus, RegistrationStatus, PerformanceLevel, CertificateStatus, NotificationChannel, NotificationStatus } from '../enums/index.js';
+export interface ApiResponse<T = any> {
+    success: boolean;
+    data?: T;
+    error?: {
+        code: string;
+        message: string;
+        details?: any;
+    };
+}
+export interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+export interface UserSummary {
+    id: string;
+    email: string;
+    name: string;
+    role: Role;
+    phone?: string | null;
+    avatar?: string | null;
+    status: UserStatus;
+    createdAt: string;
+    studentProfile?: StudentProfileDetail | null;
+}
+export interface StudentProfileDetail {
+    id: string;
+    userId: string;
+    phone?: string | null;
+    whatsappNumber?: string | null;
+    address?: string | null;
+    city?: string | null;
+    education?: string | null;
+    avatar?: string | null;
+    performanceLevel: PerformanceLevel;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface CourseSettings {
+    passingQuizScorePercent: number;
+    maxQuizAttempts: number;
+    sequentialLessonsLock: boolean;
+    lessonCompletionThresholdPercent: number;
+    mockTestPassingPercent: number;
+    finalAssessmentPassingPercent: number;
+}
+export interface CourseSummary {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    thumbnail: string | null;
+    price: number;
+    recordedPrice?: number | null;
+    livePrice?: number | null;
+    currency: string;
+    hasRecorded: boolean;
+    hasLive: boolean;
+    level: CourseLevel;
+    category: string;
+    status: CourseStatus;
+    instructorId: string;
+    instructor?: UserSummary;
+    settings: CourseSettings;
+    modulesCount?: number;
+    batchesCount?: number;
+    totalDurationSeconds?: number;
+    enrolledStudentsCount?: number;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface BatchSummary {
+    id: string;
+    courseId: string;
+    courseTitle?: string;
+    name: string;
+    section: string;
+    className?: string | null;
+    mode: DeliveryMode;
+    instructorId?: string | null;
+    instructorName?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    scheduleText?: string | null;
+    weeklySchedule?: any;
+    capacity: number;
+    enrolledCount?: number;
+    status: BatchStatus;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface BatchDetail extends BatchSummary {
+    liveSessions?: LiveSessionDetail[];
+    enrollments?: EnrollmentDetail[];
+}
+export interface LiveSessionDetail {
+    id: string;
+    batchId: string;
+    moduleId?: string | null;
+    title: string;
+    startsAt: string;
+    durationMinutes: number;
+    provider: LiveProvider;
+    joinUrl: string;
+    recordingUrl?: string | null;
+    status: LiveSessionStatus;
+    batchName?: string;
+    moduleTitle?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface LiveAttendanceDetail {
+    id: string;
+    sessionId: string;
+    studentId: string;
+    studentName?: string;
+    joinedAt: string;
+    status: AttendanceStatus;
+}
+export interface LessonResource {
+    title: string;
+    url: string;
+    type: 'pdf' | 'link' | 'zip' | 'code';
+}
+export interface LessonDetail {
+    id: string;
+    moduleId: string;
+    title: string;
+    description?: string | null;
+    videoUrl: string;
+    durationSeconds: number;
+    order: number;
+    resources: LessonResource[];
+    isCompleted?: boolean;
+    isLocked?: boolean;
+    progressPercent?: number;
+}
+export interface OptionDetail {
+    id: string;
+    questionId: string;
+    text: string;
+    isCorrect?: boolean;
+}
+export interface QuestionDetail {
+    id: string;
+    quizId?: string;
+    text: string;
+    explanation?: string | null;
+    type: QuestionType;
+    order: number;
+    points: number;
+    marks?: number;
+    options: OptionDetail[];
+}
+export interface QuizDetail {
+    id: string;
+    moduleId: string;
+    title: string;
+    description?: string | null;
+    questionCount?: number | null;
+    passPercentage: number;
+    passingScorePercent: number;
+    maxAttempts?: number | null;
+    shuffleQuestions?: boolean;
+    shuffleOptions?: boolean;
+    showAnswersAfterSubmit?: boolean;
+    questions: QuestionDetail[];
+    attemptsCount?: number;
+    userBestScore?: number | null;
+    isPassed?: boolean;
+    isLocked?: boolean;
+}
+export interface AssignmentSubmissionDetail {
+    id: string;
+    assignmentId: string;
+    studentId: string;
+    version: number;
+    textContent?: string | null;
+    files: string[];
+    linkUrl?: string | null;
+    status: SubmissionStatus;
+    feedback?: string | null;
+    grade?: number | null;
+    reviewedBy?: string | null;
+    reviewedAt?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    student?: UserSummary;
+}
+export interface AssignmentDetail {
+    id: string;
+    moduleId: string;
+    title: string;
+    description: string;
+    maxScore: number;
+    latestSubmission?: AssignmentSubmissionDetail | null;
+    submissionHistory?: AssignmentSubmissionDetail[];
+    isApproved?: boolean;
+    isLocked?: boolean;
+}
+export interface ModuleDetail {
+    id: string;
+    courseId: string;
+    title: string;
+    description?: string | null;
+    order: number;
+    requiresAssignment: boolean;
+    requiresQuiz: boolean;
+    lessons: LessonDetail[];
+    quiz?: QuizDetail | null;
+    assignment?: AssignmentDetail | null;
+    status: ModuleStatus;
+    isLocked: boolean;
+    progressPercent: number;
+}
+export interface MockTestDetail {
+    id: string;
+    courseId: string;
+    title: string;
+    description?: string | null;
+    durationMinutes: number;
+    passingScorePercent: number;
+    questionsCount: number;
+    isLocked: boolean;
+    isPassed: boolean;
+    bestScore?: number | null;
+    attemptsCount?: number;
+}
+export interface FinalProjectDetail {
+    id: string;
+    courseId: string;
+    title: string;
+    description: string;
+    isLocked: boolean;
+    isApproved: boolean;
+    submission?: {
+        id: string;
+        description: string;
+        files: string[];
+        linkUrl?: string | null;
+        status: SubmissionStatus;
+        feedback?: string | null;
+        grade?: number | null;
+        submittedAt: string;
+    } | null;
+}
+export interface FinalAssessmentDetail {
+    id: string;
+    courseId: string;
+    title: string;
+    description?: string | null;
+    durationMinutes: number;
+    passingScorePercent: number;
+    maxAttempts: number;
+    isLocked: boolean;
+    isPassed: boolean;
+    bestScore?: number | null;
+    attemptsCount?: number;
+}
+export interface EnrollmentDetail {
+    id: string;
+    studentId: string;
+    courseId: string;
+    batchId?: string | null;
+    mode: DeliveryMode;
+    status: EnrollmentStatus;
+    paymentStatus: PaymentStatus;
+    accessStatus: AccessStatus;
+    paymentId?: string | null;
+    enrolledAt: string;
+    completedAt?: string | null;
+    student?: UserSummary;
+    course?: CourseSummary;
+    batch?: BatchSummary | null;
+}
+export interface CourseProgressionSummary {
+    courseId: string;
+    studentId: string;
+    totalModules: number;
+    completedModules: number;
+    coursePercent: number;
+    mode: DeliveryMode;
+    accessStatus: AccessStatus;
+    paymentStatus: PaymentStatus;
+    modules: {
+        id: string;
+        order: number;
+        title: string;
+        status: ModuleStatus;
+        requiresAssignment: boolean;
+        requiresQuiz: boolean;
+        lessonsCompleted: number;
+        totalLessons: number;
+        isQuizPassed: boolean;
+        isAssignmentApproved: boolean;
+        isLocked: boolean;
+    }[];
+    isAllModulesCompleted: boolean;
+    mockTestPassed: boolean;
+    finalProjectApproved: boolean;
+    finalAssessmentPassed: boolean;
+    certificateEligible: boolean;
+    certificate?: {
+        id: string;
+        certificateId: string;
+        issuedAt: string;
+        pdfUrl: string;
+        status: CertificateStatus;
+    } | null;
+}
+export interface CertificateDetail {
+    id: string;
+    certificateId: string;
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    courseId: string;
+    courseTitle: string;
+    issuedAt: string;
+    revokedAt?: string | null;
+    status: CertificateStatus;
+    pdfUrl: string;
+    qrCodeUrl?: string;
+    verificationUrl: string;
+}
+export interface InquiryDetail {
+    id: string;
+    name: string;
+    phone: string;
+    email: string;
+    courseId?: string | null;
+    courseTitle?: string | null;
+    message: string;
+    source: string;
+    status: InquiryStatus;
+    assignedToId?: string | null;
+    assignedToName?: string | null;
+    notes?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface RegistrationDetail {
+    id: string;
+    applicantName: string;
+    email: string;
+    phone: string;
+    whatsappNumber?: string | null;
+    courseId: string;
+    courseTitle?: string;
+    batchId?: string | null;
+    batchName?: string | null;
+    mode: DeliveryMode;
+    status: RegistrationStatus;
+    amount: number;
+    currency: string;
+    paymentId?: string | null;
+    userId?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface NotificationTemplateDetail {
+    id: string;
+    key: string;
+    channel: NotificationChannel;
+    subject?: string | null;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+}
+export interface NotificationLogDetail {
+    id: string;
+    channel: NotificationChannel;
+    to: string;
+    templateKey: string;
+    status: NotificationStatus;
+    provider?: string | null;
+    error?: string | null;
+    userId?: string | null;
+    createdAt: string;
+}
