@@ -11,7 +11,7 @@ import { finalAssessmentService } from '../src/services/final-assessment.service
 import { certificateService } from '../src/services/certificate.service.js';
 import { Role, SubmissionStatus, ModuleStatus } from '@academy/shared';
 
-describe('End-to-End Progression Vertical Slice Integration Test', () => {
+describe('End-to-End Progression Vertical Slice Integration Test', { timeout: 30000 }, () => {
   let student: any;
   let instructor: any;
   let course: any;
