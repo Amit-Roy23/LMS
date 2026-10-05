@@ -12,7 +12,7 @@ import { formatDate } from '../../../../lib/utils';
 
 export default function AdminStudentDetailPage() {
   const params = useParams();
-  const studentId = params.studentId as string;
+  const studentId = (params?.studentId as string) || '';
 
   const [student, setStudent] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);

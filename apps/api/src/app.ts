@@ -14,6 +14,9 @@ import { apiRateLimiter } from './middleware/rate-limit.middleware.js';
 export function createApp() {
   const app = express();
 
+  // Trust proxy for reverse proxies / Vercel serverless
+  app.set('trust proxy', 1);
+
   // Security Headers
   app.use(
     helmet({
@@ -25,7 +28,18 @@ export function createApp() {
   // CORS Configuration
   app.use(
     cors({
-      origin: [config.clientUrl, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1') ||
+          origin.endsWith('.vercel.app') ||
+          (config.clientUrl && origin === config.clientUrl)
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -37,8 +51,9 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());
 
-  // Static Uploads Serving
-  app.use('/uploads', express.static(path.resolve(process.cwd(), 'uploads')));
+  // Static Uploads Serving (Safe for Serverless)
+  const uploadPath = process.env.UPLOAD_DIR || (process.env.VERCEL ? '/tmp/uploads' : path.resolve(process.cwd(), 'uploads'));
+  app.use('/uploads', express.static(uploadPath));
 
   // Swagger Documentation
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

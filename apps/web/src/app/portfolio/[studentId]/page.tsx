@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 export default function StudentPortfolioPage() {
   const params = useParams();
-  const studentId = params.studentId as string;
+  const studentId = (params?.studentId as string) || '';
 
   // TODO(client-requirement): Load dynamic public student profile from database with custom domain support
   return (

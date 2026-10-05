@@ -1,6 +1,18 @@
 import { ApiResponse } from '@academy/shared';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+export function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    return '/api/v1';
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/v1`;
+  }
+  return 'http://localhost:3000/api/v1';
+}
+
 
 export class ApiError extends Error {
   code: string;
@@ -19,7 +31,8 @@ export async function apiClient<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+  const baseUrl = getApiBase();
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
 
   const headers = new Headers(options.headers || {});
   if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {

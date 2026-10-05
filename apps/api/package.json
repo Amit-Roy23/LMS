@@ -2,7 +2,8 @@
   "name": "@academy/api",
   "version": "1.0.0",
   "private": true,
-  "main": "dist/index.js",
+  "main": "./dist/app.js",
+  "types": "./dist/app.d.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && tsc",

@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { Role } from '@academy/shared';
 import { ForbiddenError, UnauthorizedError } from '../lib/errors.js';
 
-export function authorizeRoles(...allowedRoles: Role[]) {
+export function authorizeRoles(...allowedRoles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new UnauthorizedError('User is not authenticated.'));
@@ -19,3 +18,4 @@ export function authorizeRoles(...allowedRoles: Role[]) {
     next();
   };
 }
+

@@ -48,8 +48,8 @@ export class AuthService {
         email: params.email.toLowerCase(),
         passwordHash,
         phone: params.phone || null,
-        role: params.role || Role.STUDENT,
-        status: UserStatus.ACTIVE,
+        role: (params.role || 'STUDENT') as Role,
+        status: 'ACTIVE',
       },
       select: {
         id: true,
@@ -88,7 +88,7 @@ export class AuthService {
       where: { email: params.email.toLowerCase() },
     });
 
-    if (!user || user.status === UserStatus.INACTIVE || user.status === UserStatus.SUSPENDED) {
+    if (!user || user.status === 'INACTIVE' || user.status === 'SUSPENDED') {
       throw new UnauthorizedError('Invalid email or password');
     }
 

@@ -10,7 +10,7 @@
     "dev": "npm run dev --workspaces --if-present",
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:web": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run db:generate && npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:api": "npm run test --workspace=apps/api",
     "lint": "npm run lint --workspaces --if-present",

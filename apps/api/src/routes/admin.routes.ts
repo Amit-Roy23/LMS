@@ -27,7 +27,7 @@ const router = Router();
 
 // Apply authentication and base staff authorization to all Layer 3 admin routes
 router.use(authenticate);
-router.use(authorizeRoles(Role.ADMIN, Role.INSTRUCTOR));
+router.use(authorizeRoles('ADMIN', 'INSTRUCTOR'));
 
 // ==========================================
 // Layer 3: Administration & Instructor AMS
@@ -78,9 +78,9 @@ router.get('/admin/reports/analytics', reportController.getAnalytics);
 // ==========================================
 // Super-Admin Only Routes (ADMIN role required)
 // ==========================================
-router.post('/admin/certificates/:certificateId/revoke', authorizeRoles(Role.ADMIN), certificateController.revokeCertificate);
-router.get('/admin/users', authorizeRoles(Role.ADMIN), userController.listUsers);
-router.get('/admin/users/:id', authorizeRoles(Role.ADMIN), userController.getUser);
-router.put('/admin/users/:id/status', authorizeRoles(Role.ADMIN), userController.updateUserStatus);
+router.post('/admin/certificates/:certificateId/revoke', authorizeRoles('ADMIN'), certificateController.revokeCertificate);
+router.get('/admin/users', authorizeRoles('ADMIN'), userController.listUsers);
+router.get('/admin/users/:id', authorizeRoles('ADMIN'), userController.getUser);
+router.put('/admin/users/:id/status', authorizeRoles('ADMIN'), userController.updateUserStatus);
 
 export { router as adminRouter };

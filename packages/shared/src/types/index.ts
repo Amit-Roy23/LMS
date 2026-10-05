@@ -22,7 +22,7 @@ import {
   NotificationChannel,
   NotificationStatus,
   NotificationType,
-} from '../enums/index.js';
+} from '../enums/index';
 
 export interface ApiResponse<T = any> {
   success: boolean;

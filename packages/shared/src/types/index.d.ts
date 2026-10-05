@@ -1,4 +1,4 @@
-import { Role, UserStatus, DeliveryMode, BatchStatus, CourseStatus, CourseLevel, ModuleStatus, QuestionType, SubmissionStatus, EnrollmentStatus, PaymentStatus, AccessStatus, LiveProvider, LiveSessionStatus, AttendanceStatus, InquiryStatus, RegistrationStatus, PerformanceLevel, CertificateStatus, NotificationChannel, NotificationStatus } from '../enums/index.js';
+import { Role, UserStatus, DeliveryMode, BatchStatus, CourseStatus, CourseLevel, ModuleStatus, QuestionType, SubmissionStatus, EnrollmentStatus, PaymentStatus, AccessStatus, LiveProvider, LiveSessionStatus, AttendanceStatus, InquiryStatus, RegistrationStatus, PerformanceLevel, CertificateStatus, NotificationChannel, NotificationStatus } from '../enums/index';
 export interface ApiResponse<T = any> {
     success: boolean;
     data?: T;

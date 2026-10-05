@@ -29,7 +29,7 @@ import { formatCurrency, formatDuration } from '../../../lib/utils';
 export default function CourseDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
+  const slug = (params?.slug as string) || '';
   const { user } = useAuth();
 
   const [course, setCourse] = useState<any>(null);

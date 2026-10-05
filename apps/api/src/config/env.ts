@@ -1,12 +1,17 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
+// Load from current working directory (.env, .env.local) and api folder
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../api/.env') });
+dotenv.config({ path: path.resolve(process.cwd(), 'apps/api/.env') });
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '5000', 10),
   databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres@localhost:5432/academy_lms?schema=public',
+  directUrl: process.env.DIRECT_URL,
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET || 'academy_access_token_secret_development_key_12345',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'academy_refresh_token_secret_development_key_67890',

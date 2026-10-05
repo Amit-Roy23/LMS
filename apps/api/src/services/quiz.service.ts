@@ -74,8 +74,9 @@ export class QuizService {
       where: { quizId: params.quizId, studentId: params.studentId },
     });
 
-    if (previousAttempts >= quiz.maxAttempts) {
-      throw new BadRequestError(`Maximum attempts (${quiz.maxAttempts}) reached for this quiz.`);
+    const maxAllowedAttempts = quiz.maxAttempts ?? 3;
+    if (previousAttempts >= maxAllowedAttempts) {
+      throw new BadRequestError(`Maximum attempts (${maxAllowedAttempts}) reached for this quiz.`);
     }
 
     let totalPoints = 0;
@@ -140,7 +141,7 @@ export class QuizService {
       scorePercent,
       isPassed,
       passingScorePercent: quiz.passingScorePercent,
-      remainingAttempts: quiz.maxAttempts - (previousAttempts + 1),
+      remainingAttempts: Math.max(0, maxAllowedAttempts - (previousAttempts + 1)),
       progression,
     };
   }

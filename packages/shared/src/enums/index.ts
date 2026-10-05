@@ -1,154 +1,177 @@
-export enum Role {
-  STUDENT = 'STUDENT',
-  INSTRUCTOR = 'INSTRUCTOR',
-  ADMIN = 'ADMIN',
-}
+export const Role = {
+  STUDENT: 'STUDENT',
+  INSTRUCTOR: 'INSTRUCTOR',
+  ADMIN: 'ADMIN',
+} as const;
+export type Role = (typeof Role)[keyof typeof Role];
 
-export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  INACTIVE = 'INACTIVE',
-}
+export const UserStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  INACTIVE: 'INACTIVE',
+} as const;
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
 
-export enum DeliveryMode {
-  RECORDED = 'RECORDED',
-  LIVE = 'LIVE',
-}
+export const DeliveryMode = {
+  RECORDED: 'RECORDED',
+  LIVE: 'LIVE',
+} as const;
+export type DeliveryMode = (typeof DeliveryMode)[keyof typeof DeliveryMode];
 
-export enum BatchStatus {
-  UPCOMING = 'UPCOMING',
-  RUNNING = 'RUNNING',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
+export const BatchStatus = {
+  UPCOMING: 'UPCOMING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type BatchStatus = (typeof BatchStatus)[keyof typeof BatchStatus];
 
-export enum CourseStatus {
-  DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
-  ARCHIVED = 'ARCHIVED',
-}
+export const CourseStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED',
+} as const;
+export type CourseStatus = (typeof CourseStatus)[keyof typeof CourseStatus];
 
-export enum CourseLevel {
-  BEGINNER = 'BEGINNER',
-  INTERMEDIATE = 'INTERMEDIATE',
-  ADVANCED = 'ADVANCED',
-  ALL_LEVELS = 'ALL_LEVELS',
-}
+export const CourseLevel = {
+  BEGINNER: 'BEGINNER',
+  INTERMEDIATE: 'INTERMEDIATE',
+  ADVANCED: 'ADVANCED',
+  ALL_LEVELS: 'ALL_LEVELS',
+} as const;
+export type CourseLevel = (typeof CourseLevel)[keyof typeof CourseLevel];
 
-export enum ModuleStatus {
-  LOCKED = 'LOCKED',
-  AVAILABLE = 'AVAILABLE',
-  IN_PROGRESS = 'IN_PROGRESS',
-  AWAITING_REVIEW = 'AWAITING_REVIEW',
-  COMPLETED = 'COMPLETED',
-}
+export const ModuleStatus = {
+  LOCKED: 'LOCKED',
+  AVAILABLE: 'AVAILABLE',
+  IN_PROGRESS: 'IN_PROGRESS',
+  AWAITING_REVIEW: 'AWAITING_REVIEW',
+  COMPLETED: 'COMPLETED',
+} as const;
+export type ModuleStatus = (typeof ModuleStatus)[keyof typeof ModuleStatus];
 
-export enum QuestionType {
-  SINGLE_CHOICE = 'SINGLE_CHOICE',
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-}
+export const QuestionType = {
+  SINGLE_CHOICE: 'SINGLE_CHOICE',
+  MULTIPLE_CHOICE: 'MULTIPLE_CHOICE',
+} as const;
+export type QuestionType = (typeof QuestionType)[keyof typeof QuestionType];
 
-export enum SubmissionStatus {
-  PENDING = 'PENDING',
-  CHANGES_REQUESTED = 'CHANGES_REQUESTED',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
+export const SubmissionStatus = {
+  PENDING: 'PENDING',
+  CHANGES_REQUESTED: 'CHANGES_REQUESTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+export type SubmissionStatus = (typeof SubmissionStatus)[keyof typeof SubmissionStatus];
 
-export enum EnrollmentStatus {
-  ACTIVE = 'ACTIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  EXPIRED = 'EXPIRED',
-}
+export const EnrollmentStatus = {
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED',
+} as const;
+export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus];
 
-export enum PaymentStatus {
-  PENDING = 'PENDING',
-  PAID = 'PAID',
-  COMPLETED = 'COMPLETED',
-  PARTIAL = 'PARTIAL',
-  FAILED = 'FAILED',
-  REFUNDED = 'REFUNDED',
-}
+export const PaymentStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  COMPLETED: 'COMPLETED',
+  PARTIAL: 'PARTIAL',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED',
+} as const;
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 
-export enum AccessStatus {
-  ACTIVE = 'ACTIVE',
-  SUSPENDED = 'SUSPENDED',
-  EXPIRED = 'EXPIRED',
-}
+export const AccessStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  EXPIRED: 'EXPIRED',
+} as const;
+export type AccessStatus = (typeof AccessStatus)[keyof typeof AccessStatus];
 
-export enum PaymentProvider {
-  MOCK = 'MOCK',
-  RAZORPAY = 'RAZORPAY',
-  UPI = 'UPI',
-  MANUAL = 'MANUAL',
-}
+export const PaymentProvider = {
+  MOCK: 'MOCK',
+  RAZORPAY: 'RAZORPAY',
+  UPI: 'UPI',
+  MANUAL: 'MANUAL',
+} as const;
+export type PaymentProvider = (typeof PaymentProvider)[keyof typeof PaymentProvider];
 
-export enum LiveProvider {
-  ZOOM = 'ZOOM',
-  MEET = 'MEET',
-  YOUTUBE = 'YOUTUBE',
-  OTHER = 'OTHER',
-}
+export const LiveProvider = {
+  ZOOM: 'ZOOM',
+  MEET: 'MEET',
+  YOUTUBE: 'YOUTUBE',
+  OTHER: 'OTHER',
+} as const;
+export type LiveProvider = (typeof LiveProvider)[keyof typeof LiveProvider];
 
-export enum LiveSessionStatus {
-  SCHEDULED = 'SCHEDULED',
-  LIVE = 'LIVE',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-}
+export const LiveSessionStatus = {
+  SCHEDULED: 'SCHEDULED',
+  LIVE: 'LIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type LiveSessionStatus = (typeof LiveSessionStatus)[keyof typeof LiveSessionStatus];
 
-export enum AttendanceStatus {
-  PRESENT = 'PRESENT',
-  ABSENT = 'ABSENT',
-  LATE = 'LATE',
-  EXCUSED = 'EXCUSED',
-}
+export const AttendanceStatus = {
+  PRESENT: 'PRESENT',
+  ABSENT: 'ABSENT',
+  LATE: 'LATE',
+  EXCUSED: 'EXCUSED',
+} as const;
+export type AttendanceStatus = (typeof AttendanceStatus)[keyof typeof AttendanceStatus];
 
-export enum InquiryStatus {
-  NEW = 'NEW',
-  CONTACTED = 'CONTACTED',
-  CONVERTED = 'CONVERTED',
-  CLOSED = 'CLOSED',
-}
+export const InquiryStatus = {
+  NEW: 'NEW',
+  CONTACTED: 'CONTACTED',
+  CONVERTED: 'CONVERTED',
+  CLOSED: 'CLOSED',
+} as const;
+export type InquiryStatus = (typeof InquiryStatus)[keyof typeof InquiryStatus];
 
-export enum RegistrationStatus {
-  DRAFT = 'DRAFT',
-  PENDING_PAYMENT = 'PENDING_PAYMENT',
-  PAID = 'PAID',
-  ACCOUNT_CREATED = 'ACCOUNT_CREATED',
-  CANCELLED = 'CANCELLED',
-}
+export const RegistrationStatus = {
+  DRAFT: 'DRAFT',
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
+  PAID: 'PAID',
+  ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type RegistrationStatus = (typeof RegistrationStatus)[keyof typeof RegistrationStatus];
 
-export enum PerformanceLevel {
-  EXCELLENT = 'EXCELLENT',
-  GOOD = 'GOOD',
-  AVERAGE = 'AVERAGE',
-  NEEDS_ATTENTION = 'NEEDS_ATTENTION',
-}
+export const PerformanceLevel = {
+  EXCELLENT: 'EXCELLENT',
+  GOOD: 'GOOD',
+  AVERAGE: 'AVERAGE',
+  NEEDS_ATTENTION: 'NEEDS_ATTENTION',
+} as const;
+export type PerformanceLevel = (typeof PerformanceLevel)[keyof typeof PerformanceLevel];
 
-export enum CertificateStatus {
-  VALID = 'VALID',
-  REVOKED = 'REVOKED',
-}
+export const CertificateStatus = {
+  VALID: 'VALID',
+  REVOKED: 'REVOKED',
+} as const;
+export type CertificateStatus = (typeof CertificateStatus)[keyof typeof CertificateStatus];
 
-export enum NotificationChannel {
-  EMAIL = 'EMAIL',
-  WHATSAPP = 'WHATSAPP',
-  SMS = 'SMS',
-}
+export const NotificationChannel = {
+  EMAIL: 'EMAIL',
+  WHATSAPP: 'WHATSAPP',
+  SMS: 'SMS',
+} as const;
+export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
-export enum NotificationStatus {
-  QUEUED = 'QUEUED',
-  SENT = 'SENT',
-  FAILED = 'FAILED',
-}
+export const NotificationStatus = {
+  QUEUED: 'QUEUED',
+  SENT: 'SENT',
+  FAILED: 'FAILED',
+} as const;
+export type NotificationStatus = (typeof NotificationStatus)[keyof typeof NotificationStatus];
 
-export enum NotificationType {
-  SYSTEM = 'SYSTEM',
-  ENROLLMENT = 'ENROLLMENT',
-  REVIEW_FEEDBACK = 'REVIEW_FEEDBACK',
-  CERTIFICATE_ISSUED = 'CERTIFICATE_ISSUED',
-  QUIZ_RESULT = 'QUIZ_RESULT',
-  LIVE_CLASS_REMINDER = 'LIVE_CLASS_REMINDER',
-}
+export const NotificationType = {
+  SYSTEM: 'SYSTEM',
+  ENROLLMENT: 'ENROLLMENT',
+  REVIEW_FEEDBACK: 'REVIEW_FEEDBACK',
+  CERTIFICATE_ISSUED: 'CERTIFICATE_ISSUED',
+  QUIZ_RESULT: 'QUIZ_RESULT',
+  LIVE_CLASS_REMINDER: 'LIVE_CLASS_REMINDER',
+} as const;
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];

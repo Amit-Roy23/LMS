@@ -5,6 +5,9 @@ import { BadRequestError } from '../lib/errors.js';
 export function validateBody(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!schema || typeof schema.parse !== 'function') {
+        return next();
+      }
       req.body = schema.parse(req.body);
       next();
     } catch (error) {
@@ -24,6 +27,9 @@ export function validateBody(schema: ZodSchema) {
 export function validateQuery(schema: ZodSchema) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!schema || typeof schema.parse !== 'function') {
+        return next();
+      }
       req.query = schema.parse(req.query);
       next();
     } catch (error) {

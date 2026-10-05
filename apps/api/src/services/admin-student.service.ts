@@ -91,7 +91,7 @@ export class AdminStudentService {
               },
             },
           },
-          moduleProgresses: {
+          moduleProgress: {
             select: { moduleId: true, status: true, completedAt: true },
           },
           quizAttempts: {
@@ -139,7 +139,7 @@ export class AdminStudentService {
             }
           : null,
         stats: {
-          modulesCompleted: s.moduleProgresses.filter((m) => m.status === 'COMPLETED').length,
+          modulesCompleted: s.moduleProgress.filter((m) => m.status === 'COMPLETED').length,
           quizzesPassed: s.quizAttempts.filter((q) => q.isPassed).length,
           assignmentsApproved: s.assignmentSubmissions.filter((a) => a.status === 'APPROVED').length,
           hasCertificate: s.certificates.length > 0,

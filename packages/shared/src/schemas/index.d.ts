@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Role, DeliveryMode, BatchStatus, CourseLevel, CourseStatus, QuestionType, SubmissionStatus, PaymentProvider, LiveProvider, LiveSessionStatus, AttendanceStatus, InquiryStatus, PerformanceLevel } from '../enums/index.js';
+import { Role, DeliveryMode, BatchStatus, CourseLevel, CourseStatus, QuestionType, SubmissionStatus, PaymentProvider, LiveProvider, LiveSessionStatus, AttendanceStatus, InquiryStatus, PerformanceLevel } from '../enums/index';
 export declare const registerSchema: z.ZodObject<{
     name: z.ZodString;
     email: z.ZodString;

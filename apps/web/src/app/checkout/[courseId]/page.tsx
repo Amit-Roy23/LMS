@@ -18,7 +18,7 @@ import confetti from 'canvas-confetti';
 export default function CheckoutPage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params.courseId as string;
+  const courseId = (params?.courseId as string) || '';
   const { user, isLoading: authLoading } = useAuth();
   const { success, error: toastError } = useToast();
 

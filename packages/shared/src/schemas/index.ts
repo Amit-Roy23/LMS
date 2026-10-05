@@ -15,7 +15,7 @@ import {
   RegistrationStatus,
   PerformanceLevel,
   NotificationChannel,
-} from '../enums/index.js';
+} from '../enums/index';
 
 export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),

@@ -7,15 +7,20 @@ import { BadRequestError, NotFoundError } from '../../lib/errors.js';
 import { logger } from '../../lib/logger.js';
 
 class PaymentService {
-  private providers: Map<PaymentProvider, IPaymentProvider> = new Map();
+  private providers: Map<string, IPaymentProvider> | null = null;
 
-  constructor() {
-    this.providers.set(PaymentProvider.MOCK, new MockPaymentProvider());
-    this.providers.set(PaymentProvider.RAZORPAY, new RazorpayProvider());
+  private getProvidersMap(): Map<string, IPaymentProvider> {
+    if (!this.providers) {
+      this.providers = new Map();
+      this.providers.set('MOCK', new MockPaymentProvider());
+      this.providers.set('RAZORPAY', new RazorpayProvider());
+    }
+    return this.providers;
   }
 
-  getProvider(provider: PaymentProvider = PaymentProvider.MOCK): IPaymentProvider {
-    const instance = this.providers.get(provider);
+  getProvider(provider: PaymentProvider | string = 'MOCK'): IPaymentProvider {
+    const key = (provider || 'MOCK').toString();
+    const instance = this.getProvidersMap().get(key);
     if (!instance) {
       throw new BadRequestError(`Payment provider ${provider} is not supported`);
     }

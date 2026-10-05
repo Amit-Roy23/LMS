@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { adminStudentService } from '../services/admin-student.service.ts';
+import { adminStudentService } from '../services/admin-student.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -30,7 +30,7 @@ export class AdminStudentController {
         paymentStatus,
         performanceLevel,
         search,
-        instructorId: user.id,
+        instructorId: user.userId,
         role: user.role,
       });
 
@@ -46,7 +46,7 @@ export class AdminStudentController {
       const user = req.user!;
       const batches = await adminStudentService.listBatches({
         courseId,
-        instructorId: user.id,
+        instructorId: user.userId,
         role: user.role,
       });
       return sendSuccess(res, batches);

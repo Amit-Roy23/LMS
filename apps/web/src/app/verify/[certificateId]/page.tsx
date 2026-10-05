@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 export default function CertificateVerificationPage() {
   const params = useParams();
-  const certificateId = params.certificateId as string;
+  const certificateId = (params?.certificateId as string) || '';
 
   const [cert, setCert] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);

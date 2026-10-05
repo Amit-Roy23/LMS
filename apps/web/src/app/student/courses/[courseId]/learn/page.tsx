@@ -37,7 +37,7 @@ import confetti from 'canvas-confetti';
 export default function CoursePlayerPage() {
   const params = useParams();
   const router = useRouter();
-  const courseId = params.courseId as string;
+  const courseId = (params?.courseId as string) || '';
   const { success, error: toastError } = useToast();
 
   const [progression, setProgression] = useState<any>(null);
