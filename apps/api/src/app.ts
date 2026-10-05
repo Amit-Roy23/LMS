@@ -59,12 +59,13 @@ export function createApp() {
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Health Check
-  app.get('/api/health', (req, res) => {
+  app.get(['/api/health', '/health'], (req, res) => {
     res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
   // API Version 1
   app.use('/api/v1', apiRateLimiter, apiRouter);
+  app.use('/v1', apiRateLimiter, apiRouter);
 
   // Centralized Error Handling
   app.use(errorHandler);

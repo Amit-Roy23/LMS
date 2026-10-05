@@ -1,11 +1,21 @@
 import { ApiResponse } from '@academy/shared';
 
 export function getApiBase(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
+  // In the browser, always use relative path unless an explicit external API host is configured
   if (typeof window !== 'undefined') {
+    if (
+      process.env.NEXT_PUBLIC_API_URL &&
+      !process.env.NEXT_PUBLIC_API_URL.includes('localhost') &&
+      !process.env.NEXT_PUBLIC_API_URL.includes('127.0.0.1')
+    ) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
     return '/api/v1';
+  }
+
+  // On the server (SSR)
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}/api/v1`;
