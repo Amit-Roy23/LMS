@@ -49,7 +49,7 @@ export default function StudentDashboardPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Welcome Hero */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#0e121c] border border-[#232d42] shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#ffffff] border border-[#efdfd4] shadow-xl">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-blue-400 uppercase tracking-wider">
@@ -57,7 +57,7 @@ export default function StudentDashboardPage() {
             </span>
             <Badge variant="success">ACTIVE ENROLLMENT</Badge>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
             Welcome back, {user?.name}!
           </h1>
           <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
@@ -82,7 +82,7 @@ export default function StudentDashboardPage() {
             <span className="text-xs font-semibold text-slate-400">Enrolled Courses</span>
             <BookOpen className="w-4 h-4 text-indigo-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{enrollments.length}</p>
+          <p className="text-2xl font-bold text-ink mt-2">{enrollments.length}</p>
           <span className="text-[11px] text-slate-500">Active curriculums</span>
         </Card>
 
@@ -116,14 +116,14 @@ export default function StudentDashboardPage() {
 
       {/* Active Enrolled Courses */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-indigo-400" />
           My Active Courses
         </h2>
 
         {enrollments.length === 0 ? (
           <Card className="p-12 text-center border-dashed border-slate-800 bg-slate-900/40">
-            <p className="text-sm font-semibold text-white">You have not enrolled in any courses yet.</p>
+            <p className="text-sm font-semibold text-ink">You have not enrolled in any courses yet.</p>
             <p className="text-xs text-slate-400 mt-1">Explore our courses catalog to get started.</p>
             <Link href="/courses">
               <Button variant="primary" size="sm" className="mt-4">
@@ -146,7 +146,7 @@ export default function StudentDashboardPage() {
                     </Badge>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white line-clamp-2">
+                  <h3 className="text-lg font-bold text-ink line-clamp-2">
                     {enr.course.title}
                   </h3>
 

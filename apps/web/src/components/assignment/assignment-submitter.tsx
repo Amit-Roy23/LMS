@@ -113,7 +113,7 @@ export function AssignmentSubmitter({
               <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">
                 Practical Assignment
               </span>
-              <CardTitle className="text-xl mt-1 text-white">{assignment.title}</CardTitle>
+              <CardTitle className="text-xl mt-1 text-ink">{assignment.title}</CardTitle>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-400">Max Grade:</span>
@@ -135,7 +135,7 @@ export function AssignmentSubmitter({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-slate-400" />
-                <h4 className="text-sm font-bold text-white">
+                <h4 className="text-sm font-bold text-ink">
                   Submission Version {latest.version}
                 </h4>
               </div>
@@ -194,7 +194,7 @@ export function AssignmentSubmitter({
       {canResubmit && (
         <Card className="border-indigo-500/30 bg-slate-900/90">
           <CardHeader>
-            <CardTitle className="text-base text-white flex items-center gap-2">
+            <CardTitle className="text-base text-ink flex items-center gap-2">
               <Send className="w-4 h-4 text-indigo-400" />
               {latest ? 'Submit Updated Version' : 'Submit Practical Assignment'}
             </CardTitle>

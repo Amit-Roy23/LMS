@@ -31,7 +31,7 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Academy Analytics & Performance Reports</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Academy Analytics & Performance Reports</h1>
         <p className="text-xs text-slate-400 mt-1">
           Detailed metrics covering course revenue, retention, student progression, and certification volume.
         </p>
@@ -40,7 +40,7 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-3">
           <DollarSign className="w-8 h-8 text-emerald-400" />
-          <h3 className="text-base font-bold text-white">Revenue Performance</h3>
+          <h3 className="text-base font-bold text-ink">Revenue Performance</h3>
           <p className="text-3xl font-extrabold text-emerald-400">
             {formatCurrency(summary.totalRevenue || 0)}
           </p>
@@ -49,7 +49,7 @@ export default function AdminReportsPage() {
 
         <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-3">
           <Award className="w-8 h-8 text-purple-400" />
-          <h3 className="text-base font-bold text-white">Certification Rate</h3>
+          <h3 className="text-base font-bold text-ink">Certification Rate</h3>
           <p className="text-3xl font-extrabold text-purple-400">
             {summary.totalCertificates || 0} Diplomas
           </p>
@@ -58,7 +58,7 @@ export default function AdminReportsPage() {
 
         <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-3">
           <Users className="w-8 h-8 text-indigo-400" />
-          <h3 className="text-base font-bold text-white">Admissions Volume</h3>
+          <h3 className="text-base font-bold text-ink">Admissions Volume</h3>
           <p className="text-3xl font-extrabold text-indigo-400">
             {summary.totalEnrollments || 0} Enrollments
           </p>

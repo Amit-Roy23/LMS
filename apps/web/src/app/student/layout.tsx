@@ -45,9 +45,9 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   ];
 
   return (
-    <div className="min-h-screen flex bg-[#07090e] text-slate-100">
+    <div className="min-h-screen flex bg-[#fff8f3] text-slate-100">
       {/* Sidebar Navigation */}
-      <aside className="w-64 border-r border-[#1e2638] bg-[#0a0d14] flex flex-col justify-between hidden md:flex shrink-0">
+      <aside className="w-64 border-r border-[#f0e2d8] bg-[#fff6ef] flex flex-col justify-between hidden md:flex shrink-0">
         <div className="p-5 space-y-6">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-3 group">
@@ -55,7 +55,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm text-white tracking-tight">Creative & IT</span>
+              <span className="font-bold text-sm text-ink tracking-tight">Creative & IT</span>
               <span className="text-[10px] font-mono text-slate-400 uppercase">STUDENT PORTAL</span>
             </div>
           </Link>
@@ -73,7 +73,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
                     isActive
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#131826]'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#fff3ec]'
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
@@ -92,7 +92,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 {user.name.charAt(0)}
               </div>
               <div className="truncate text-xs">
-                <p className="font-bold text-white truncate">{user.name}</p>
+                <p className="font-bold text-ink truncate">{user.name}</p>
                 <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
               </div>
             </div>
@@ -113,7 +113,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         {/* Top Header Mobile / Subnav */}
         <header className="h-16 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Link href="/" className="hover:text-white transition-colors">Academy</Link>
+            <Link href="/" className="hover:text-ink transition-colors">Academy</Link>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
             <span className="text-slate-200 font-semibold">Student Portal</span>
           </div>

@@ -108,7 +108,7 @@ export default function AdminReviewsPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white">Instructor Review Queue</h1>
+          <h1 className="text-2xl font-extrabold text-ink">Instructor Review Queue</h1>
           <p className="text-xs text-slate-400 mt-1">
             Evaluate pending practical assignments and capstone projects. Approving a submission advances the student's progression.
           </p>
@@ -128,7 +128,7 @@ export default function AdminReviewsPage() {
       ) : reviewsData.totalPending === 0 ? (
         <Card className="p-12 text-center border-dashed border-slate-800 bg-slate-900/40 space-y-3">
           <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-          <h3 className="text-base font-bold text-white">Review Queue is Clear!</h3>
+          <h3 className="text-base font-bold text-ink">Review Queue is Clear!</h3>
           <p className="text-xs text-slate-400">All student submissions have been evaluated.</p>
         </Card>
       ) : (
@@ -142,7 +142,7 @@ export default function AdminReviewsPage() {
                     {sub.student?.name?.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">{sub.student?.name}</h4>
+                    <h4 className="text-sm font-bold text-ink">{sub.student?.name}</h4>
                     <p className="text-[11px] text-slate-400">{sub.assignment?.module?.course?.title}</p>
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export default function AdminReviewsPage() {
                     {sub.student?.name?.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">{sub.student?.name}</h4>
+                    <h4 className="text-sm font-bold text-ink">{sub.student?.name}</h4>
                     <p className="text-[11px] text-purple-300">Capstone Final Project</p>
                   </div>
                 </div>

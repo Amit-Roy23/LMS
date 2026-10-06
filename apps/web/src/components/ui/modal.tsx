@@ -52,12 +52,12 @@ export function Modal({
       >
         <div className="flex items-start justify-between pb-4 border-b border-slate-800">
           <div>
-            {title && <h3 className="text-lg font-bold text-white">{title}</h3>}
+            {title && <h3 className="text-lg font-bold text-ink">{title}</h3>}
             {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-ink transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

@@ -15,7 +15,7 @@ export default function StudentProfilePage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Student Profile & Settings</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Student Profile & Settings</h1>
         <p className="text-xs text-slate-400 mt-1">
           Manage your account credentials and personal information.
         </p>
@@ -28,7 +28,7 @@ export default function StudentProfilePage() {
             {user?.name?.charAt(0) || 'U'}
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">{user?.name}</h3>
+            <h3 className="text-base font-bold text-ink">{user?.name}</h3>
             <p className="text-xs text-slate-400">{user?.email}</p>
           </div>
           <Badge variant="purple" className="mx-auto">
@@ -41,7 +41,7 @@ export default function StudentProfilePage() {
 
         {/* Profile Details */}
         <Card className="md:col-span-2 border-slate-800 bg-slate-900/80 p-6 space-y-4">
-          <CardTitle className="text-base text-white">Account Information</CardTitle>
+          <CardTitle className="text-base text-ink">Account Information</CardTitle>
           <div className="space-y-4">
             <Input label="Full Name" defaultValue={user?.name || ''} readOnly />
             <Input label="Email Address" defaultValue={user?.email || ''} readOnly />

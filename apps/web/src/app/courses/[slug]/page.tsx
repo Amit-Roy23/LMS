@@ -80,7 +80,7 @@ export default function CourseDetailPage() {
         <Navbar />
         <div className="flex-1 flex items-center justify-center text-center p-8">
           <div>
-            <h2 className="text-2xl font-bold text-white">Course Not Found</h2>
+            <h2 className="text-2xl font-bold text-ink">Course Not Found</h2>
             <Link href="/courses">
               <Button variant="secondary" size="md" className="mt-4">
                 Back to All Courses
@@ -94,11 +94,11 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
       <Navbar />
 
       {/* Header Banner */}
-      <section className="py-14 bg-[#0a0d14] border-b border-[#1e2638] tech-dot-grid">
+      <section className="py-14 bg-[#fff6ef] border-b border-[#f0e2d8] tech-dot-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             {/* Left 2 Cols: Course Overview */}
@@ -108,7 +108,7 @@ export default function CourseDetailPage() {
                 <Badge variant="purple">{course.level}</Badge>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-ink tracking-tight leading-tight">
                 {course.title}
               </h1>
 
@@ -124,17 +124,17 @@ export default function CourseDetailPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-mono text-slate-400 uppercase">LEAD INSTRUCTOR</p>
-                    <p className="text-xs font-bold text-white">{course.instructor.name}</p>
+                    <p className="text-xs font-bold text-ink">{course.instructor.name}</p>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Right Col: Pricing & Admission Action Card */}
-            <Card className="lg:col-span-1 border-[#232d42] bg-[#0e121c] p-6 space-y-6 shadow-xl">
+            <Card className="lg:col-span-1 border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-slate-400">TUITION / FEE:</span>
-                <span className="text-2xl font-mono font-bold text-white">
+                <span className="text-2xl font-mono font-bold text-ink">
                   {formatCurrency(course.price, course.currency)}
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function CourseDetailPage() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
         <div className="max-w-4xl space-y-8">
           <div>
-            <h2 className="text-2xl font-extrabold text-white">Curriculum & Syllabus Structure</h2>
+            <h2 className="text-2xl font-extrabold text-ink">Curriculum & Syllabus Structure</h2>
             <p className="text-xs text-slate-400 mt-1">
               Modules are unlocked sequentially as each assessment checkpoint is satisfied.
             </p>
@@ -203,7 +203,7 @@ export default function CourseDetailPage() {
                         0{mIdx + 1}
                       </div>
                       <div>
-                        <h4 className="font-bold text-white text-sm">{mod.title}</h4>
+                        <h4 className="font-bold text-ink text-sm">{mod.title}</h4>
                         <span className="text-xs text-slate-400">
                           {mod.lessons?.length || 0} Lessons • {mod.quiz ? '1 Quiz' : 'No Quiz'} • {mod.assignment ? '1 Assignment' : 'No Assignment'}
                         </span>

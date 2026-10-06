@@ -43,16 +43,16 @@ export default function CoursesPage() {
   const levels = ['ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
       <Navbar />
 
       {/* Header Banner */}
-      <section className="py-14 bg-[#0a0d14] border-b border-[#1e2638] tech-dot-grid">
+      <section className="py-14 bg-[#fff6ef] border-b border-[#f0e2d8] tech-dot-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <Badge variant="blue" className="mb-2">
             ACADEMIC CATALOG
           </Badge>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
             Professional Engineering Curriculums
           </h1>
           <p className="mt-3 text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
@@ -67,7 +67,7 @@ export default function CoursesPage() {
               placeholder="Search courses by topic, skill, or title..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 rounded-lg border border-[#232d42] bg-[#0e121c] text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-10 pl-10 pr-4 rounded-lg border border-[#efdfd4] bg-[#ffffff] text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function CoursesPage() {
       {/* Main Catalog Content */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
         {/* Filters */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#1e2638] mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#f0e2d8] mb-8">
           {/* Category Tabs */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0">
             {categories.map((cat) => (
@@ -86,7 +86,7 @@ export default function CoursesPage() {
                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 border ${
                   selectedCategory === cat
                     ? 'bg-blue-600 text-white border-blue-500'
-                    : 'bg-[#0e121c] text-slate-400 hover:text-white border-[#232d42]'
+                    : 'bg-[#ffffff] text-slate-400 hover:text-ink border-[#efdfd4]'
                 }`}
               >
                 {cat === 'ALL' ? 'All Categories' : cat}
@@ -105,7 +105,7 @@ export default function CoursesPage() {
                   className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold transition-all border ${
                     selectedLevel === lvl
                       ? 'bg-violet-600/20 text-violet-300 border-violet-500/50'
-                      : 'bg-[#0e121c] text-slate-400 border-[#232d42]'
+                      : 'bg-[#ffffff] text-slate-400 border-[#efdfd4]'
                   }`}
                 >
                   {lvl}
@@ -121,14 +121,14 @@ export default function CoursesPage() {
             {[1, 2, 3].map((n) => (
               <div
                 key={n}
-                className="h-72 rounded-lg bg-[#0e121c] border border-[#1e2638] animate-pulse"
+                className="h-72 rounded-lg bg-[#ffffff] border border-[#f0e2d8] animate-pulse"
               />
             ))}
           </div>
         ) : courses.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-[#232d42] rounded-lg bg-[#0e121c] p-8">
+          <div className="text-center py-16 border border-dashed border-[#efdfd4] rounded-lg bg-[#ffffff] p-8">
             <BookOpen className="w-10 h-10 text-slate-600 mx-auto mb-3" />
-            <h3 className="text-sm font-bold text-white">No courses match your filter</h3>
+            <h3 className="text-sm font-bold text-ink">No courses match your filter</h3>
             <p className="text-xs text-slate-400 mt-1">Try resetting your search filters.</p>
             <Button
               variant="secondary"
@@ -148,7 +148,7 @@ export default function CoursesPage() {
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="group rounded-lg border border-[#232d42] bg-[#0e121c] p-5 flex flex-col justify-between hover:border-blue-500/50 transition-colors"
+                className="group rounded-lg border border-[#efdfd4] bg-[#ffffff] p-5 flex flex-col justify-between hover:border-blue-500/50 transition-colors"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
@@ -163,12 +163,12 @@ export default function CoursesPage() {
                     >
                       {course.level}
                     </Badge>
-                    <span className="text-sm font-mono font-bold text-white">
+                    <span className="text-sm font-mono font-bold text-ink">
                       {formatCurrency(course.price, course.currency)}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2">
+                  <h3 className="text-base font-bold text-ink group-hover:text-blue-400 transition-colors line-clamp-2">
                     {course.title}
                   </h3>
 
@@ -177,7 +177,7 @@ export default function CoursesPage() {
                   </p>
                 </div>
 
-                <div className="pt-4 mt-5 border-t border-[#1e2638] flex items-center justify-between">
+                <div className="pt-4 mt-5 border-t border-[#f0e2d8] flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400">
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-3.5 h-3.5 text-blue-400" />

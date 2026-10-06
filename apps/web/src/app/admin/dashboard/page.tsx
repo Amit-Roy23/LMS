@@ -43,10 +43,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Top Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#0e121c] border border-[#232d42] shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#ffffff] border border-[#efdfd4] shadow-xl">
         <div className="space-y-1.5">
           <Badge variant="purple">INSTITUTE CONTROL CENTER</Badge>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
             Administrative Overview
           </h1>
           <p className="text-xs text-slate-400 max-w-xl">
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
             <span className="text-xs font-semibold text-slate-400">Total Students</span>
             <Users className="w-4 h-4 text-indigo-400" />
           </div>
-          <p className="text-2xl font-bold text-white mt-2">{summary.totalStudents || 0}</p>
+          <p className="text-2xl font-bold text-ink mt-2">{summary.totalStudents || 0}</p>
           <span className="text-[11px] text-slate-500">{summary.totalEnrollments || 0} Enrollments</span>
         </Card>
 
@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
         {/* Recent Enrollments */}
         <Card className="lg:col-span-2 border-slate-800 bg-slate-900/80 p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
               <Users className="w-4 h-4 text-indigo-400" />
               Recent Student Admissions
             </h3>
@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
                       {enr.student?.name?.charAt(0)}
                     </div>
                     <div>
-                      <p className="font-bold text-white">{enr.student?.name}</p>
+                      <p className="font-bold text-ink">{enr.student?.name}</p>
                       <p className="text-[11px] text-slate-400">{enr.course?.title}</p>
                     </div>
                   </div>
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
 
         {/* Quick Management Shortcuts */}
         <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-4">
-          <h3 className="font-bold text-sm text-white border-b border-slate-800 pb-3">
+          <h3 className="font-bold text-sm text-ink border-b border-slate-800 pb-3">
             Quick Administrative Actions
           </h3>
 

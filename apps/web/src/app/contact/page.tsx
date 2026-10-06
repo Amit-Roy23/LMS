@@ -27,7 +27,7 @@ export default function ContactPage() {
       <main className="flex-1 max-w-5xl mx-auto px-4 py-20 w-full space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <Badge variant="primary">Admissions & Inquiries</Badge>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white">Get in Touch</h1>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-ink">Get in Touch</h1>
           <p className="text-xs sm:text-sm text-slate-400">
             Have questions regarding curriculum requirements, corporate training, or certification validation?
           </p>
@@ -35,14 +35,14 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="p-6 border-slate-800 bg-slate-900/80 space-y-6">
-            <h3 className="font-bold text-base text-white">Contact Information</h3>
+            <h3 className="font-bold text-base text-ink">Contact Information</h3>
 
             <div className="space-y-4 text-xs text-slate-300">
               <div className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-slate-400">Admissions Email</p>
-                  <p className="font-semibold text-white">admissions@creativeit.academy</p>
+                  <p className="font-semibold text-ink">admissions@creativeit.academy</p>
                 </div>
               </div>
 
@@ -50,7 +50,7 @@ export default function ContactPage() {
                 <Phone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-slate-400">Direct Support</p>
-                  <p className="font-semibold text-white">+1 (800) 555-0199</p>
+                  <p className="font-semibold text-ink">+1 (800) 555-0199</p>
                 </div>
               </div>
 
@@ -58,14 +58,14 @@ export default function ContactPage() {
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-slate-400">Academy Headquarters</p>
-                  <p className="font-semibold text-white">Innovation Campus, Tech District</p>
+                  <p className="font-semibold text-ink">Innovation Campus, Tech District</p>
                 </div>
               </div>
             </div>
           </Card>
 
           <Card className="md:col-span-2 border-slate-800 bg-slate-900/80 p-6">
-            <CardTitle className="text-base text-white mb-4">Send Us a Message</CardTitle>
+            <CardTitle className="text-base text-ink mb-4">Send Us a Message</CardTitle>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Your Name" placeholder="John Doe" required />

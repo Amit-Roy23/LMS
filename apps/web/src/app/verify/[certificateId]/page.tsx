@@ -45,7 +45,7 @@ export default function CertificateVerificationPage() {
           <Badge variant="success" className="gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5" /> Official Verification Registry
           </Badge>
-          <h1 className="text-3xl font-extrabold text-white">Certificate Authentication</h1>
+          <h1 className="text-3xl font-extrabold text-ink">Certificate Authentication</h1>
           <p className="text-xs text-slate-400">
             Cryptographic ledger validation for Online Creative & IT Academy credentials
           </p>
@@ -60,7 +60,7 @@ export default function CertificateVerificationPage() {
           <Card className="border-rose-500/40 bg-rose-950/20 p-8 text-center space-y-4">
             <AlertTriangle className="w-12 h-12 text-rose-400 mx-auto" />
             <div>
-              <h3 className="text-lg font-bold text-white">Verification Failed</h3>
+              <h3 className="text-lg font-bold text-ink">Verification Failed</h3>
               <p className="text-xs text-rose-300 mt-1">{error}</p>
             </div>
             <Link href="/">
@@ -70,9 +70,9 @@ export default function CertificateVerificationPage() {
             </Link>
           </Card>
         ) : (
-          <Card className="border-[#232d42] bg-[#0e121c] p-8 shadow-xl space-y-8">
+          <Card className="border-[#efdfd4] bg-[#ffffff] p-8 shadow-xl space-y-8">
             {/* Top Verified Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#1e2638]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#f0e2d8]">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                   <Award className="w-6 h-6" />
@@ -84,7 +84,7 @@ export default function CertificateVerificationPage() {
                     </span>
                     <Badge variant="success">AUTHENTIC</Badge>
                   </div>
-                  <h3 className="text-xl font-bold text-white mt-0.5">
+                  <h3 className="text-xl font-bold text-ink mt-0.5">
                     {cert.courseTitle}
                   </h3>
                 </div>
@@ -106,7 +106,7 @@ export default function CertificateVerificationPage() {
                 <span className="text-xs text-slate-400 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 text-indigo-400" /> Awarded To
                 </span>
-                <p className="text-base font-bold text-white">{cert.studentName}</p>
+                <p className="text-base font-bold text-ink">{cert.studentName}</p>
                 <p className="text-xs text-slate-400">{cert.studentEmail}</p>
               </div>
 
@@ -114,7 +114,7 @@ export default function CertificateVerificationPage() {
                 <span className="text-xs text-slate-400 flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-purple-400" /> Issue Date
                 </span>
-                <p className="text-base font-bold text-white">{formatDate(cert.issuedAt)}</p>
+                <p className="text-base font-bold text-ink">{formatDate(cert.issuedAt)}</p>
                 <p className="text-xs text-emerald-400 flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3" /> Permanent Record
                 </p>
@@ -128,7 +128,7 @@ export default function CertificateVerificationPage() {
 
             {/* Issuer Badge */}
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/80 text-center text-xs text-slate-400">
-              Issued by <span className="text-white font-semibold">Online Creative & IT Academy</span> • Accreditations verified through ISO 9001 compliance standards.
+              Issued by <span className="text-ink font-semibold">Online Creative & IT Academy</span> • Accreditations verified through ISO 9001 compliance standards.
             </div>
           </Card>
         )}

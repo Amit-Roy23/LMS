@@ -17,7 +17,7 @@ export default function AiPage() {
           <Badge variant="purple" className="gap-1.5">
             <Sparkles className="w-3.5 h-3.5" /> Creative AI Engineering Lab
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-ink tracking-tight">
             Applied Generative AI & Autonomous Agents
           </h1>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
@@ -30,7 +30,7 @@ export default function AiPage() {
             <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
               <Bot className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">Autonomous Agent Workflows</h3>
+            <h3 className="text-lg font-bold text-ink">Autonomous Agent Workflows</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Design multi-step reasoning agents with tool usage, memory persistence, dynamic execution plans, and human-in-the-loop validation.
             </p>
@@ -40,7 +40,7 @@ export default function AiPage() {
             <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
               <Network className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">RAG & Vector Retrieval</h3>
+            <h3 className="text-lg font-bold text-ink">RAG & Vector Retrieval</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Semantic chunking strategies, hybrid keyword-vector search, reranking algorithms, and real-time streaming citations.
             </p>
@@ -50,7 +50,7 @@ export default function AiPage() {
             <div className="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
               <Cpu className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white">Model Evaluation & Safety</h3>
+            <h3 className="text-lg font-bold text-ink">Model Evaluation & Safety</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Automated LLM unit testing, prompt regression testing, red-teaming safety guardrails, and latency optimization.
             </p>

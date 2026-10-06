@@ -42,7 +42,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center p-4 py-16 tech-dot-grid">
@@ -51,11 +51,11 @@ export default function RegisterPage() {
             <div className="w-10 h-10 rounded-lg bg-blue-600 border border-blue-400/30 flex items-center justify-center mx-auto shadow-sm">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Create Your Academy Account</h1>
+            <h1 className="text-2xl font-bold text-ink tracking-tight">Create Your Academy Account</h1>
             <p className="text-xs font-mono text-slate-400">JOIN DETERMINISTIC MASTERY & CERTIFICATION TRACKS</p>
           </div>
 
-          <Card className="border-[#232d42] bg-[#0e121c] p-6 space-y-6 shadow-xl">
+          <Card className="border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Full Name"
@@ -100,8 +100,8 @@ export default function RegisterPage() {
                     onClick={() => setRole(Role.STUDENT)}
                     className={`p-2.5 rounded-md border text-xs font-semibold transition-all ${
                       role === Role.STUDENT
-                        ? 'bg-blue-600/20 border-blue-500 text-white'
-                        : 'bg-[#07090e] border-[#1e2638] text-slate-400'
+                        ? 'bg-blue-600/20 border-blue-500 text-ink'
+                        : 'bg-[#fff8f3] border-[#f0e2d8] text-slate-400'
                     }`}
                   >
                     Student
@@ -111,8 +111,8 @@ export default function RegisterPage() {
                     onClick={() => setRole(Role.INSTRUCTOR)}
                     className={`p-2.5 rounded-md border text-xs font-semibold transition-all ${
                       role === Role.INSTRUCTOR
-                        ? 'bg-violet-600/20 border-violet-500 text-white'
-                        : 'bg-[#07090e] border-[#1e2638] text-slate-400'
+                        ? 'bg-violet-600/20 border-violet-500 text-ink'
+                        : 'bg-[#fff8f3] border-[#f0e2d8] text-slate-400'
                     }`}
                   >
                     Instructor

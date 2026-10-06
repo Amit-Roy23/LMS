@@ -17,7 +17,7 @@ export default function CareerPage() {
           <Badge variant="success" className="gap-1.5">
             <Briefcase className="w-3.5 h-3.5" /> Career Placement Cell
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-ink tracking-tight">
             Accelerate Your Engineering Career
           </h1>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
@@ -28,7 +28,7 @@ export default function CareerPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
             <Building2 className="w-8 h-8 text-indigo-400" />
-            <h3 className="text-lg font-bold text-white">50+ Global Hiring Partners</h3>
+            <h3 className="text-lg font-bold text-ink">50+ Global Hiring Partners</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Top tech companies hire directly from our certified student portfolio roster.
             </p>
@@ -36,7 +36,7 @@ export default function CareerPage() {
 
           <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
             <TrendingUp className="w-8 h-8 text-emerald-400" />
-            <h3 className="text-lg font-bold text-white">94% Placement Rate</h3>
+            <h3 className="text-lg font-bold text-ink">94% Placement Rate</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Students who pass all 3 modules and the final assessment secure senior software roles within 6 months.
             </p>
@@ -44,7 +44,7 @@ export default function CareerPage() {
 
           <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
             <Users className="w-8 h-8 text-purple-400" />
-            <h3 className="text-lg font-bold text-white">1-on-1 Mock Technical Interviews</h3>
+            <h3 className="text-lg font-bold text-ink">1-on-1 Mock Technical Interviews</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               Practice live algorithmic and system design interview rounds with senior engineering leaders.
             </p>

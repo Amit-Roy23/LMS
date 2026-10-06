@@ -51,7 +51,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#07090e] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center p-4 py-16 tech-dot-grid">
@@ -61,12 +61,12 @@ export default function LoginPage() {
             <div className="w-10 h-10 rounded-lg bg-blue-600 border border-blue-400/30 flex items-center justify-center mx-auto shadow-sm">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Sign In to Your Academy</h1>
+            <h1 className="text-2xl font-bold text-ink tracking-tight">Sign In to Your Academy</h1>
             <p className="text-xs font-mono text-slate-400">AUTHENTICATED LEARNING & CERTIFICATION PORTAL</p>
           </div>
 
           {/* Login Form Card */}
-          <Card className="border-[#232d42] bg-[#0e121c] p-6 space-y-6 shadow-xl">
+          <Card className="border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Email Address"
@@ -107,7 +107,7 @@ export default function LoginPage() {
           </Card>
 
           {/* Fast 1-Click Demo Logins */}
-          <div className="p-4 rounded-lg bg-[#0e121c] border border-[#1e2638] space-y-3">
+          <div className="p-4 rounded-lg bg-[#ffffff] border border-[#f0e2d8] space-y-3">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
               <Zap className="w-3.5 h-3.5 text-amber-400" />
               <span>INSTANT 1-CLICK DEMO ACCESS</span>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('student1')}
-                className="p-2.5 rounded-md border border-[#232d42] bg-[#07090e] hover:border-blue-500/50 text-left transition-all disabled:opacity-50"
+                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-blue-500/50 text-left transition-all disabled:opacity-50"
               >
                 <p className="text-xs font-bold text-blue-400">
                   Student 1 (Enrolled)
@@ -130,7 +130,7 @@ export default function LoginPage() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('student2')}
-                className="p-2.5 rounded-md border border-[#232d42] bg-[#07090e] hover:border-cyan-500/50 text-left transition-all disabled:opacity-50"
+                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-cyan-500/50 text-left transition-all disabled:opacity-50"
               >
                 <p className="text-xs font-bold text-cyan-400">
                   Student 2 (Fresh)
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('instructor')}
-                className="p-2.5 rounded-md border border-[#232d42] bg-[#07090e] hover:border-violet-500/50 text-left transition-all disabled:opacity-50"
+                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-violet-500/50 text-left transition-all disabled:opacity-50"
               >
                 <p className="text-xs font-bold text-violet-400">
                   Instructor
@@ -154,7 +154,7 @@ export default function LoginPage() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('admin')}
-                className="p-2.5 rounded-md border border-[#232d42] bg-[#07090e] hover:border-emerald-500/50 text-left transition-all disabled:opacity-50"
+                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-emerald-500/50 text-left transition-all disabled:opacity-50"
               >
                 <p className="text-xs font-bold text-emerald-400">
                   Administrator

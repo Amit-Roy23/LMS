@@ -30,7 +30,7 @@ export default function StudentCertificatesPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">My Earned Certificates</h1>
+        <h1 className="text-2xl font-extrabold text-ink">My Earned Certificates</h1>
         <p className="text-xs text-slate-400 mt-1">
           Cryptographically registered completion diplomas with public verification links and downloadable PDFs.
         </p>
@@ -45,7 +45,7 @@ export default function StudentCertificatesPage() {
       ) : certificates.length === 0 ? (
         <Card className="p-12 text-center border-dashed border-slate-800 bg-slate-900/40 space-y-3">
           <Award className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-white">No Certificates Issued Yet</h3>
+          <h3 className="text-base font-bold text-ink">No Certificates Issued Yet</h3>
           <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
             Complete all video lessons (≥90%), pass module quizzes, obtain instructor approvals on assignments, and pass the final certification assessment to receive your verifiable certificate.
           </p>

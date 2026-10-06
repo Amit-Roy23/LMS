@@ -105,7 +105,7 @@ export default function CheckoutPage() {
       <main className="flex-1 max-w-4xl mx-auto px-4 py-16 w-full">
         <div className="text-center mb-10">
           <Badge variant="primary" className="mb-2">Admission Checkout</Badge>
-          <h1 className="text-3xl font-extrabold text-white">Complete Your Enrollment</h1>
+          <h1 className="text-3xl font-extrabold text-ink">Complete Your Enrollment</h1>
           <p className="text-xs text-slate-400 mt-1">
             Secure admission portal for Online Creative & IT Academy
           </p>
@@ -115,7 +115,7 @@ export default function CheckoutPage() {
           {/* Left: Payment Method Selection */}
           <div className="md:col-span-2 space-y-6">
             <Card className="border-slate-800 bg-slate-900/90 p-6 space-y-4">
-              <CardTitle className="text-base text-white flex items-center gap-2">
+              <CardTitle className="text-base text-ink flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-indigo-400" />
                 Select Payment Method
               </CardTitle>
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
                   onClick={() => setProvider(PaymentProvider.MOCK)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                     provider === PaymentProvider.MOCK
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md'
+                      ? 'bg-indigo-600/20 border-indigo-500 text-ink shadow-md'
                       : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
                       ⚡
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-white">Instant Sandbox Payment (Mock Dev)</p>
+                      <p className="font-bold text-sm text-ink">Instant Sandbox Payment (Mock Dev)</p>
                       <p className="text-[11px] text-slate-400">1-click instant approval for rapid testing & demos</p>
                     </div>
                   </div>
@@ -147,7 +147,7 @@ export default function CheckoutPage() {
                   onClick={() => setProvider(PaymentProvider.RAZORPAY)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between opacity-80 ${
                     provider === PaymentProvider.RAZORPAY
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md'
+                      ? 'bg-indigo-600/20 border-indigo-500 text-ink shadow-md'
                       : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
                   }`}
                 >
@@ -156,7 +156,7 @@ export default function CheckoutPage() {
                       ₹
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-white">Razorpay (Cards, UPI, NetBanking)</p>
+                      <p className="font-bold text-sm text-ink">Razorpay (Cards, UPI, NetBanking)</p>
                       <p className="text-[11px] text-slate-400">Production gateway stub</p>
                     </div>
                   </div>
@@ -174,26 +174,26 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: Order Summary */}
-          <Card className="md:col-span-1 border-[#232d42] bg-[#0e121c] p-6 space-y-6 shadow-xl">
-            <h3 className="font-mono font-bold text-xs text-white border-b border-[#1e2638] pb-3 uppercase tracking-wider">
+          <Card className="md:col-span-1 border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
+            <h3 className="font-mono font-bold text-xs text-ink border-b border-[#f0e2d8] pb-3 uppercase tracking-wider">
               ORDER SPECIFICATION
             </h3>
 
             <div className="space-y-3 text-xs">
               <div>
-                <p className="font-bold text-white text-sm">{course?.title}</p>
+                <p className="font-bold text-ink text-sm">{course?.title}</p>
                 <p className="text-slate-400 font-mono text-[11px] mt-0.5">{course?.category}</p>
               </div>
 
-              <div className="pt-3 border-t border-[#1e2638] flex items-center justify-between">
+              <div className="pt-3 border-t border-[#f0e2d8] flex items-center justify-between">
                 <span className="text-slate-400 font-mono">TUITION:</span>
-                <span className="font-mono font-semibold text-white">{formatCurrency(course?.price || 0, course?.currency)}</span>
+                <span className="font-mono font-semibold text-ink">{formatCurrency(course?.price || 0, course?.currency)}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-400 font-mono">PLATFORM FEE:</span>
                 <span className="text-emerald-400 font-mono font-semibold">$0.00 (WAIVED)</span>
               </div>
-              <div className="pt-3 border-t border-[#1e2638] flex items-center justify-between text-base font-extrabold text-white">
+              <div className="pt-3 border-t border-[#f0e2d8] flex items-center justify-between text-base font-extrabold text-ink">
                 <span className="font-mono">TOTAL DUE:</span>
                 <span className="text-blue-400 font-mono">{formatCurrency(course?.price || 0, course?.currency)}</span>
               </div>
