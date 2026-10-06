@@ -90,7 +90,7 @@ export default function AdminStudentsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-extrabold text-ink flex items-center gap-2">
             <Users className="w-6 h-6 text-violet-400" />
             L3 Student & Cohort Registry
           </h1>
@@ -99,12 +99,12 @@ export default function AdminStudentsPage() {
           </p>
         </div>
         <div className="text-xs text-slate-400 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2">
-          Total Learners: <span className="font-bold text-white">{totalCount}</span>
+          Total Learners: <span className="font-bold text-ink">{totalCount}</span>
         </div>
       </div>
 
       {/* Filters Bar */}
-      <Card className="border-slate-800 bg-[#0d121f]/90 p-4">
+      <Card className="border-slate-800 bg-[#ffffff]/90 p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="md:col-span-2 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -112,7 +112,7 @@ export default function AdminStudentsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by student name, email, or phone..."
-              className="pl-9 bg-slate-950 border-slate-800 text-xs text-white"
+              className="pl-9 bg-slate-950 border-slate-800 text-xs text-ink"
             />
           </div>
 
@@ -155,15 +155,15 @@ export default function AdminStudentsPage() {
           ))}
         </div>
       ) : students.length === 0 ? (
-        <Card className="border-slate-800 bg-[#0d121f]/90 p-12 text-center">
+        <Card className="border-slate-800 bg-[#ffffff]/90 p-12 text-center">
           <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-white">No students match current filters</h3>
+          <h3 className="text-base font-bold text-ink">No students match current filters</h3>
           <p className="text-xs text-slate-400 mt-1">Try resetting search keywords or status filters.</p>
         </Card>
       ) : (
         <div className="space-y-3">
           {students.map((st) => (
-            <Card key={st.id} className="border-slate-800 bg-[#0c101a] hover:border-violet-900/50 transition-all">
+            <Card key={st.id} className="border-slate-800 bg-[#fffaf6] hover:border-violet-900/50 transition-all">
               <div className="p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Left: Student Identity */}
                 <div className="flex items-start gap-3.5 min-w-[240px]">
@@ -172,7 +172,7 @@ export default function AdminStudentsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-white">{st.name}</h4>
+                      <h4 className="text-sm font-bold text-ink">{st.name}</h4>
                       {getPerformanceBadge(st.performanceLevel)}
                     </div>
                     <p className="text-xs text-slate-400 font-mono mt-0.5">{st.email}</p>
@@ -219,7 +219,7 @@ export default function AdminStudentsPage() {
                       {getPaymentBadge(st.enrollment?.paymentStatus || 'PENDING')}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                      <span>Modules: <b className="text-white">{st.stats.modulesCompleted}</b></span>
+                      <span>Modules: <b className="text-ink">{st.stats.modulesCompleted}</b></span>
                       <span>Quizzes: <b className="text-emerald-400">{st.stats.quizzesPassed}</b></span>
                     </div>
                   </div>

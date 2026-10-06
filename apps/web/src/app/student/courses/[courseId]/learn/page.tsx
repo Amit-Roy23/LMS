@@ -174,14 +174,14 @@ export default function CoursePlayerPage() {
             variant="ghost"
             size="sm"
             onClick={() => router.push('/student/courses')}
-            className="text-xs text-slate-400 hover:text-white"
+            className="text-xs text-slate-400 hover:text-ink"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             My Courses
           </Button>
 
           <div className="h-4 w-px bg-slate-800" />
-          <span className="font-bold text-sm text-white truncate max-w-xs sm:max-w-md">
+          <span className="font-bold text-sm text-ink truncate max-w-xs sm:max-w-md">
             {course?.title}
           </span>
         </div>
@@ -200,7 +200,7 @@ export default function CoursePlayerPage() {
               onClick={() => setActiveViewMode('certificate')}
               className="text-xs gap-1.5"
             >
-              <Award className="w-3.5 h-3.5 text-white" />
+              <Award className="w-3.5 h-3.5 text-ink" />
               <span>View Certificate</span>
             </Button>
           )}
@@ -257,7 +257,7 @@ export default function CoursePlayerPage() {
                             Module {mIdx + 1}
                           </span>
                         </div>
-                        <h4 className="text-xs font-bold text-white leading-snug">
+                        <h4 className="text-xs font-bold text-ink leading-snug">
                           {mod.title}
                         </h4>
                       </div>
@@ -402,7 +402,7 @@ export default function CoursePlayerPage() {
                 }}
                 className={`w-full p-3 rounded-xl border text-xs flex items-center justify-between transition-all ${
                   activeViewMode === 'mock-test'
-                    ? 'border-indigo-500 bg-indigo-600/30 text-white font-bold'
+                    ? 'border-indigo-500 bg-indigo-600/30 text-ink font-bold'
                     : progression?.isAllModulesCompleted
                     ? 'border-indigo-500/30 bg-slate-900 text-indigo-300 hover:bg-indigo-950/30'
                     : 'border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed'
@@ -432,7 +432,7 @@ export default function CoursePlayerPage() {
                 }}
                 className={`w-full p-3 rounded-xl border text-xs flex items-center justify-between transition-all ${
                   activeViewMode === 'final-project'
-                    ? 'border-purple-500 bg-purple-600/30 text-white font-bold'
+                    ? 'border-purple-500 bg-purple-600/30 text-ink font-bold'
                     : progression?.isAllModulesCompleted && progression?.mockTestPassed
                     ? 'border-purple-500/30 bg-slate-900 text-purple-300 hover:bg-purple-950/30'
                     : 'border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed'
@@ -462,7 +462,7 @@ export default function CoursePlayerPage() {
                 }}
                 className={`w-full p-3 rounded-xl border text-xs flex items-center justify-between transition-all ${
                   activeViewMode === 'final-assessment'
-                    ? 'border-cyan-500 bg-cyan-600/30 text-white font-bold'
+                    ? 'border-cyan-500 bg-cyan-600/30 text-ink font-bold'
                     : progression?.finalProjectApproved
                     ? 'border-cyan-500/30 bg-slate-900 text-cyan-300 hover:bg-cyan-950/30'
                     : 'border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed'
@@ -492,7 +492,7 @@ export default function CoursePlayerPage() {
                 }}
                 className={`w-full p-3 rounded-xl border text-xs flex items-center justify-between transition-all ${
                   activeViewMode === 'certificate'
-                    ? 'border-emerald-500 bg-emerald-600/30 text-white font-bold'
+                    ? 'border-emerald-500 bg-emerald-600/30 text-ink font-bold'
                     : progression?.certificateEligible || progression?.certificate
                     ? 'border-emerald-500/40 bg-emerald-950/30 text-emerald-300 animate-pulse'
                     : 'border-slate-800 bg-slate-950/40 text-slate-600 cursor-not-allowed'
@@ -583,7 +583,7 @@ export default function CoursePlayerPage() {
             <div className="space-y-6">
               <Card className="border-purple-500/30 bg-slate-900/90 p-6 space-y-4">
                 <Badge variant="purple">Capstone Requirement</Badge>
-                <CardTitle className="text-xl text-white">{course.finalProject.title}</CardTitle>
+                <CardTitle className="text-xl text-ink">{course.finalProject.title}</CardTitle>
                 <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300 leading-relaxed whitespace-pre-line">
                   {course.finalProject.description}
                 </div>
@@ -593,7 +593,7 @@ export default function CoursePlayerPage() {
                 <div className="p-6 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-3">
                   <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
                   <div>
-                    <p className="font-bold text-sm text-white">Capstone Project Approved!</p>
+                    <p className="font-bold text-sm text-ink">Capstone Project Approved!</p>
                     <p className="text-xs text-slate-300 mt-0.5">
                       Your project has been reviewed and passed by your instructor. You may now proceed to the Official Final Assessment.
                     </p>
@@ -656,12 +656,12 @@ export default function CoursePlayerPage() {
                   <CertificateCard certificate={progression.certificate} />
                 </div>
               ) : progression?.certificateEligible ? (
-                <Card className="border-[#232d42] bg-[#0e121c] p-8 text-center space-y-6 shadow-xl">
+                <Card className="border-[#efdfd4] bg-[#ffffff] p-8 text-center space-y-6 shadow-xl">
                   <div className="w-14 h-14 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
                     <Award className="w-7 h-7" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">All Requirements Satisfied!</h2>
+                    <h2 className="text-xl font-bold text-ink">All Requirements Satisfied!</h2>
                     <p className="text-xs text-slate-400 max-w-md mx-auto mt-2 leading-relaxed">
                       You have completed all video lessons, passed all quizzes, received approvals on assignments & capstone project, and passed the final assessment.
                     </p>
@@ -681,7 +681,7 @@ export default function CoursePlayerPage() {
               ) : (
                 <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 text-center space-y-2">
                   <Lock className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                  <h3 className="text-base font-bold text-white">Certificate Locked</h3>
+                  <h3 className="text-base font-bold text-ink">Certificate Locked</h3>
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Complete all modules, mock tests, assignments, and the final assessment to unlock your official diploma.
                   </p>

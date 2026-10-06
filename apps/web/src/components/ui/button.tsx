@@ -15,24 +15,24 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          'inline-flex items-center justify-center font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-lg active:scale-[0.99]',
+          'inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-1 focus:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-lg active:scale-[0.98]',
           // Solid Variants - NO gradients
           variant === 'primary' &&
-            'bg-blue-600 hover:bg-blue-500 text-white font-semibold border border-blue-500/40 shadow-sm',
+            'bg-brand hover:bg-brand-dark text-white font-semibold border border-transparent shadow-soft',
           (variant === 'white' || variant === 'gradient') &&
-            'bg-white hover:bg-slate-100 text-slate-950 font-bold border border-white shadow-sm',
+            'bg-coral-500 hover:bg-coral-600 text-white font-semibold border border-transparent shadow-soft',
           variant === 'secondary' &&
-            'bg-[#131826] hover:bg-[#1c2336] text-slate-200 border border-[#232d42]',
+            'bg-cream-100 hover:bg-cream-200 text-ink border border-[#efdfd4]',
           variant === 'outline' &&
-            'bg-transparent hover:bg-[#131826] text-slate-300 hover:text-white border border-[#232d42] hover:border-[#3b82f6]/50',
-          variant === 'ghost' && 'bg-transparent hover:bg-[#131826] text-slate-400 hover:text-slate-100',
+            'bg-transparent hover:bg-brand-50 text-brand border border-brand/60 hover:border-brand',
+          variant === 'ghost' && 'bg-transparent hover:bg-[#fff3ec] text-slate-400 hover:text-slate-100',
           variant === 'danger' &&
             'bg-rose-600 hover:bg-rose-500 text-white font-semibold border border-rose-500/40',
           // Sizes
-          size === 'sm' && 'h-8 px-3 text-xs gap-1.5',
-          size === 'md' && 'h-9 px-4 text-xs font-semibold gap-2',
-          size === 'lg' && 'h-11 px-5 text-sm font-bold gap-2',
-          size === 'icon' && 'h-9 w-9 p-0',
+          size === 'sm' && 'h-8 px-3.5 text-xs gap-1.5',
+          size === 'md' && 'h-10 px-5 text-sm font-semibold gap-2',
+          size === 'lg' && 'h-12 px-7 text-sm font-semibold gap-2',
+          size === 'icon' && 'h-10 w-10 p-0',
           className
         )}
         {...props}

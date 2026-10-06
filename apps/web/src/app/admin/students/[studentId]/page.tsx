@@ -48,7 +48,7 @@ export default function AdminStudentDetailPage() {
             <ArrowLeft className="w-4 h-4 mr-1" /> Back to Students
           </Button>
         </Link>
-        <h1 className="text-2xl font-extrabold text-white">Student Progression Profile</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Student Progression Profile</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -58,7 +58,7 @@ export default function AdminStudentDetailPage() {
             {student?.name?.charAt(0)}
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">{student?.name}</h3>
+            <h3 className="text-lg font-bold text-ink">{student?.name}</h3>
             <p className="text-xs text-slate-400">{student?.email}</p>
           </div>
           <Badge variant="success" className="mx-auto">
@@ -72,7 +72,7 @@ export default function AdminStudentDetailPage() {
         {/* Enrollments & Certificates */}
         <div className="md:col-span-2 space-y-6">
           <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-4">
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-indigo-400" />
               Active Enrolled Courses ({student?.enrollments?.length || 0})
             </h3>
@@ -84,7 +84,7 @@ export default function AdminStudentDetailPage() {
                   className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs"
                 >
                   <div>
-                    <p className="font-bold text-white">{enr.course?.title}</p>
+                    <p className="font-bold text-ink">{enr.course?.title}</p>
                     <p className="text-[11px] text-slate-400">Enrolled: {formatDate(enr.enrolledAt)}</p>
                   </div>
                   <Badge variant={enr.status === 'COMPLETED' ? 'success' : 'purple'}>
@@ -96,7 +96,7 @@ export default function AdminStudentDetailPage() {
           </Card>
 
           <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-4">
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
               <Award className="w-4 h-4 text-emerald-400" />
               Earned Verifiable Diplomas ({student?.certificates?.length || 0})
             </h3>
@@ -111,7 +111,7 @@ export default function AdminStudentDetailPage() {
                     className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs"
                   >
                     <div>
-                      <p className="font-bold text-white">{cert.course?.title}</p>
+                      <p className="font-bold text-ink">{cert.course?.title}</p>
                       <p className="font-mono text-indigo-300 text-[10px]">{cert.certificateId}</p>
                     </div>
                     <Badge variant="success">Verified</Badge>

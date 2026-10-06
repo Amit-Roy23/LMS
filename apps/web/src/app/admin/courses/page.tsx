@@ -46,7 +46,7 @@ export default function AdminCoursesPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white">Course Management</h1>
+          <h1 className="text-2xl font-extrabold text-ink">Course Management</h1>
           <p className="text-xs text-slate-400 mt-1">
             Build, edit, and publish curriculums, modules, quizzes, and assignments.
           </p>
@@ -69,7 +69,7 @@ export default function AdminCoursesPage() {
       ) : courses.length === 0 ? (
         <Card className="p-12 text-center border-dashed border-slate-800 bg-slate-900/40 space-y-3">
           <BookOpen className="w-12 h-12 text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-white">No courses created yet</h3>
+          <h3 className="text-base font-bold text-ink">No courses created yet</h3>
           <p className="text-xs text-slate-400">Click "Create New Course" to build your first curriculum.</p>
         </Card>
       ) : (
@@ -84,7 +84,7 @@ export default function AdminCoursesPage() {
                   <Badge variant="purple">{c.level}</Badge>
                   <span className="text-xs text-slate-400">{c.category}</span>
                 </div>
-                <h3 className="text-base font-bold text-white">{c.title}</h3>
+                <h3 className="text-base font-bold text-ink">{c.title}</h3>
                 <p className="text-xs text-slate-400">
                   {formatCurrency(c.price, c.currency)} • {c.modulesCount || 3} Modules • {c.enrolledStudentsCount || 0} Enrolled Students
                 </p>

@@ -73,7 +73,7 @@ export default function NewCoursePage() {
             <ArrowLeft className="w-4 h-4 mr-1" /> Back
           </Button>
         </Link>
-        <h1 className="text-2xl font-extrabold text-white">Create New Course Track</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Create New Course Track</h1>
       </div>
 
       <Card className="border-slate-800 bg-slate-900/90 p-6">

@@ -163,9 +163,9 @@ export function QuizRunner({
 
   if (isLoadingQuiz) {
     return (
-      <Card className="border-slate-800 bg-[#0e121c] p-12 text-center">
+      <Card className="border-slate-800 bg-[#ffffff] p-12 text-center">
         <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
-        <h3 className="text-sm font-bold text-white">Loading Assessment Questions...</h3>
+        <h3 className="text-sm font-bold text-ink">Loading Assessment Questions...</h3>
         <p className="text-xs text-slate-400 mt-1">Retrieving questions and options for {quiz.title}.</p>
       </Card>
     );
@@ -176,7 +176,7 @@ export function QuizRunner({
       <Card className="border-rose-900/50 bg-rose-950/20 p-8 text-center space-y-4">
         <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
         <div>
-          <h3 className="text-base font-bold text-white">Assessment Access Blocked</h3>
+          <h3 className="text-base font-bold text-ink">Assessment Access Blocked</h3>
           <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto">{loadError}</p>
         </div>
         <Button variant="secondary" size="sm" onClick={fetchFullQuiz} className="text-xs gap-1.5 mx-auto">
@@ -189,7 +189,7 @@ export function QuizRunner({
   return (
     <div className="w-full space-y-6">
       {/* Quiz Header Card */}
-      <Card className="border-[#232d42] bg-[#0e121c]">
+      <Card className="border-[#efdfd4] bg-[#ffffff]">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -201,13 +201,13 @@ export function QuizRunner({
                   </Badge>
                 )}
               </div>
-              <CardTitle className="text-lg mt-2 text-white font-bold">{fullQuiz.title || quiz.title}</CardTitle>
+              <CardTitle className="text-lg mt-2 text-ink font-bold">{fullQuiz.title || quiz.title}</CardTitle>
               {(fullQuiz.description || quiz.description) && (
                 <p className="text-xs text-slate-400 mt-1">{fullQuiz.description || quiz.description}</p>
               )}
             </div>
 
-            <div className="flex items-center gap-3 text-xs bg-[#07090e] p-3 rounded-lg border border-[#1e2638]">
+            <div className="flex items-center gap-3 text-xs bg-[#fff8f3] p-3 rounded-lg border border-[#f0e2d8]">
               <div>
                 <p className="text-slate-400">Pass Mark</p>
                 <p className="font-bold text-blue-400 text-sm">{passingScore}%</p>
@@ -246,7 +246,7 @@ export function QuizRunner({
                 <XCircle className="w-10 h-10 text-rose-400 shrink-0" />
               )}
               <div>
-                <h4 className="text-lg font-bold text-white">
+                <h4 className="text-lg font-bold text-ink">
                   {result.isPassed ? 'Congratulations! You Passed!' : 'Assessment Incomplete'}
                 </h4>
                 <p className="text-xs text-slate-300 mt-1">
@@ -274,7 +274,7 @@ export function QuizRunner({
           const isMulti = question.type === QuestionType.MULTIPLE_CHOICE || question.type === 'MULTIPLE_CHOICE';
 
           return (
-            <Card key={question.id} className="border-slate-800 bg-[#0c101a]">
+            <Card key={question.id} className="border-slate-800 bg-[#fffaf6]">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-blue-400">
@@ -284,7 +284,7 @@ export function QuizRunner({
                     {question.points || 1} {question.points === 1 ? 'Point' : 'Points'}
                   </span>
                 </div>
-                <h4 className="text-base font-semibold text-white mt-1 leading-relaxed">
+                <h4 className="text-base font-semibold text-ink mt-1 leading-relaxed">
                   {question.text}
                 </h4>
               </CardHeader>
@@ -299,7 +299,7 @@ export function QuizRunner({
                       onClick={() => !result && handleOptionSelect(question.id, option.id, isMulti)}
                       className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
                         isChecked
-                          ? 'bg-blue-600/20 border-blue-500/60 text-white shadow-md shadow-blue-600/10'
+                          ? 'bg-blue-600/20 border-blue-500/60 text-ink shadow-md shadow-blue-600/10'
                           : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 text-slate-300'
                       }`}
                     >
@@ -310,7 +310,7 @@ export function QuizRunner({
                             : 'border-slate-700 bg-slate-800'
                         }`}
                       >
-                        {isChecked && <CheckCircle2 className="w-3.5 h-3.5 fill-current text-white" />}
+                        {isChecked && <CheckCircle2 className="w-3.5 h-3.5 fill-current text-ink" />}
                       </div>
                       <span className="text-sm font-medium">{option.text}</span>
                     </div>

@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">System User Management</h1>
+        <h1 className="text-2xl font-extrabold text-ink">System User Management</h1>
         <p className="text-xs text-slate-400 mt-1">
           Manage roles, credentials, and access status across all academy accounts.
         </p>
@@ -72,7 +72,7 @@ export default function AdminUsersPage() {
                     {u.name?.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-white text-sm">{u.name}</h4>
+                    <h4 className="font-bold text-ink text-sm">{u.name}</h4>
                     <p className="text-slate-400">{u.email}</p>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export default function AdminUsersPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleStatus(u)}
-                    className="text-xs text-slate-400 hover:text-white"
+                    className="text-xs text-slate-400 hover:text-ink"
                   >
                     {u.status === 'ACTIVE' ? (
                       <span className="text-rose-400 flex items-center gap-1">

@@ -4,41 +4,46 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
+    --background: 24 100% 98%;
+    --foreground: 170 46% 13%;
 
-    --card: 224 45% 7%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 170 46% 13%;
 
-    --popover: 224 45% 7%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 170 46% 13%;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 170 75% 24%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 26% 14%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 22 100% 96%;
+    --secondary-foreground: 170 46% 13%;
 
-    --muted: 220 26% 14%;
-    --muted-foreground: 215 16% 57%;
+    --muted: 22 100% 96%;
+    --muted-foreground: 168 9% 40%;
 
-    --accent: 221 83% 53%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 15 90% 67%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 347 77% 50%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 222 24% 18%;
-    --input: 222 24% 18%;
-    --ring: 221 83% 53%;
+    --border: 24 52% 90%;
+    --input: 24 52% 90%;
+    --ring: 170 75% 24%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   body {
-    background-color: #07090e;
-    color: #f1f5f9;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: #fff8f3;
+    color: #12302b;
+    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    color: #12302b;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -46,28 +51,48 @@
   .tech-grid {
     background-size: 32px 32px;
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      linear-gradient(to right, rgba(15, 107, 90, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 107, 90, 0.05) 1px, transparent 1px);
   }
 
   .tech-dot-grid {
     background-size: 24px 24px;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(247, 132, 94, 0.18) 1px, transparent 1px);
   }
 
   .panel-flat {
-    background: #0d111a;
-    border: 1px solid #1e2638;
+    background: #ffffff;
+    border: 1px solid #f0e2d8;
   }
 
   .panel-card {
-    background: #0f1422;
-    border: 1px solid #232d42;
+    background: #ffffff;
+    border: 1px solid #efdfd4;
+    box-shadow: 0 4px 18px -6px rgba(18, 48, 43, 0.1);
+  }
+
+  /* Coral "pill" used to highlight a word in headings */
+  .highlight-pill {
+    display: inline-block;
+    background: #f7845e;
+    color: #ffffff;
+    padding: 0 0.35em 0.05em;
+    border-radius: 0.6rem;
+  }
+
+  /* Soft coral diagonal stripes for feature panels */
+  .hero-stripes {
+    background-color: #fde6dc;
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(247, 132, 94, 0.22) 0 10px,
+      transparent 10px 22px
+    );
   }
 
   .panel-active {
-    background: #141b2d;
-    border: 1px solid #3b82f6;
+    background: #eef7f4;
+    border: 1px solid #0f6b5a;
   }
 }
 
@@ -77,12 +102,12 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #07090e;
+  background: #fff8f3;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e2638;
+  background: #e8d6ca;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #0f6b5a;
 }

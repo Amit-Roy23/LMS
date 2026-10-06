@@ -132,7 +132,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
           <Clock className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-white">{mockTest.title}</h2>
+          <h2 className="text-2xl font-bold text-ink">{mockTest.title}</h2>
           <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
             {mockTest.description || 'Simulate real exam conditions before your final certification.'}
           </p>
@@ -141,11 +141,11 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
         <div className="grid grid-cols-3 gap-3 max-w-md mx-auto text-xs">
           <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
             <p className="text-slate-400">Duration</p>
-            <p className="font-bold text-white text-sm mt-0.5">{mockTest.durationMinutes} Mins</p>
+            <p className="font-bold text-ink text-sm mt-0.5">{mockTest.durationMinutes} Mins</p>
           </div>
           <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
             <p className="text-slate-400">Questions</p>
-            <p className="font-bold text-white text-sm mt-0.5">{mockTest.questions.length} Items</p>
+            <p className="font-bold text-ink text-sm mt-0.5">{mockTest.questions.length} Items</p>
           </div>
           <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
             <p className="text-slate-400">Passing Mark</p>
@@ -167,7 +167,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
       {/* Sticky Countdown Header */}
       <div className="sticky top-20 z-30 flex items-center justify-between p-4 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-800 shadow-xl">
         <div>
-          <h3 className="font-bold text-white text-sm">{mockTest.title}</h3>
+          <h3 className="font-bold text-ink text-sm">{mockTest.title}</h3>
           <span className="text-xs text-slate-400">Answer all questions before submitting</span>
         </div>
 
@@ -200,7 +200,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
                 <XCircle className="w-10 h-10 text-rose-400" />
               )}
               <div>
-                <h4 className="text-lg font-bold text-white">
+                <h4 className="text-lg font-bold text-ink">
                   {result.isPassed ? 'Mock Test Passed!' : 'Mock Test Result'}
                 </h4>
                 <p className="text-xs mt-1">
@@ -232,7 +232,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm font-semibold text-white mt-1">{item.questionText}</p>
+                <p className="text-sm font-semibold text-ink mt-1">{item.questionText}</p>
               </CardHeader>
               {item.explanation && (
                 <CardContent className="pt-0">
@@ -260,7 +260,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
                     <span className="text-xs font-semibold text-indigo-400">Question {idx + 1}</span>
                     <span className="text-xs text-slate-400">{q.points} Points</span>
                   </div>
-                  <h4 className="text-sm font-semibold text-white mt-1">{q.text}</h4>
+                  <h4 className="text-sm font-semibold text-ink mt-1">{q.text}</h4>
                 </CardHeader>
                 <CardContent className="space-y-2.5 pt-2">
                   {q.options.map((opt) => {
@@ -272,7 +272,7 @@ export function MockTestRunner({ mockTest, courseId, onCompleted }: MockTestRunn
                         onClick={() => handleOptionSelect(q.id, opt.id)}
                         className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
                           isChecked
-                            ? 'bg-indigo-600/20 border-indigo-500/60 text-white'
+                            ? 'bg-indigo-600/20 border-indigo-500/60 text-ink'
                             : 'bg-slate-900/90 border-slate-800 hover:border-slate-700 text-slate-300'
                         }`}
                       >

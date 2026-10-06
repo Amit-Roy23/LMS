@@ -30,7 +30,7 @@ export default function StudentCoursesPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">My Enrolled Courses</h1>
+        <h1 className="text-2xl font-extrabold text-ink">My Enrolled Courses</h1>
         <p className="text-xs text-slate-400 mt-1">
           Continue your progress across all enrolled academic curriculums.
         </p>
@@ -45,7 +45,7 @@ export default function StudentCoursesPage() {
       ) : enrollments.length === 0 ? (
         <Card className="p-12 text-center border-dashed border-slate-800 bg-slate-900/40">
           <BookOpen className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-white">No active enrollments found</h3>
+          <h3 className="text-base font-bold text-ink">No active enrollments found</h3>
           <p className="text-xs text-slate-400 mt-1">Browse our course catalog to get enrolled.</p>
           <Link href="/courses">
             <Button variant="primary" size="sm" className="mt-4">
@@ -68,7 +68,7 @@ export default function StudentCoursesPage() {
                   </Badge>
                 </div>
 
-                <h3 className="text-lg font-bold text-white line-clamp-2">
+                <h3 className="text-lg font-bold text-ink line-clamp-2">
                   {enr.course.title}
                 </h3>
 

@@ -24,7 +24,7 @@ export function CertificateCard({ certificate }: { certificate: any }) {
   };
 
   return (
-    <Card className="border-[#232d42] bg-[#0e121c] overflow-hidden shadow-xl hover:border-blue-500/50 transition-all">
+    <Card className="border-[#efdfd4] bg-[#ffffff] overflow-hidden shadow-xl hover:border-blue-500/50 transition-all">
       {/* Decorative Top Solid Line */}
       <div className="h-1 w-full bg-blue-600" />
 
@@ -43,16 +43,16 @@ export function CertificateCard({ certificate }: { certificate: any }) {
           </Badge>
         </div>
 
-        <CardTitle className="text-base text-white mt-2 font-bold">
+        <CardTitle className="text-base text-ink mt-2 font-bold">
           {certificate.course?.title || certificate.courseTitle || 'Mastery Certification'}
         </CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="p-3.5 rounded-lg bg-[#07090e] border border-[#1e2638] space-y-2">
+        <div className="p-3.5 rounded-lg bg-[#fff8f3] border border-[#f0e2d8] space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-mono text-[11px]">SERIAL NO:</span>
-            <span className="font-mono font-bold text-white text-[11px]">{certificate.certificateId}</span>
+            <span className="font-mono font-bold text-ink text-[11px]">{certificate.certificateId}</span>
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-mono text-[11px]">ISSUED:</span>

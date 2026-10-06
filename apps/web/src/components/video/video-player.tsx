@@ -260,7 +260,7 @@ export function VideoPlayer({
       {/* Video Container */}
       <div
         ref={containerRef}
-        className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#07090e] border border-slate-800 shadow-2xl group select-none"
+        className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#fff8f3] border border-slate-800 shadow-2xl group select-none"
       >
         {isYouTube && ytEmbedUrl ? (
           /* YouTube Embed Player */
@@ -297,7 +297,7 @@ export function VideoPlayer({
           /* Interactive Code & Studio Presentation Mode (Graceful Offline / Video Fallback) */
           <div
             onClick={togglePlay}
-            className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-[#0a0e1a] via-[#0d1322] to-[#070a12] text-slate-100 cursor-pointer relative overflow-hidden"
+            className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-[#fff6ef] via-[#ffffff] to-[#fff8f3] text-slate-100 cursor-pointer relative overflow-hidden"
           >
             {/* Background Grid Accent */}
             <div className="absolute inset-0 tech-dot-grid opacity-30 pointer-events-none" />
@@ -320,7 +320,7 @@ export function VideoPlayer({
               <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
                 <Code2 className="w-7 h-7" />
               </div>
-              <h2 className="text-lg md:text-xl font-extrabold text-white tracking-tight">
+              <h2 className="text-lg md:text-xl font-extrabold text-ink tracking-tight">
                 {title}
               </h2>
               <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
@@ -359,7 +359,7 @@ export function VideoPlayer({
         )}
 
         {/* Custom Player Controls Bar */}
-        <div className="absolute bottom-0 inset-x-0 bg-[#07090e]/95 border-t border-[#1e2638] p-3 flex flex-col gap-2 opacity-95 group-hover:opacity-100 transition-opacity z-30">
+        <div className="absolute bottom-0 inset-x-0 bg-[#fff8f3]/95 border-t border-[#f0e2d8] p-3 flex flex-col gap-2 opacity-95 group-hover:opacity-100 transition-opacity z-30">
           {/* Progress Timeline Slider */}
           <div className="relative w-full flex items-center group/slider">
             <input
@@ -368,7 +368,7 @@ export function VideoPlayer({
               max={duration || 600}
               value={currentTime}
               onChange={handleSeek}
-              className="w-full h-1 bg-[#1e2638] rounded appearance-none cursor-pointer accent-blue-500 hover:h-1.5 transition-all"
+              className="w-full h-1 bg-[#f0e2d8] rounded appearance-none cursor-pointer accent-blue-500 hover:h-1.5 transition-all"
             />
           </div>
 
@@ -419,9 +419,9 @@ export function VideoPlayer({
       </div>
 
       {/* Video Footer Status & Manual Completion Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#0c101a] border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#fffaf6] border border-slate-800">
         <div>
-          <h3 className="font-bold text-white text-sm">{title}</h3>
+          <h3 className="font-bold text-ink text-sm">{title}</h3>
           <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
             <span>Watch Progress: <b className="text-blue-400">{Math.round(watchPercent)}%</b></span>
             <span>•</span>

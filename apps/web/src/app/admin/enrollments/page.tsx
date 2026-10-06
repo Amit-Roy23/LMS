@@ -29,7 +29,7 @@ export default function AdminEnrollmentsPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-white">Enrollment & Billing History</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Enrollment & Billing History</h1>
         <p className="text-xs text-slate-400 mt-1">
           Complete log of student course admissions and processed payment transactions.
         </p>
@@ -54,13 +54,13 @@ export default function AdminEnrollmentsPage() {
                     {enr.student?.name?.charAt(0)}
                   </div>
                   <div>
-                    <h4 className="font-bold text-white text-sm">{enr.student?.name}</h4>
+                    <h4 className="font-bold text-ink text-sm">{enr.student?.name}</h4>
                     <p className="text-slate-400">{enr.course?.title}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <span className="font-bold text-white text-sm">
+                  <span className="font-bold text-ink text-sm">
                     {formatCurrency(enr.course?.price || 0)}
                   </span>
                   <Badge variant={enr.status === 'COMPLETED' ? 'success' : 'primary'}>
