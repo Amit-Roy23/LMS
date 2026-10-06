@@ -52,6 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/reviews', label: 'Review Queue', icon: ClipboardCheck },
     { href: '/admin/students', label: 'Students & Progress', icon: Users },
     { href: '/admin/enrollments', label: 'Enrollments & Billing', icon: CreditCard },
+    { href: '/admin/notifications', label: 'Notifications & Logs', icon: ShieldAlert },
     { href: '/admin/reports', label: 'Analytics Reports', icon: BarChart3 },
     ...(user.role === Role.ADMIN
       ? [{ href: '/admin/users', label: 'User Management', icon: UserCheck }]

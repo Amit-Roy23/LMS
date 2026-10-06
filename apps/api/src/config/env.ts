@@ -42,4 +42,53 @@ export const config = {
       keySecret: process.env.RAZORPAY_KEY_SECRET || '',
     },
   },
+  redisUrl: process.env.REDIS_URL || '',
+  notifications: {
+    channelsRegistration: (process.env.NOTIFY_CHANNELS_REGISTRATION || 'email,whatsapp,sms')
+      .split(',')
+      .map((c) => c.trim().toUpperCase())
+      .filter(Boolean),
+    credentialDelivery: (process.env.CREDENTIAL_DELIVERY || 'setup_link') as 'password' | 'setup_link',
+    fallbackEnabled: process.env.NOTIFY_FALLBACK !== 'false',
+    smtp: {
+      host: process.env.SMTP_HOST || '',
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      user: process.env.SMTP_USER || '',
+      pass: process.env.SMTP_PASS || '',
+      from: process.env.SMTP_FROM || 'Online Creative & IT Academy <noreply@creativeit.academy>',
+    },
+    whatsapp: {
+      provider: (process.env.WHATSAPP_PROVIDER || 'LOG').toUpperCase(),
+      meta: {
+        phoneNumberId: process.env.META_WA_PHONE_NUMBER_ID || '',
+        accessToken: process.env.META_WA_ACCESS_TOKEN || '',
+        accountId: process.env.META_WA_ACCOUNT_ID || '',
+        apiVersion: process.env.META_WA_API_VERSION || 'v19.0',
+      },
+      twilio: {
+        accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+        authToken: process.env.TWILIO_AUTH_TOKEN || '',
+        fromNumber: process.env.TWILIO_WA_FROM || '',
+      },
+      gupshup: {
+        apiKey: process.env.GUPSHUP_API_KEY || '',
+        appName: process.env.GUPSHUP_APP_NAME || '',
+      },
+    },
+    sms: {
+      provider: (process.env.SMS_PROVIDER || 'LOG').toUpperCase(),
+      dltTemplateId: process.env.SMS_DLT_TE_ID || '',
+      msg91: {
+        authKey: process.env.MSG91_AUTH_KEY || '',
+        senderId: process.env.MSG91_SENDER_ID || 'CRITAC',
+      },
+      twilio: {
+        accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+        authToken: process.env.TWILIO_AUTH_TOKEN || '',
+        fromNumber: process.env.TWILIO_SMS_FROM || '',
+      },
+    },
+  },
 };
+

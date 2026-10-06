@@ -122,22 +122,58 @@ npm install
 
 ### 3. Setup Environment Variables
 Default development environments are pre-configured:
-- `apps/api/.env` (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `PORT=5000`)
+- `apps/api/.env`:
+  ```bash
+  DATABASE_URL="postgresql://postgres:password@localhost:5432/academy_lms?schema=public"
+  JWT_ACCESS_SECRET="super-secret-jwt-access-key-minimum-32-chars"
+  JWT_REFRESH_SECRET="super-secret-jwt-refresh-key-minimum-32-chars"
+  PORT=5000
+
+  # Redis & Queue (optional, in-memory queue used if omitted)
+  REDIS_URL="redis://localhost:6379"
+
+  # Notification Channels & Fallback
+  NOTIFY_CHANNELS_REGISTRATION="email,whatsapp,sms"
+  NOTIFY_FALLBACK=true
+  CREDENTIAL_DELIVERY="setup_link" # "setup_link" (72h token) or "password" (temporary password)
+
+  # Email Delivery (SMTP / Nodemailer)
+  SMTP_HOST="localhost"
+  SMTP_PORT=1025
+  SMTP_SECURE=false
+  SMTP_USER=""
+  SMTP_PASS=""
+  SMTP_FROM="Creative & IT Academy <admissions@creativeit.academy>"
+
+  # WhatsApp Delivery (LOG | META | TWILIO | GUPSHUP)
+  WHATSAPP_PROVIDER="LOG"
+  META_WA_PHONE_NUMBER_ID=""
+  META_WA_ACCESS_TOKEN=""
+  META_WA_BUSINESS_ACCOUNT_ID=""
+
+  # SMS Delivery (LOG | MSG91 | TWILIO)
+  SMS_PROVIDER="LOG"
+  MSG91_AUTH_KEY=""
+  MSG91_SENDER_ID="OCACAD"
+  ```
 - `apps/web/.env.local` (`NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1`)
 
-### 4. Database Setup & Seeding
+### 4. Database & Infrastructure Setup
 ```bash
+# Start PostgreSQL & Redis services via Docker
+docker compose up -d
+
 # Push schema to database
 npm run db:push
 
-# Seed default admin, instructor, students, recorded + live batches, and 20-MCQ quiz
+# Seed default admin, instructor, students, recorded + live batches, notification templates, and 20-MCQ quiz
 npm run db:seed
 ```
 
 ### 5. Run Automated Tests
 ```bash
-# Run unit tests and end-to-end progression integration tests
-npm run test:api
+# Run all unit, integration, and E2E admission tests
+npm test
 ```
 
 ### 6. Start the Development Servers

@@ -25,9 +25,43 @@ export const registerSchema = z.object({
   role: z.nativeEnum(Role).default(Role.STUDENT),
 });
 
-export const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+export const loginSchema = z
+  .object({
+    email: z.string().min(1, 'Email, Student ID, or Phone number is required').optional(),
+    identifier: z.string().min(1, 'Identifier is required').optional(),
+    password: z.string().min(1, 'Password is required'),
+  })
+  .refine((data) => Boolean(data.email || data.identifier), {
+    message: 'Please provide your Email, Student ID, or Phone number',
+    path: ['email'],
+  });
+
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, 'Email or Phone number is required'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  password: z.string().min(8, 'New password must be at least 8 characters'),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
+});
+
+export const resendCredentialsSchema = z.object({
+  channel: z.nativeEnum(NotificationChannel).optional(),
+});
+
+export const notificationFilterSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  channel: z.nativeEnum(NotificationChannel).optional(),
+  status: z.enum(['QUEUED', 'SENT', 'FAILED']).optional(),
+  templateKey: z.string().optional(),
+  userId: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const updateProfileSchema = z.object({

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { authController } from '../controllers/auth.controller.js';
 import { courseController } from '../controllers/course.controller.js';
@@ -10,8 +10,10 @@ import { finalProjectController } from '../controllers/final-project.controller.
 import { finalAssessmentController } from '../controllers/final-assessment.controller.js';
 import { certificateController } from '../controllers/certificate.controller.js';
 import { uploadController } from '../controllers/misc.controller.js';
-import { authenticate } from '../middleware/auth.middleware.js';
+import { authenticate, requirePasswordChanged } from '../middleware/auth.middleware.js';
 import { validateBody } from '../middleware/validate.middleware.js';
+import { prisma } from '../lib/prisma.js';
+import { sendSuccess } from '../lib/utils.js';
 import {
   updateLessonProgressSchema,
   submitQuizAttemptSchema,
@@ -20,6 +22,8 @@ import {
   submitMockTestSchema,
   submitFinalProjectSchema,
   submitFinalAssessmentSchema,
+  changePasswordSchema,
+  updateProfileSchema,
 } from '@academy/shared';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
@@ -29,13 +33,97 @@ const router = Router();
 router.use(authenticate);
 
 // ==========================================
-// Layer 2: Student LMS Routes
+// Layer 2: Student LMS Auth & Profile Routes
 // ==========================================
 
-// User Identity
+// User Identity & Security
 router.get('/auth/me', authController.getMe);
+router.post('/auth/change-password', validateBody(changePasswordSchema), authController.changePassword);
+router.post('/auth/logout-everywhere', authController.logoutEverywhere);
 
-// Course & Progression
+// Student Profile Management
+router.put('/student/profile', validateBody(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const { name, phone, whatsappNumber, address, city, education, avatar } = req.body;
+
+    const [updatedUser, updatedProfile] = await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          ...(name ? { name } : {}),
+          ...(phone ? { phone } : {}),
+          ...(avatar ? { avatar } : {}),
+        },
+      }),
+      prisma.studentProfile.upsert({
+        where: { userId },
+        create: {
+          userId,
+          phone: phone || null,
+          whatsappNumber: whatsappNumber || null,
+          address: address || null,
+          city: city || null,
+          education: education || null,
+          avatar: avatar || null,
+        },
+        update: {
+          ...(phone !== undefined ? { phone } : {}),
+          ...(whatsappNumber !== undefined ? { whatsappNumber } : {}),
+          ...(address !== undefined ? { address } : {}),
+          ...(city !== undefined ? { city } : {}),
+          ...(education !== undefined ? { education } : {}),
+          ...(avatar !== undefined ? { avatar } : {}),
+        },
+      }),
+    ]);
+
+    return sendSuccess(res, {
+      ...updatedUser,
+      studentProfile: updatedProfile,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Student Receipts
+router.get('/student/receipts', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.userId;
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    const [payments, registrations] = await Promise.all([
+      prisma.payment.findMany({
+        where: { studentId: userId },
+        include: { course: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.registration.findMany({
+        where: {
+          OR: [
+            { userId },
+            ...(user?.email ? [{ email: user.email }] : []),
+            ...(user?.phone ? [{ phone: user.phone }] : []),
+          ],
+        },
+        include: { course: true, batch: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return sendSuccess(res, { payments, registrations });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ==========================================
+// Guard: Force Password Change before Accessing Courses
+// ==========================================
+router.use(requirePasswordChanged);
+
+// Course & Progression (ONLY enrolled courses accessible)
 router.get('/courses/id/:id', courseController.getCourseById);
 router.get('/courses/:id/progression', courseController.getCourseProgression);
 router.post('/lessons/:lessonId/progress', validateBody(updateLessonProgressSchema), courseController.updateLessonProgress);

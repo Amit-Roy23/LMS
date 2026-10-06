@@ -8,11 +8,12 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: UserSummary | null;
   isLoading: boolean;
-  login: (credentials: { email: string; password: string }) => Promise<void>;
+  login: (credentials: { email?: string; identifier?: string; password: string }) => Promise<void>;
   register: (data: { name: string; email: string; password: string; role?: Role; phone?: string | null }) => Promise<void>;
   logout: () => Promise<void>;
   loginAsDemo: (role: 'admin' | 'instructor' | 'student1' | 'student2') => Promise<void>;
   refreshUser: () => Promise<void>;
+  changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const login = async (credentials: { email: string; password: string }) => {
+  const login = async (credentials: { email?: string; identifier?: string; password: string }) => {
     const res = await apiClient<{ user: UserSummary; accessToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
@@ -48,6 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', res.accessToken);
     }
     setUser(res.user);
+
+    // If student must change temporary password, route strictly to change-password
+    if (res.user.role === Role.STUDENT && res.user.mustChangePassword) {
+      router.push('/student/change-password');
+      return;
+    }
 
     if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
       router.push('/admin/dashboard');
@@ -66,6 +73,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', res.accessToken);
     }
     setUser(res.user);
+    router.push('/student/dashboard');
+  };
+
+  const changePassword = async (data: { currentPassword?: string; newPassword: string }) => {
+    await apiClient('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+
+    await refreshUser();
     router.push('/student/dashboard');
   };
 
@@ -104,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         loginAsDemo,
         refreshUser,
+        changePassword,
       }}
     >
       {children}

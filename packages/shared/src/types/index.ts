@@ -44,12 +44,14 @@ export interface PaginatedResponse<T> {
 
 export interface UserSummary {
   id: string;
+  studentId?: string | null;
   email: string;
   name: string;
   role: Role;
   phone?: string | null;
   avatar?: string | null;
   status: UserStatus;
+  mustChangePassword?: boolean;
   createdAt: string;
   studentProfile?: StudentProfileDetail | null;
 }
@@ -416,6 +418,7 @@ export interface NotificationTemplateDetail {
   id: string;
   key: string;
   channel: NotificationChannel;
+  locale: string;
   subject?: string | null;
   body: string;
   createdAt: string;
@@ -427,9 +430,33 @@ export interface NotificationLogDetail {
   channel: NotificationChannel;
   to: string;
   templateKey: string;
+  locale: string;
   status: NotificationStatus;
   provider?: string | null;
+  providerMessageId?: string | null;
   error?: string | null;
+  attempts: number;
+  idempotencyKey?: string | null;
   userId?: string | null;
+  metadata?: any;
+  createdAt: string;
+  updatedAt: string;
+  user?: UserSummary | null;
+}
+
+export interface SettingDetail {
+  key: string;
+  value: string;
+  category: string;
+  description?: string | null;
+  updatedAt: string;
+}
+
+export interface VerificationTokenDetail {
+  id: string;
+  userId: string;
+  type: string;
+  expiresAt: string;
+  usedAt?: string | null;
   createdAt: string;
 }
