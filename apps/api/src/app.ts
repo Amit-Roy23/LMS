@@ -72,3 +72,8 @@ export function createApp() {
 
   return app;
 }
+
+// Default export so Vercel's Express preset (which picks src/app.ts as the
+// entrypoint because it imports express) has an app instance to serve.
+const app = createApp();
+export default app;
