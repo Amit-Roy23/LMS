@@ -1,9 +1,7 @@
-import { createApp } from './app.js';
+import app, { createApp } from './app.js';
 import { config } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { prisma } from './lib/prisma.js';
-
-const app = createApp();
 
 // Only bind TCP listener in standalone mode, not in Vercel Serverless
 if (!process.env.VERCEL) {
