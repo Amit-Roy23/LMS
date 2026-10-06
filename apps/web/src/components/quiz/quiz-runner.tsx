@@ -163,7 +163,7 @@ export function QuizRunner({
 
   if (isLoadingQuiz) {
     return (
-      <Card className="border-slate-800 bg-[#ffffff] p-12 text-center">
+      <Card className="border-slate-800 bg-[#fffbf4] p-12 text-center">
         <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
         <h3 className="text-sm font-bold text-ink">Loading Assessment Questions...</h3>
         <p className="text-xs text-slate-400 mt-1">Retrieving questions and options for {quiz.title}.</p>
@@ -189,7 +189,7 @@ export function QuizRunner({
   return (
     <div className="w-full space-y-6">
       {/* Quiz Header Card */}
-      <Card className="border-[#efdfd4] bg-[#ffffff]">
+      <Card className="border-[#e7d5bd] bg-[#fffbf4]">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -207,7 +207,7 @@ export function QuizRunner({
               )}
             </div>
 
-            <div className="flex items-center gap-3 text-xs bg-[#fff8f3] p-3 rounded-lg border border-[#f0e2d8]">
+            <div className="flex items-center gap-3 text-xs bg-[#fbf3e6] p-3 rounded-lg border border-[#eadac4]">
               <div>
                 <p className="text-slate-400">Pass Mark</p>
                 <p className="font-bold text-blue-400 text-sm">{passingScore}%</p>
@@ -274,7 +274,7 @@ export function QuizRunner({
           const isMulti = question.type === QuestionType.MULTIPLE_CHOICE || question.type === 'MULTIPLE_CHOICE';
 
           return (
-            <Card key={question.id} className="border-slate-800 bg-[#fffaf6]">
+            <Card key={question.id} className="border-slate-800 bg-[#fdf7ec]">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-blue-400">
@@ -306,7 +306,7 @@ export function QuizRunner({
                       <div
                         className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
                           isChecked
-                            ? 'bg-blue-600 border-blue-500 text-white'
+                            ? 'bg-blue-600 border-blue-500 text-cream'
                             : 'border-slate-700 bg-slate-800'
                         }`}
                       >

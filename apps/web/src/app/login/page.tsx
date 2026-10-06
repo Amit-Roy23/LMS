@@ -51,22 +51,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#fbf3e6] text-slate-100">
       <Navbar />
 
-      <main className="flex-1 flex items-center justify-center p-4 py-16 tech-dot-grid">
+      <main className="flex-1 flex items-center justify-center p-4 py-16 checker-pink">
         <div className="w-full max-w-md space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="w-10 h-10 rounded-lg bg-blue-600 border border-blue-400/30 flex items-center justify-center mx-auto shadow-sm">
-              <GraduationCap className="w-5 h-5 text-white" />
+            <div className="w-12 h-12 rounded-full bg-plum flex items-center justify-center mx-auto shadow-soft">
+              <GraduationCap className="w-5 h-5 text-cream" />
             </div>
-            <h1 className="text-2xl font-bold text-ink tracking-tight">Sign In to Your Academy</h1>
-            <p className="text-xs font-mono text-slate-400">AUTHENTICATED LEARNING & CERTIFICATION PORTAL</p>
+            <h1 className="font-display text-4xl font-extrabold text-plum leading-tight">Sign In to Your Academy</h1>
+            <p className="text-xs font-semibold tracking-wide text-plum/75">AUTHENTICATED LEARNING & CERTIFICATION PORTAL</p>
           </div>
 
           {/* Login Form Card */}
-          <Card className="border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
+          <Card className="border-transparent bg-cream-50 p-7 space-y-6 rounded-3xl shadow-soft">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Email Address"
@@ -107,9 +107,9 @@ export default function LoginPage() {
           </Card>
 
           {/* Fast 1-Click Demo Logins */}
-          <div className="p-4 rounded-lg bg-[#ffffff] border border-[#f0e2d8] space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
+          <div className="p-5 rounded-3xl bg-plum text-cream space-y-3 shadow-soft">
+            <div className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-cream">
+              <Zap className="w-3.5 h-3.5 text-peach-500" />
               <span>INSTANT 1-CLICK DEMO ACCESS</span>
             </div>
 
@@ -118,48 +118,48 @@ export default function LoginPage() {
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('student1')}
-                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-blue-500/50 text-left transition-all disabled:opacity-50"
+                className="p-3.5 rounded-2xl bg-cream-50 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-                <p className="text-xs font-bold text-blue-400">
+                <p className="font-display text-base font-extrabold">
                   Student 1 (Enrolled)
                 </p>
-                <p className="text-[10px] font-mono text-slate-400">Active Course Progress</p>
+                <p className="text-[11px] opacity-75">Active Course Progress</p>
               </button>
 
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('student2')}
-                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-cyan-500/50 text-left transition-all disabled:opacity-50"
+                className="p-3.5 rounded-2xl bg-pink-500 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-                <p className="text-xs font-bold text-cyan-400">
+                <p className="font-display text-base font-extrabold">
                   Student 2 (Fresh)
                 </p>
-                <p className="text-[10px] font-mono text-slate-400">New Admission</p>
+                <p className="text-[11px] opacity-75">New Admission</p>
               </button>
 
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('instructor')}
-                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-violet-500/50 text-left transition-all disabled:opacity-50"
+                className="p-3.5 rounded-2xl bg-peach-500 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-                <p className="text-xs font-bold text-violet-400">
+                <p className="font-display text-base font-extrabold">
                   Instructor
                 </p>
-                <p className="text-[10px] font-mono text-slate-400">Submissions Review</p>
+                <p className="text-[11px] opacity-75">Submissions Review</p>
               </button>
 
               <button
                 type="button"
                 disabled={isLoading}
                 onClick={() => handleDemoLogin('admin')}
-                className="p-2.5 rounded-md border border-[#efdfd4] bg-[#fff8f3] hover:border-emerald-500/50 text-left transition-all disabled:opacity-50"
+                className="p-3.5 rounded-2xl bg-rust text-cream text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-                <p className="text-xs font-bold text-emerald-400">
+                <p className="font-display text-base font-extrabold">
                   Administrator
                 </p>
-                <p className="text-[10px] font-mono text-slate-400">Full System Control</p>
+                <p className="text-[11px] opacity-75">Full System Control</p>
               </button>
             </div>
           </div>

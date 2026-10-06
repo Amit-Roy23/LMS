@@ -285,7 +285,7 @@ export default function CoursePlayerPage() {
                               }}
                               className={`w-full p-2.5 rounded-lg flex items-center justify-between text-xs text-left transition-all ${
                                 isCurrentLesson
-                                  ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                                  ? 'bg-indigo-600 text-cream font-bold shadow-sm'
                                   : lesson.isLocked
                                   ? 'text-slate-500 cursor-not-allowed'
                                   : 'text-slate-300 hover:bg-slate-800/60'
@@ -323,7 +323,7 @@ export default function CoursePlayerPage() {
                             }}
                             className={`w-full p-2.5 rounded-lg flex items-center justify-between text-xs text-left transition-all ${
                               activeViewMode === 'quiz' && activeModuleId === mod.id
-                                ? 'bg-purple-600 text-white font-bold shadow-sm'
+                                ? 'bg-purple-600 text-plum font-bold shadow-sm'
                                 : mod.quizDetail.isLocked
                                 ? 'text-slate-500 cursor-not-allowed'
                                 : 'text-purple-300 hover:bg-purple-950/40'
@@ -357,7 +357,7 @@ export default function CoursePlayerPage() {
                             }}
                             className={`w-full p-2.5 rounded-lg flex items-center justify-between text-xs text-left transition-all ${
                               activeViewMode === 'assignment' && activeModuleId === mod.id
-                                ? 'bg-amber-600 text-white font-bold shadow-sm'
+                                ? 'bg-amber-600 text-plum font-bold shadow-sm'
                                 : mod.assignmentDetail.isLocked
                                 ? 'text-slate-500 cursor-not-allowed'
                                 : 'text-amber-300 hover:bg-amber-950/40'
@@ -656,7 +656,7 @@ export default function CoursePlayerPage() {
                   <CertificateCard certificate={progression.certificate} />
                 </div>
               ) : progression?.certificateEligible ? (
-                <Card className="border-[#efdfd4] bg-[#ffffff] p-8 text-center space-y-6 shadow-xl">
+                <Card className="border-[#e7d5bd] bg-[#fffbf4] p-8 text-center space-y-6 shadow-xl">
                   <div className="w-14 h-14 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
                     <Award className="w-7 h-7" />
                   </div>

@@ -4,110 +4,135 @@
 
 @layer base {
   :root {
-    --background: 24 100% 98%;
-    --foreground: 170 46% 13%;
+    --background: 37 72% 94%;
+    --foreground: 330 52% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 170 46% 13%;
+    --card: 40 100% 98%;
+    --card-foreground: 330 52% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 170 46% 13%;
+    --popover: 40 100% 98%;
+    --popover-foreground: 330 52% 12%;
 
-    --primary: 170 75% 24%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 330 52% 12%;
+    --primary-foreground: 37 72% 94%;
 
-    --secondary: 22 100% 96%;
-    --secondary-foreground: 170 46% 13%;
+    --secondary: 36 62% 90%;
+    --secondary-foreground: 330 52% 12%;
 
-    --muted: 22 100% 96%;
-    --muted-foreground: 168 9% 40%;
+    --muted: 36 62% 90%;
+    --muted-foreground: 345 13% 40%;
 
-    --accent: 15 90% 67%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 18 62% 44%;
+    --accent-foreground: 37 72% 94%;
 
     --destructive: 347 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 24 52% 90%;
-    --input: 24 52% 90%;
-    --ring: 170 75% 24%;
+    --border: 36 46% 84%;
+    --input: 36 46% 84%;
+    --ring: 18 62% 44%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   body {
-    background-color: #fff8f3;
-    color: #12302b;
-    font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    background-color: #fbf3e6;
+    color: #2f0f1f;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4 {
-    color: #12302b;
-    letter-spacing: -0.01em;
+  h1,
+  h2,
+  h3 {
+    font-family: 'Bricolage Grotesque', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  h1,
+  h2 {
+    font-weight: 800;
+    letter-spacing: -0.035em;
   }
 }
 
 @layer utilities {
+  /* Big chunky display heading */
+  .font-display {
+    font-family: 'Bricolage Grotesque', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.035em;
+  }
+
+  /* Subtle dotted texture */
+  .tech-dot-grid {
+    background-size: 22px 22px;
+    background-image: radial-gradient(rgba(180, 83, 42, 0.16) 1px, transparent 1px);
+  }
+
   .tech-grid {
     background-size: 32px 32px;
-    background-image: 
-      linear-gradient(to right, rgba(15, 107, 90, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 107, 90, 0.05) 1px, transparent 1px);
+    background-image:
+      linear-gradient(to right, rgba(47, 15, 31, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(47, 15, 31, 0.05) 1px, transparent 1px);
   }
 
-  .tech-dot-grid {
-    background-size: 24px 24px;
-    background-image: radial-gradient(rgba(247, 132, 94, 0.18) 1px, transparent 1px);
+  /* Playful pink diamond checker pattern */
+  .checker-pink {
+    background-color: #f48fb9;
+    background-image:
+      linear-gradient(45deg, #f7b0cf 25%, transparent 25%, transparent 75%, #f7b0cf 75%),
+      linear-gradient(45deg, #f7b0cf 25%, transparent 25%, transparent 75%, #f7b0cf 75%);
+    background-size: 56px 56px;
+    background-position: 0 0, 28px 28px;
   }
 
-  .panel-flat {
-    background: #ffffff;
-    border: 1px solid #f0e2d8;
-  }
-
-  .panel-card {
-    background: #ffffff;
-    border: 1px solid #efdfd4;
-    box-shadow: 0 4px 18px -6px rgba(18, 48, 43, 0.1);
-  }
-
-  /* Coral "pill" used to highlight a word in headings */
-  .highlight-pill {
-    display: inline-block;
-    background: #f7845e;
-    color: #ffffff;
-    padding: 0 0.35em 0.05em;
-    border-radius: 0.6rem;
-  }
-
-  /* Soft coral diagonal stripes for feature panels */
+  /* Soft diagonal stripes in peach */
   .hero-stripes {
-    background-color: #fde6dc;
+    background-color: #fce5d6;
     background-image: repeating-linear-gradient(
       135deg,
-      rgba(247, 132, 94, 0.22) 0 10px,
+      rgba(238, 139, 83, 0.25) 0 10px,
       transparent 10px 22px
     );
   }
 
+  /* Highlighted word inside a heading */
+  .highlight-pill {
+    display: inline-block;
+    background: #2f0f1f;
+    color: #fbf3e6;
+    padding: 0 0.3em 0.06em;
+    border-radius: 0.5em;
+  }
+
+  .panel-flat {
+    background: #fffbf4;
+    border: 1px solid #eadac4;
+  }
+
+  .panel-card {
+    background: #fffbf4;
+    border: 1px solid #e7d5bd;
+    box-shadow: 0 4px 18px -6px rgba(47, 15, 31, 0.1);
+  }
+
   .panel-active {
-    background: #eef7f4;
-    border: 1px solid #0f6b5a;
+    background: #fbefe6;
+    border: 1px solid #b4532a;
   }
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #fff8f3;
+  background: #fbf3e6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e8d6ca;
-  border-radius: 3px;
+  background: #e0ccb2;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0f6b5a;
+  background: #b4532a;
 }
