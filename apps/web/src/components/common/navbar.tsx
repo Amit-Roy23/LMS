@@ -25,18 +25,18 @@ export function Navbar() {
   const [demoMenuOpen, setDemoMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-[#f0e2d8] bg-cream/90 backdrop-blur-xl">
+    <nav className="sticky top-0 z-40 w-full border-b border-[#eadac4] bg-cream/90 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center shadow-soft group-hover:bg-brand-dark transition-colors">
-              <GraduationCap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-full bg-rust flex items-center justify-center shadow-soft group-hover:bg-plum transition-colors">
+              <GraduationCap className="w-5 h-5 text-cream" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight text-brand flex items-center gap-1.5">
+              <span className="font-display font-extrabold text-lg tracking-tight text-plum flex items-center gap-1.5">
                 Creative & IT Academy
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[9px] font-semibold bg-coral-500 text-white">
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-peach-500 text-plum">
                   EST. 2026
                 </span>
               </span>
@@ -50,25 +50,25 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             <Link
               href="/courses"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-brand transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
             >
               <BookOpen className="w-3.5 h-3.5 text-blue-400" /> Courses
             </Link>
             <Link
               href="/ai"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-brand transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> AI & Labs
             </Link>
             <Link
               href="/career"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-brand transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
             >
               <Briefcase className="w-3.5 h-3.5 text-amber-400" /> Career
             </Link>
             <Link
               href="/verify/CERT-2026-DEMO01"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-brand transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
             >
               <Award className="w-3.5 h-3.5 text-emerald-400" /> Verification
             </Link>
@@ -82,7 +82,7 @@ export function Navbar() {
                 variant="secondary"
                 size="sm"
                 onClick={() => setDemoMenuOpen(!demoMenuOpen)}
-                className="text-xs bg-white border-[#efdfd4] hover:border-coral-500/60 rounded-full"
+                className="text-xs bg-cream-50 border-[#e7d5bd] hover:border-rust/60"
               >
                 <span>⚡ Demo Logins</span>
                 <ChevronDown className="w-3.5 h-3.5 ml-1 text-slate-400" />
@@ -90,7 +90,7 @@ export function Navbar() {
 
               {demoMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-[#efdfd4] bg-[#ffffff] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95"
+                  className="absolute right-0 mt-2 w-56 rounded-xl border border-[#e7d5bd] bg-[#fffbf4] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95"
                   onMouseLeave={() => setDemoMenuOpen(false)}
                 >
                   <p className="px-2 py-1 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
@@ -187,7 +187,7 @@ export function Navbar() {
 
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#f0e2d8] bg-cream p-4 space-y-3">
+        <div className="md:hidden border-b border-[#eadac4] bg-cream p-4 space-y-3">
           <Link
             href="/courses"
             onClick={() => setMobileMenuOpen(false)}

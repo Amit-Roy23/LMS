@@ -25,326 +25,298 @@ import {
   Check,
   Flame,
 } from 'lucide-react';
+import { Burst, Squiggle } from '../components/decor/burst';
+
+const STAGES = [
+  {
+    n: '01',
+    title: 'Video Lessons',
+    desc: 'Sequential playback with automatic heartbeats until 90% threshold.',
+    meta: 'LOCKED: Next Module',
+    icon: PlayCircle,
+    tone: 'bg-plum text-cream border-plum',
+    chip: 'border-cream/40 text-cream',
+    sub: 'text-cream/70',
+  },
+  {
+    n: '02',
+    title: 'Module Quizzes',
+    desc: 'Knowledge assessments unlocked only after 100% lesson completion.',
+    meta: 'BENCHMARK: 70% PASS',
+    icon: Terminal,
+    tone: 'bg-cream-50 text-plum border-[#e7d5bd]',
+    chip: 'border-plum/25 text-plum',
+    sub: 'text-slate-400',
+  },
+  {
+    n: '03',
+    title: 'Assignments',
+    desc: 'Production code repository submission with live demo links.',
+    meta: 'FORMAT: ZIP / GIT / URL',
+    icon: FileCode2,
+    tone: 'bg-peach-500 text-plum border-peach-500',
+    chip: 'border-plum/30 text-plum',
+    sub: 'text-plum/75',
+  },
+  {
+    n: '04',
+    title: 'Instructor Review',
+    desc: 'Human code audit with line-by-line feedback and scoring.',
+    meta: 'STATUS: QUEUED AUDIT',
+    icon: Users,
+    tone: 'bg-rust text-cream border-rust',
+    chip: 'border-cream/40 text-cream',
+    sub: 'text-cream/75',
+  },
+  {
+    n: '05',
+    title: 'Mock & Final Exam',
+    desc: 'Strict countdown timed comprehensive proctoring simulation.',
+    meta: 'BENCHMARK: 75% PASS',
+    icon: Zap,
+    tone: 'bg-cream-50 text-plum border-[#e7d5bd]',
+    chip: 'border-plum/25 text-plum',
+    sub: 'text-slate-400',
+  },
+  {
+    n: '06',
+    title: 'Credential Issuance',
+    desc: 'Server-generated PDF certificate with verifiable live QR code.',
+    meta: 'EXPORT: VECTOR PDF',
+    icon: Award,
+    tone: 'bg-pink-500 text-plum border-pink-500',
+    chip: 'border-plum/30 text-plum',
+    sub: 'text-plum/75',
+  },
+];
+
+const TRACKS = [
+  {
+    tag: 'SOFTWARE TRACK',
+    price: '$199.00',
+    title: 'Full-Stack Web Development & Modern AI Engineering',
+    desc: 'Build complete end-to-end applications with Next.js 15, Node.js, TypeScript, PostgreSQL, state machines, and PDF generation.',
+    meta: '3 MODULES • 9 LESSONS',
+    href: '/courses/fullstack-ai-engineering',
+    cta: 'Inspect Syllabus',
+  },
+  {
+    tag: 'AI ARCHITECTURE',
+    price: '$249.00',
+    title: 'Autonomous AI Agents & Multi-Model Systems',
+    desc: 'Master tool orchestration, vector retrieval, embeddings, semantic cache, and agentic workflows with production reliability.',
+    meta: '4 MODULES • 12 LESSONS',
+    href: '/ai',
+    cta: 'Explore AI Lab',
+  },
+  {
+    tag: 'CLOUD INFRASTRUCTURE',
+    price: '$149.00',
+    title: 'Cloud DevOps, Kubernetes & CI/CD Pipelines',
+    desc: 'Containerization with Docker, multi-stage builds, automated testing pipelines, reverse proxies, and production deployment.',
+    meta: '3 MODULES • 8 LESSONS',
+    href: '/courses',
+    cta: 'View Catalog',
+  },
+];
+
+const HERO_STATS = [
+  { value: '100% STRICT', label: 'Zero bypassable gates' },
+  { value: '≥ 90.0%', label: 'Realtime telemetry tracking' },
+  { value: 'QR + UUID', label: 'Blockchain-grade PDF export' },
+  { value: 'TRI-TIER', label: 'Student / Instructor / Admin' },
+];
 
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-cream text-ink">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-[#f0e2d8]">
-        {/* Teal panel on the right (desktop) */}
-        <div className="hidden lg:block absolute inset-y-0 right-0 w-[38%] bg-brand" aria-hidden />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid lg:grid-cols-2 gap-12 items-center py-16 lg:py-24">
-          {/* Left: headline */}
-          <div className="text-left">
-            <div className="inline-flex items-center gap-2 text-sm font-medium text-ink mb-6">
-              <Sparkles className="w-4 h-4 text-coral-500" />
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-rust text-cream">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.25fr_1fr] gap-12 items-center py-16 lg:py-24">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-cream/40 px-4 py-1.5 text-sm font-medium text-cream/90 mb-7">
+              <Sparkles className="w-4 h-4 text-peach-500" />
               <span>Deterministic Progression Architecture</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-brand tracking-tight leading-[1.15]">
-              Online Creative &amp; <span className="highlight-pill">IT</span> Academy
+            <h1 className="font-display text-[2.6rem] sm:text-6xl lg:text-7xl font-extrabold leading-[0.98]">
+              <span className="block text-cream">Online Creative &amp;</span>
+              <span className="block text-plum">IT Academy.</span>
             </h1>
-            <p className="text-lg sm:text-xl font-semibold text-ink mt-4">
+            <p className="mt-6 text-lg sm:text-xl text-cream/90 max-w-xl leading-snug">
               Server-Enforced Mastery &amp; Verifiable Technical Certification
             </p>
-
-            <p className="mt-5 text-sm sm:text-base text-slate-400 max-w-xl leading-relaxed">
+            <p className="mt-4 text-sm sm:text-base text-cream/75 max-w-xl leading-relaxed">
               The next-generation technical academy where skipping is impossible. Master full-stack software and AI through deterministic checkpoints: Video Tracking → Module Quizzes → Code Assignments → Instructor Approvals → Capstone Defense → Cryptographic PDF Diplomas.
             </p>
 
-            <div className="mt-9 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3">
+            <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link href="/courses">
-                <Button variant="primary" size="lg" className="w-full sm:w-auto gap-2">
-                  <BookOpen className="w-4 h-4" />
+                <Button variant="primary" size="lg" className="gap-2">
                   <span>Explore Technical Catalog</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-
-              <Link href="/login" className="group inline-flex items-center gap-3 px-2 py-2 text-sm font-semibold text-ink">
-                <span className="w-11 h-11 rounded-full bg-coral-500 group-hover:bg-coral-600 flex items-center justify-center shadow-soft transition-colors">
-                  <Zap className="w-4 h-4 text-white" />
-                </span>
-                <span>Instant 1-Click Demo</span>
-              </Link>
-
-              <Link href="/verify/CERT-2026-DEMO01">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto gap-2">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Verify Credentials</span>
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="gap-2 border-cream text-cream hover:bg-cream hover:text-plum"
+                >
+                  <Zap className="w-4 h-4" />
+                  <span>Instant 1-Click Demo</span>
                 </Button>
               </Link>
+              <Link
+                href="/verify/CERT-2026-DEMO01"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cream/90 hover:text-cream underline-offset-4 hover:underline"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Verify Credentials
+              </Link>
+            </div>
+
+            {/* Stats row */}
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-y-6">
+              {HERO_STATS.map((s, i) => (
+                <div key={s.value} className={i > 0 ? 'sm:border-l sm:border-cream/25 sm:pl-5' : ''}>
+                  <p className="font-display text-2xl font-extrabold text-cream">{s.value}</p>
+                  <p className="text-xs text-cream/75 mt-1">{s.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right: spec counters on a striped coral card over the teal panel */}
-          <div className="relative">
-            <div className="hero-stripes rounded-3xl p-5 sm:p-7 shadow-soft">
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div className="p-5 rounded-2xl bg-white shadow-card">
-                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Progression Protocol</div>
-                  <p className="text-2xl font-bold text-brand mt-1">100% STRICT</p>
-                  <p className="text-xs text-slate-400 mt-1">Zero bypassable gates</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-white shadow-card">
-                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Watch Threshold</div>
-                  <p className="text-2xl font-bold text-coral-500 mt-1">≥ 90.0%</p>
-                  <p className="text-xs text-slate-400 mt-1">Realtime telemetry tracking</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-white shadow-card">
-                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Authentication</div>
-                  <p className="text-2xl font-bold text-brand mt-1">QR + UUID</p>
-                  <p className="text-xs text-slate-400 mt-1">Blockchain-grade PDF export</p>
-                </div>
-                <div className="p-5 rounded-2xl bg-white shadow-card">
-                  <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Role Access</div>
-                  <p className="text-2xl font-bold text-coral-500 mt-1">TRI-TIER</p>
-                  <p className="text-xs text-slate-400 mt-1">Student / Instructor / Admin</p>
-                </div>
-              </div>
+          {/* Collage of stage cards over a checker panel */}
+          <div className="relative hidden lg:block h-[460px]">
+            <div className="absolute inset-6 rounded-[2rem] checker-pink rotate-3" aria-hidden />
+            <Burst className="absolute -top-2 left-4 w-14 h-14 text-cream" />
+            <div className="absolute top-10 left-2 w-64 rotate-[-6deg] rounded-3xl bg-cream-50 text-plum p-6 shadow-soft">
+              <PlayCircle className="w-9 h-9 text-rust" />
+              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Video Lessons</p>
+              <p className="text-xs text-slate-400 mt-2">Sequential playback with automatic heartbeats until 90% threshold.</p>
+            </div>
+            <div className="absolute top-44 right-0 w-60 rotate-[5deg] rounded-3xl bg-plum text-cream p-6 shadow-soft">
+              <Terminal className="w-9 h-9 text-peach-500" />
+              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Module Quizzes</p>
+              <p className="text-xs text-cream/70 mt-2">Knowledge assessments unlocked only after 100% lesson completion.</p>
+            </div>
+            <div className="absolute bottom-0 left-12 w-56 rotate-[-3deg] rounded-3xl bg-peach-500 text-plum p-6 shadow-soft">
+              <Award className="w-9 h-9" />
+              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Credential Issuance</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Progression Pipeline Architecture */}
-      <section className="py-20 bg-[#fff6ef] border-b border-[#f0e2d8]">
+      {/* Progression Pipeline */}
+      <section className="py-20 lg:py-28 bg-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <Badge variant="blue" className="mb-2">ENGINEERING BLUEPRINT</Badge>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-ink tracking-tight">
-              Deterministic 6-Stage Mastery Pipeline
+          <div className="text-center max-w-4xl mx-auto mb-14 relative">
+            <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-plum leading-[1.02]">
+              Deterministic 6-Stage Mastery Pipeline.
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2">
+            <Burst className="hidden md:block absolute -top-6 -right-4 w-14 h-14" />
+            <p className="text-base sm:text-lg text-slate-300 mt-5">
               Unlike generic platforms with loose progress checkboxes, our state machine enforces sequential mastery validation on the backend database.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
-            {/* Step 1 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-[#efdfd4] flex flex-col justify-between space-y-3 hover:border-blue-500/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">STAGE 01</span>
-                <PlayCircle className="w-4 h-4 text-blue-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Video Lessons</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Sequential playback with automatic heartbeats until 90% threshold.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-slate-400">
-                LOCKED: Next Module
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-[#efdfd4] flex flex-col justify-between space-y-3 hover:border-violet-500/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">STAGE 02</span>
-                <Terminal className="w-4 h-4 text-violet-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Module Quizzes</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Knowledge assessments unlocked only after 100% lesson completion.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-violet-400">
-                BENCHMARK: 70% PASS
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-[#efdfd4] flex flex-col justify-between space-y-3 hover:border-amber-500/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">STAGE 03</span>
-                <FileCode2 className="w-4 h-4 text-amber-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Assignments</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Production code repository submission with live demo links.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-amber-400">
-                FORMAT: ZIP / GIT / URL
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-[#efdfd4] flex flex-col justify-between space-y-3 hover:border-cyan-500/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">STAGE 04</span>
-                <Users className="w-4 h-4 text-cyan-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Instructor Review</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Human code audit with line-by-line feedback and scoring.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-cyan-400">
-                STATUS: QUEUED AUDIT
-              </div>
-            </div>
-
-            {/* Step 5 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-[#efdfd4] flex flex-col justify-between space-y-3 hover:border-rose-500/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">STAGE 05</span>
-                <Zap className="w-4 h-4 text-rose-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Mock & Final Exam</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Strict countdown timed comprehensive proctoring simulation.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-rose-400">
-                BENCHMARK: 75% PASS
-              </div>
-            </div>
-
-            {/* Step 6 */}
-            <div className="p-4 rounded-lg bg-[#ffffff] border border-emerald-500/40 flex flex-col justify-between space-y-3 hover:border-emerald-400 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">STAGE 06</span>
-                <Award className="w-4 h-4 text-emerald-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-ink text-sm">Credential Issuance</h4>
-                <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                  Server-generated PDF certificate with verifiable live QR code.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-[#f0e2d8] text-[10px] font-mono text-emerald-400">
-                EXPORT: VECTOR PDF
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {STAGES.map((st) => {
+              const Icon = st.icon;
+              return (
+                <div
+                  key={st.n}
+                  className={`rounded-3xl border p-7 flex flex-col justify-between min-h-[260px] transition-transform hover:-translate-y-1 ${st.tone}`}
+                >
+                  <div className="flex items-start justify-between">
+                    <span className={`rounded-full border px-3.5 py-1 text-xs font-semibold ${st.chip}`}>
+                      Stage {st.n}
+                    </span>
+                    <Icon className="w-9 h-9" />
+                  </div>
+                  <div className="mt-8">
+                    <h3 className="font-display text-3xl font-extrabold leading-tight">{st.title}</h3>
+                    <p className={`text-sm mt-2 leading-relaxed ${st.sub}`}>{st.desc}</p>
+                  </div>
+                  <p className={`mt-5 text-[11px] font-semibold tracking-wide ${st.sub}`}>{st.meta}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Featured Curriculums Section */}
-      <section className="py-20 bg-[#fff8f3] border-b border-[#f0e2d8]">
+      {/* Featured Tracks */}
+      <section className="py-20 lg:py-28 bg-plum text-cream relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
             <div>
-              <Badge variant="blue" className="mb-2">CURATED SYLLABUS</Badge>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-ink">
-                Flagship Technical Tracks
+              <p className="text-peach-500 font-semibold text-sm tracking-wide">CURATED SYLLABUS</p>
+              <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-cream mt-2 leading-[1.02]">
+                Flagship Technical Tracks.
               </h2>
+              <Squiggle className="mt-3" />
             </div>
             <Link href="/courses">
-              <Button variant="outline" size="sm" className="gap-1.5">
+              <Button variant="white" size="md" className="gap-1.5">
                 <span>View All Curriculums</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 */}
-            <div className="rounded-lg border border-[#efdfd4] bg-[#ffffff] p-6 flex flex-col justify-between hover:border-blue-500/50 transition-colors">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <Badge variant="blue">SOFTWARE TRACK</Badge>
-                  <span className="text-sm font-mono font-bold text-ink">$199.00</span>
+            {TRACKS.map((t, i) => (
+              <div
+                key={t.title}
+                className="rounded-3xl bg-cream-50 text-plum p-7 flex flex-col justify-between hover:-translate-y-1 transition-transform"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-display text-5xl font-extrabold text-peach-600">0{i + 1}</span>
+                    <span className="rounded-full bg-plum text-cream px-3 py-1 text-sm font-bold">{t.price}</span>
+                  </div>
+                  <p className="mt-5 text-[11px] font-semibold tracking-wide text-rust">{t.tag}</p>
+                  <h3 className="font-display text-2xl font-extrabold leading-tight mt-1">{t.title}</h3>
+                  <p className="text-sm text-slate-400 mt-3 leading-relaxed">{t.desc}</p>
                 </div>
-                <h3 className="text-base font-bold text-ink hover:text-blue-400 transition-colors">
-                  Full-Stack Web Development & Modern AI Engineering
-                </h3>
-                <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">
-                  Build complete end-to-end applications with Next.js 15, Node.js, TypeScript, PostgreSQL, state machines, and PDF generation.
-                </p>
-              </div>
-
-              <div className="pt-5 mt-6 border-t border-[#f0e2d8] flex items-center justify-between">
-                <span className="text-[11px] font-mono text-slate-400">3 MODULES • 9 LESSONS</span>
-                <Link href="/courses/fullstack-ai-engineering">
-                  <Button variant="primary" size="sm">
-                    Inspect Syllabus
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="rounded-lg border border-[#efdfd4] bg-[#ffffff] p-6 flex flex-col justify-between hover:border-violet-500/50 transition-colors">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <Badge variant="purple">AI ARCHITECTURE</Badge>
-                  <span className="text-sm font-mono font-bold text-ink">$249.00</span>
+                <div className="pt-5 mt-6 border-t border-[#e7d5bd] flex items-center justify-between gap-3">
+                  <span className="text-[11px] font-semibold text-slate-400">{t.meta}</span>
+                  <Link href={t.href}>
+                    <Button variant="primary" size="sm" className="gap-1.5">
+                      {t.cta}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
                 </div>
-                <h3 className="text-base font-bold text-ink hover:text-violet-400 transition-colors">
-                  Autonomous AI Agents & Multi-Model Systems
-                </h3>
-                <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">
-                  Master tool orchestration, vector retrieval, embeddings, semantic cache, and agentic workflows with production reliability.
-                </p>
               </div>
-
-              <div className="pt-5 mt-6 border-t border-[#f0e2d8] flex items-center justify-between">
-                <span className="text-[11px] font-mono text-slate-400">4 MODULES • 12 LESSONS</span>
-                <Link href="/ai">
-                  <Button variant="secondary" size="sm">
-                    Explore AI Lab
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="rounded-lg border border-[#efdfd4] bg-[#ffffff] p-6 flex flex-col justify-between hover:border-cyan-500/50 transition-colors">
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <Badge variant="cyan">CLOUD INFRASTRUCTURE</Badge>
-                  <span className="text-sm font-mono font-bold text-ink">$149.00</span>
-                </div>
-                <h3 className="text-base font-bold text-ink hover:text-cyan-400 transition-colors">
-                  Cloud DevOps, Kubernetes & CI/CD Pipelines
-                </h3>
-                <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">
-                  Containerization with Docker, multi-stage builds, automated testing pipelines, reverse proxies, and production deployment.
-                </p>
-              </div>
-
-              <div className="pt-5 mt-6 border-t border-[#f0e2d8] flex items-center justify-between">
-                <span className="text-[11px] font-mono text-slate-400">3 MODULES • 8 LESSONS</span>
-                <Link href="/courses">
-                  <Button variant="secondary" size="sm">
-                    View Catalog
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Cryptographic Verification Callout */}
-      <section className="py-14 bg-[#fff6ef] border-b border-[#f0e2d8]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1.5 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <Badge variant="success" className="gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> CRYPTOGRAPHIC VERIFICATION
-              </Badge>
-              <span className="text-xs font-mono text-slate-400">PUBLIC REGISTRY</span>
+      {/* Verification Callout */}
+      <section className="py-20 bg-peach-500 text-plum relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="max-w-3xl relative">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <ShieldCheck className="w-4 h-4" /> CRYPTOGRAPHIC VERIFICATION · PUBLIC REGISTRY
             </div>
-            <h3 className="text-xl font-bold text-ink">
-              Instant Public Diploma Verification
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <h2 className="font-display text-4xl sm:text-6xl font-extrabold leading-[1.02] mt-3">
+              Instant Public Diploma Verification.
+            </h2>
+            <p className="text-base text-plum/80 mt-4 leading-relaxed">
               Employers, recruiters, and academic institutions can verify any diploma issued by our academy in real time using the certificate serial number or QR code.
             </p>
           </div>
-
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="shrink-0 relative">
+            <Burst className="absolute -top-10 -right-2 w-12 h-12 text-plum" />
             <Link href="/verify/CERT-2026-DEMO01">
-              <Button variant="primary" size="md" className="gap-2">
+              <Button variant="primary" size="lg" className="gap-2">
                 <Award className="w-4 h-4" />
                 <span>Test Live Verification Engine</span>
               </Button>

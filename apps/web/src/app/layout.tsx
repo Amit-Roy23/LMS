@@ -21,11 +21,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-cream text-ink antialiased selection:bg-coral-500 selection:text-white">
+      <body className="min-h-screen bg-cream text-ink antialiased selection:bg-peach-500 selection:text-plum">
         <QueryProvider>
           <AuthProvider>
             <ToastProvider>

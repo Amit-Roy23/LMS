@@ -20,8 +20,8 @@ export function Badge({ className, variant = 'primary', size = 'sm', children, .
         variant === 'danger' && 'bg-rose-950/60 text-rose-400 border-rose-500/30',
         variant === 'purple' && 'bg-purple-950/60 text-purple-400 border-purple-500/30',
         variant === 'cyan' && 'bg-cyan-950/60 text-cyan-400 border-cyan-500/30',
-        variant === 'slate' && 'bg-cream-100 text-slate-300 border-[#efdfd4]',
-        variant === 'outline' && 'bg-transparent text-slate-300 border-[#efdfd4]',
+        variant === 'slate' && 'bg-cream-100 text-slate-300 border-[#e7d5bd]',
+        variant === 'outline' && 'bg-transparent text-slate-300 border-[#e7d5bd]',
         className
       )}
       {...props}

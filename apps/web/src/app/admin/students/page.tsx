@@ -104,7 +104,7 @@ export default function AdminStudentsPage() {
       </div>
 
       {/* Filters Bar */}
-      <Card className="border-slate-800 bg-[#ffffff]/90 p-4">
+      <Card className="border-slate-800 bg-[#fffbf4]/90 p-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div className="md:col-span-2 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
@@ -155,7 +155,7 @@ export default function AdminStudentsPage() {
           ))}
         </div>
       ) : students.length === 0 ? (
-        <Card className="border-slate-800 bg-[#ffffff]/90 p-12 text-center">
+        <Card className="border-slate-800 bg-[#fffbf4]/90 p-12 text-center">
           <Users className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="text-base font-bold text-ink">No students match current filters</h3>
           <p className="text-xs text-slate-400 mt-1">Try resetting search keywords or status filters.</p>
@@ -163,7 +163,7 @@ export default function AdminStudentsPage() {
       ) : (
         <div className="space-y-3">
           {students.map((st) => (
-            <Card key={st.id} className="border-slate-800 bg-[#fffaf6] hover:border-violet-900/50 transition-all">
+            <Card key={st.id} className="border-slate-800 bg-[#fdf7ec] hover:border-violet-900/50 transition-all">
               <div className="p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 {/* Left: Student Identity */}
                 <div className="flex items-start gap-3.5 min-w-[240px]">

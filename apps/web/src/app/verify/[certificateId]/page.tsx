@@ -70,9 +70,9 @@ export default function CertificateVerificationPage() {
             </Link>
           </Card>
         ) : (
-          <Card className="border-[#efdfd4] bg-[#ffffff] p-8 shadow-xl space-y-8">
+          <Card className="border-[#e7d5bd] bg-[#fffbf4] p-8 shadow-xl space-y-8">
             {/* Top Verified Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#f0e2d8]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#eadac4]">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
                   <Award className="w-6 h-6" />
