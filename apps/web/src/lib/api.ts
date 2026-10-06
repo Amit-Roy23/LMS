@@ -67,7 +67,7 @@ export async function apiClient<T = any>(
     success: false,
     error: {
       code: 'PARSE_ERROR',
-      message: 'Failed to parse response from server',
+      message: `Unexpected response from API (HTTP ${response.status}) at ${url}`,
     },
   }));
 
