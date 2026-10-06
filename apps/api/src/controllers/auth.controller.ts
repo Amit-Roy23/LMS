@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service.js';
 import { sendSuccess } from '../lib/utils.js';
+import { UnauthorizedError } from '../lib/errors.js';
 
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -91,7 +92,10 @@ export class AuthController {
 
   async getMe(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await authService.getMe(req.user!.userId);
+      if (!req.user || !req.user.userId) {
+        throw new UnauthorizedError('Authentication required');
+      }
+      const user = await authService.getMe(req.user.userId);
       return sendSuccess(res, user);
     } catch (err) {
       next(err);

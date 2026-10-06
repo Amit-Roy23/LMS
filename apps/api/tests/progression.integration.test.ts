@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '../src/lib/prisma.js';
 import { progressionService } from '../src/services/progression.service.js';
 import { courseService } from '../src/services/course.service.js';
@@ -149,5 +149,9 @@ describe('End-to-End Progression Vertical Slice Integration Test', { timeout: 30
     expect(prog.modules[0].status).toBe(ModuleStatus.COMPLETED);
     // Module 2 is now UNLOCKED!
     expect(prog.modules[1].isLocked).toBe(false);
+  });
+
+  afterAll(async () => {
+    await prisma.$disconnect();
   });
 });

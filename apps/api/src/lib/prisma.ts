@@ -1,12 +1,13 @@
 import { PrismaClient } from '@prisma/client';
+import { config } from '../config/env.js';
 import { logger } from './logger.js';
 
-const globalForPrisma = global as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    datasourceUrl: process.env.DATABASE_URL,
+    datasourceUrl: process.env.DATABASE_URL || config.databaseUrl,
     log:
       process.env.NODE_ENV === 'development'
         ? [
@@ -14,12 +15,11 @@ export const prisma =
             { emit: 'stdout', level: 'error' },
             { emit: 'stdout', level: 'warn' },
           ]
-        : ['error'],
+        : ['error', 'warn'],
   });
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+// Always cache client on globalThis to prevent connection pool exhaustion in serverless lambdas
+globalForPrisma.prisma = prisma;
 
 // Log queries in debug mode if needed
 if (process.env.NODE_ENV === 'development') {

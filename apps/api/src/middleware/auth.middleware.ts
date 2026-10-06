@@ -26,15 +26,15 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     // 1. Check Authorization header: Bearer <token>
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7);
+      token = authHeader.substring(7).trim();
     }
 
     // 2. Check httpOnly cookie: accessToken
     if (!token && req.cookies && req.cookies.accessToken) {
-      token = req.cookies.accessToken;
+      token = String(req.cookies.accessToken).trim();
     }
 
-    if (!token) {
+    if (!token || token === 'undefined' || token === 'null' || token === '') {
       throw new UnauthorizedError('Authentication required. No token provided.');
     }
 
@@ -57,12 +57,12 @@ export function optionalAuthenticate(req: Request, res: Response, next: NextFunc
     let token: string | undefined;
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-      token = authHeader.substring(7);
+      token = authHeader.substring(7).trim();
     } else if (req.cookies && req.cookies.accessToken) {
-      token = req.cookies.accessToken;
+      token = String(req.cookies.accessToken).trim();
     }
 
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null' && token !== '') {
       const payload = jwt.verify(token, config.jwt.accessSecret) as AuthUser;
       req.user = payload;
     }

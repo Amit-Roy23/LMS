@@ -84,8 +84,13 @@ export class AuthService {
   }
 
   async login(params: { email: string; password: string }) {
+    if (!params?.email || !params?.password) {
+      throw new BadRequestError('Email and password are required');
+    }
+
+    const email = String(params.email).toLowerCase().trim();
     const user = await prisma.user.findUnique({
-      where: { email: params.email.toLowerCase() },
+      where: { email },
     });
 
     if (!user || user.status === 'INACTIVE' || user.status === 'SUSPENDED') {
@@ -197,6 +202,10 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
+    if (!userId) {
+      throw new UnauthorizedError('User ID required');
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {

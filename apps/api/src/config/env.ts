@@ -13,16 +13,27 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres@localhost:5432/academy_lms?schema=public',
   directUrl: process.env.DIRECT_URL,
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET || 'academy_access_token_secret_development_key_12345',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'academy_refresh_token_secret_development_key_67890',
+    accessSecret:
+      process.env.JWT_ACCESS_SECRET ||
+      process.env.JWT_SECRET ||
+      'academy_access_token_secret_development_key_12345',
+    refreshSecret:
+      process.env.JWT_REFRESH_SECRET ||
+      process.env.JWT_SECRET ||
+      'academy_refresh_token_secret_development_key_67890',
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
-  appUrl: process.env.APP_URL || 'http://localhost:5000',
+  clientUrl:
+    process.env.CLIENT_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
+  appUrl:
+    process.env.APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5000'),
   storage: {
     driver: process.env.STORAGE_DRIVER || 'local',
-    uploadDir: process.env.UPLOAD_DIR || path.resolve(process.cwd(), 'uploads'),
+    uploadDir: process.env.UPLOAD_DIR || (process.env.VERCEL ? '/tmp/uploads' : path.resolve(process.cwd(), 'uploads')),
   },
   payment: {
     defaultProvider: process.env.PAYMENT_PROVIDER || 'MOCK',
