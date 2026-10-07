@@ -99,6 +99,39 @@ export interface LiveSessionReminderDueEvent {
   occurredAt: Date;
 }
 
+export interface QuizSubmittedEvent {
+  attemptId: string;
+  quizId: string;
+  studentId: string;
+  score: number;
+  percentage: number;
+  passed: boolean;
+  occurredAt: Date;
+}
+
+export interface QuizPassedEvent {
+  attemptId: string;
+  quizId: string;
+  studentId: string;
+  percentage: number;
+  occurredAt: Date;
+}
+
+export interface QuizFailedEvent {
+  attemptId: string;
+  quizId: string;
+  studentId: string;
+  percentage: number;
+  occurredAt: Date;
+}
+
+export interface ModuleCompletedEvent {
+  moduleId: string;
+  studentId: string;
+  courseId: string;
+  occurredAt: Date;
+}
+
 export interface DomainEventsMap {
   'payment.succeeded': PaymentSucceededEvent;
   'account.created': AccountCreatedEvent;
@@ -107,5 +140,10 @@ export interface DomainEventsMap {
   'lesson.completed': LessonCompletedEvent;
   'module.lessons_completed': ModuleLessonsCompletedEvent;
   'live_session.reminder_due': LiveSessionReminderDueEvent;
+  'quiz.submitted': QuizSubmittedEvent;
+  'quiz.passed': QuizPassedEvent;
+  'quiz.failed': QuizFailedEvent;
+  'module.completed': ModuleCompletedEvent;
 }
+
 

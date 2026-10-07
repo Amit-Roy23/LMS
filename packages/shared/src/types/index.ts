@@ -28,6 +28,13 @@ import {
   PracticeStatus,
   CompletionSource,
   ResourceType,
+  QuestionDifficulty,
+  QuestionStatus,
+  AnswerReviewPolicy,
+  ScoringMode,
+  QuizAttemptStatus,
+  QuizEventType,
+  QuizStatus,
 } from '../enums/index';
 
 export interface ApiResponse<T = any> {
@@ -246,7 +253,7 @@ export interface LessonDetail {
 
 export interface OptionDetail {
   id: string;
-  questionId: string;
+  questionId?: string;
   text: string;
   isCorrect?: boolean;
 }
@@ -260,6 +267,11 @@ export interface QuestionDetail {
   order: number;
   points: number;
   marks?: number;
+  difficulty?: QuestionDifficulty;
+  tags?: string[];
+  imageUrl?: string | null;
+  status?: QuestionStatus;
+  version?: number;
   options: OptionDetail[];
 }
 
@@ -270,11 +282,18 @@ export interface QuizDetail {
   description?: string | null;
   questionCount?: number | null;
   passPercentage: number;
-  passingScorePercent: number;
+  passingScorePercent?: number;
   maxAttempts?: number | null;
+  cooldownMinutes?: number;
+  timeLimitMinutes?: number | null;
   shuffleQuestions?: boolean;
   shuffleOptions?: boolean;
-  showAnswersAfterSubmit?: boolean;
+  showAnswersAfterSubmit?: AnswerReviewPolicy | boolean;
+  scoringMode?: ScoringMode;
+  negativeMarking?: boolean;
+  negativeMarkValue?: number;
+  status?: QuizStatus;
+  allowRetakeAfterPass?: boolean;
   questions: QuestionDetail[];
   attemptsCount?: number;
   userBestScore?: number | null;
@@ -529,3 +548,104 @@ export interface VerificationTokenDetail {
   usedAt?: string | null;
   createdAt: string;
 }
+
+export interface QuizQuestionSnapshotItem {
+  id: string;
+  text: string;
+  type: QuestionType;
+  order: number;
+  points: number;
+  explanation?: string | null;
+  difficulty: QuestionDifficulty;
+  tags: string[];
+  imageUrl?: string | null;
+  options: { id: string; text: string }[];
+  correctOptionIds: string[];
+}
+
+export interface QuizAttemptAnswerDetail {
+  id?: string;
+  questionId: string;
+  selectedOptionIds: string[];
+  isCorrect?: boolean;
+  awardedMarks?: number;
+  pointsEarned?: number;
+  answeredAt?: string;
+  flagged?: boolean;
+}
+
+export interface QuizAttemptDetail {
+  id: string;
+  quizId: string;
+  studentId: string;
+  attemptNumber: number;
+  status: QuizAttemptStatus;
+  startedAt: string;
+  expiresAt?: string | null;
+  submittedAt?: string | null;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passed: boolean;
+  remainingSeconds?: number;
+  questions?: Omit<QuizQuestionSnapshotItem, 'correctOptionIds' | 'explanation'>[];
+  answers?: QuizAttemptAnswerDetail[];
+}
+
+export interface QuizResultDetail {
+  attemptId: string;
+  quizId: string;
+  attemptNumber: number;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passed: boolean;
+  passPercentage: number;
+  startedAt: string;
+  submittedAt: string;
+  timeSpentSeconds: number;
+  totalQuestions: number;
+  correctAnswersCount: number;
+  incorrectAnswersCount: number;
+  unansweredCount: number;
+  showAnswers: boolean;
+  questionsReview?: {
+    questionId: string;
+    text: string;
+    type: QuestionType;
+    points: number;
+    awardedMarks: number;
+    isCorrect: boolean;
+    selectedOptionIds: string[];
+    correctOptionIds?: string[];
+    explanation?: string | null;
+    options: { id: string; text: string; isCorrect?: boolean }[];
+    relatedLessonTags?: string[];
+  }[];
+  attemptsLeft: number;
+  cooldownEndsAt?: string | null;
+  nextModuleUnlocked: boolean;
+  assignmentAvailable: boolean;
+}
+
+export interface QuizAnalyticsDetail {
+  quizId: string;
+  quizTitle: string;
+  totalAttempts: number;
+  passedAttempts: number;
+  failedAttempts: number;
+  passRate: number;
+  averageScore: number;
+  averagePercentage: number;
+  averageTimeSpentSeconds: number;
+  questionStats: {
+    questionId: string;
+    text: string;
+    type: QuestionType;
+    difficulty: QuestionDifficulty;
+    totalAnswers: number;
+    correctCount: number;
+    accuracyPercent: number;
+  }[];
+}
+

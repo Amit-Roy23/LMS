@@ -8,6 +8,8 @@ import { certificateController } from '../controllers/certificate.controller.js'
 import { reportController, userController } from '../controllers/misc.controller.js';
 import { adminStudentController } from '../controllers/admin-student.controller.js';
 import { notificationController } from '../controllers/notification.controller.js';
+import multer from 'multer';
+import { adminQuizController } from '../controllers/admin-quiz.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { authorizeRoles } from '../middleware/rbac.middleware.js';
 import { validateBody } from '../middleware/validate.middleware.js';
@@ -19,12 +21,17 @@ import {
   createModuleSchema,
   createLessonSchema,
   createQuizSchema,
+  updateQuizSettingsSchema,
+  createQuizQuestionSchema,
+  updateQuizQuestionSchema,
   createAssignmentSchema,
   reviewSubmissionSchema,
   reviewFinalProjectSchema,
   createBatchSchema,
   Role,
 } from '@academy/shared';
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const router = Router();
 
@@ -89,6 +96,35 @@ router.post('/admin/students/:id/resend-credentials', notificationController.res
 // Notification Logs & Retries
 router.get('/admin/notifications', notificationController.listNotifications);
 router.post('/admin/notifications/:id/retry', notificationController.retryNotification);
+
+// Quizzes & Assessment Engine (Prompt 5)
+router.get('/admin/modules/:moduleId/quiz', adminQuizController.getQuizConfig);
+router.get('/admin/quizzes/:quizId/config', adminQuizController.getQuizConfig);
+router.put('/admin/quizzes/:quizId', validateBody(updateQuizSettingsSchema), adminQuizController.updateQuizSettings);
+router.post('/admin/quizzes/:quizId/publish', adminQuizController.publishQuiz);
+
+// Question Bank CRUD
+router.get('/admin/quizzes/:quizId/questions', adminQuizController.listQuestions);
+router.post('/admin/quizzes/:quizId/questions', validateBody(createQuizQuestionSchema), adminQuizController.createQuestion);
+router.put('/admin/questions/:questionId', validateBody(updateQuizQuestionSchema), adminQuizController.updateQuestion);
+router.delete('/admin/questions/:questionId', adminQuizController.deleteQuestion);
+router.post('/admin/questions/:questionId/duplicate', adminQuizController.duplicateQuestion);
+router.post('/admin/quizzes/:quizId/questions/bulk', adminQuizController.bulkQuestionsAction);
+
+// CSV Bulk Import & Export
+router.get('/admin/quizzes/template/csv', adminQuizController.downloadCsvTemplate);
+router.post('/admin/quizzes/:quizId/questions/import', upload.single('file'), adminQuizController.importQuestionsCsv);
+router.get('/admin/quizzes/:quizId/questions/export', adminQuizController.exportQuestionsCsv);
+
+// Assessment Analytics & Student Performance
+router.get('/admin/quizzes/:quizId/attempts', adminQuizController.listQuizAttempts);
+router.get('/admin/students/:studentId/assessments', adminQuizController.getStudentAssessments);
+router.get('/admin/quizzes/:quizId/analytics', adminQuizController.getQuizAnalytics);
+
+// Admin Overrides (with Audit Logs)
+router.post('/admin/quizzes/:quizId/override/reset-attempts', adminQuizController.resetStudentAttempts);
+router.post('/admin/modules/:moduleId/quiz/override/pass', adminQuizController.passModuleQuiz);
+router.post('/admin/attempts/:attemptId/override/invalidate', adminQuizController.invalidateAttempt);
 
 // Quizzes & Assignments Management
 router.post('/admin/quizzes', validateBody(createQuizSchema), quizController.createQuiz);

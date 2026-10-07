@@ -204,6 +204,49 @@ enum ResourceType {
   CODE
 }
 
+enum QuestionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AnswerReviewPolicy {
+  NEVER
+  AFTER_PASS
+  AFTER_EACH_ATTEMPT
+  AFTER_MAX_ATTEMPTS
+}
+
+enum ScoringMode {
+  ALL_OR_NOTHING
+  PARTIAL
+}
+
+enum QuizAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+  ABANDONED
+}
+
+enum QuizEventType {
+  TAB_HIDDEN
+  TAB_VISIBLE
+  COPY_ATTEMPT
+  FULLSCREEN_EXIT
+}
+
+enum QuizStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model User {
   id                  String      @id @default(uuid())
   studentId           String?     @unique
@@ -678,19 +721,26 @@ model ModuleProgress {
 }
 
 model Quiz {
-  id                     String   @id @default(uuid())
-  moduleId               String   @unique
+  id                     String             @id @default(uuid())
+  moduleId               String             @unique
   title                  String
   description            String?
   questionCount          Int?
-  passPercentage         Float    @default(70.0)
-  passingScorePercent    Float    @default(70.0)
-  maxAttempts            Int?     @default(3)
-  shuffleQuestions       Boolean  @default(false)
-  shuffleOptions         Boolean  @default(false)
-  showAnswersAfterSubmit Boolean  @default(true)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  passPercentage         Float              @default(70.0)
+  passingScorePercent    Float              @default(70.0)
+  maxAttempts            Int?               @default(3)
+  cooldownMinutes        Int                @default(0)
+  timeLimitMinutes       Int?
+  shuffleQuestions       Boolean            @default(true)
+  shuffleOptions         Boolean            @default(true)
+  showAnswersAfterSubmit AnswerReviewPolicy @default(AFTER_PASS)
+  scoringMode            ScoringMode        @default(ALL_OR_NOTHING)
+  negativeMarking        Boolean            @default(false)
+  negativeMarkValue      Float              @default(0.25)
+  status                 QuizStatus         @default(PUBLISHED)
+  allowRetakeAfterPass   Boolean            @default(false)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
   deletedAt              DateTime?
 
   module    Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
@@ -701,16 +751,21 @@ model Quiz {
 }
 
 model Question {
-  id          String       @id @default(uuid())
+  id          String             @id @default(uuid())
   quizId      String
   text        String
   explanation String?
-  type        QuestionType @default(SINGLE_CHOICE)
-  order       Int          @default(1)
-  points      Float        @default(1.0)
-  marks       Float        @default(1.0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  type        QuestionType       @default(SINGLE_CHOICE)
+  order       Int                @default(1)
+  points      Float              @default(1.0)
+  marks       Float              @default(1.0)
+  difficulty  QuestionDifficulty @default(MEDIUM)
+  tags        String[]           @default([])
+  imageUrl    String?
+  status      QuestionStatus     @default(ACTIVE)
+  version     Int                @default(1)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   quiz           Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options        Option[]
@@ -733,20 +788,31 @@ model Option {
 }
 
 model QuizAttempt {
-  id            String   @id @default(uuid())
-  quizId        String
-  studentId     String
-  attemptNumber Int      @default(1)
-  scorePercent  Float
-  totalPoints   Float
-  earnedPoints  Float
-  isPassed      Boolean  @default(false)
-  submittedAt   DateTime @default(now())
-  createdAt     DateTime @default(now())
+  id               String            @id @default(uuid())
+  quizId           String
+  studentId        String
+  attemptNumber    Int               @default(1)
+  status           QuizAttemptStatus @default(IN_PROGRESS)
+  startedAt        DateTime          @default(now())
+  expiresAt        DateTime?
+  submittedAt      DateTime?
+  questionSnapshot Json              @default("[]")
+  score            Float             @default(0.0)
+  maxScore         Float             @default(0.0)
+  percentage       Float             @default(0.0)
+  scorePercent     Float             @default(0.0)
+  totalPoints      Float             @default(0.0)
+  earnedPoints     Float             @default(0.0)
+  passed           Boolean           @default(false)
+  isPassed         Boolean           @default(false)
+  ip               String?
+  userAgent        String?
+  createdAt        DateTime          @default(now())
 
   quiz    Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
   student User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
   answers AttemptAnswer[]
+  events  QuizEvent[]
 
   @@index([quizId])
   @@index([studentId])
@@ -758,11 +824,28 @@ model AttemptAnswer {
   questionId        String
   selectedOptionIds Json     @default("[]")
   isCorrect         Boolean  @default(false)
+  awardedMarks      Float    @default(0.0)
   pointsEarned      Float    @default(0.0)
+  answeredAt        DateTime @default(now())
+  flagged           Boolean  @default(false)
   createdAt         DateTime @default(now())
 
   attempt  QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model QuizEvent {
+  id        String        @id @default(uuid())
+  attemptId String
+  type      QuizEventType
+  at        DateTime      @default(now())
+  metadata  Json?
+
+  attempt QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   @@index([attemptId])
 }

@@ -21,6 +21,13 @@ import {
   PracticeStatus,
   CompletionSource,
   ResourceType,
+  QuestionDifficulty,
+  QuestionStatus,
+  AnswerReviewPolicy,
+  ScoringMode,
+  QuizAttemptStatus,
+  QuizEventType,
+  QuizStatus,
 } from '../enums/index';
 
 export const registerSchema = z.object({
@@ -283,42 +290,83 @@ export const updateLessonProgressSchema = z.object({
 
 
 export const createQuizOptionSchema = z.object({
+  id: z.string().optional(),
   text: z.string().min(1, 'Option text cannot be empty'),
-  isCorrect: z.boolean(),
+  isCorrect: z.boolean().default(false),
 });
 
 export const createQuizQuestionSchema = z.object({
   text: z.string().min(3, 'Question text must be at least 3 characters'),
   explanation: z.string().optional().nullable(),
   type: z.nativeEnum(QuestionType).default(QuestionType.SINGLE_CHOICE),
-  order: z.number().int().min(1),
-  points: z.number().min(1).default(1),
-  marks: z.number().min(1).default(1),
+  order: z.number().int().min(1).default(1),
+  points: z.number().min(0.5).default(1),
+  marks: z.number().min(0.5).default(1),
+  difficulty: z.nativeEnum(QuestionDifficulty).default(QuestionDifficulty.MEDIUM),
+  tags: z.array(z.string()).default([]),
+  imageUrl: z.string().url().optional().nullable(),
+  status: z.nativeEnum(QuestionStatus).default(QuestionStatus.ACTIVE),
   options: z.array(createQuizOptionSchema).min(2, 'Must have at least 2 options'),
 });
 
-export const createQuizSchema = z.object({
-  moduleId: z.string().uuid(),
-  title: z.string().min(2).max(200),
+export const updateQuizQuestionSchema = createQuizQuestionSchema.partial();
+
+export const updateQuizSettingsSchema = z.object({
+  title: z.string().min(2).max(200).optional(),
   description: z.string().optional().nullable(),
   questionCount: z.number().int().min(1).optional().nullable(),
   passPercentage: z.number().min(0).max(100).default(70),
-  passingScorePercent: z.number().min(0).max(100).default(70),
   maxAttempts: z.number().int().min(1).optional().nullable().default(3),
-  shuffleQuestions: z.boolean().default(false),
-  shuffleOptions: z.boolean().default(false),
-  showAnswersAfterSubmit: z.boolean().default(true),
-  questions: z.array(createQuizQuestionSchema).min(1, 'Must include at least 1 question'),
+  cooldownMinutes: z.number().int().min(0).default(0),
+  timeLimitMinutes: z.number().int().min(1).optional().nullable(),
+  shuffleQuestions: z.boolean().default(true),
+  shuffleOptions: z.boolean().default(true),
+  showAnswersAfterSubmit: z.nativeEnum(AnswerReviewPolicy).default(AnswerReviewPolicy.AFTER_PASS),
+  scoringMode: z.nativeEnum(ScoringMode).default(ScoringMode.ALL_OR_NOTHING),
+  negativeMarking: z.boolean().default(false),
+  negativeMarkValue: z.number().min(0).max(5).default(0.25),
+  status: z.nativeEnum(QuizStatus).default(QuizStatus.PUBLISHED),
+  allowRetakeAfterPass: z.boolean().default(false),
+});
+
+export const createQuizSchema = updateQuizSettingsSchema.extend({
+  moduleId: z.string(),
+  questions: z.array(createQuizQuestionSchema).optional(),
+});
+
+export const saveAttemptAnswersSchema = z.object({
+  answers: z.array(
+    z.object({
+      questionId: z.string(),
+      selectedOptionIds: z.array(z.string()),
+      flagged: z.boolean().optional(),
+    })
+  ),
 });
 
 export const submitQuizAttemptSchema = z.object({
-  quizId: z.string().uuid(),
-  answers: z.array(
-    z.object({
-      questionId: z.string().uuid(),
-      selectedOptionIds: z.array(z.string().uuid()),
-    })
-  ),
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string(),
+        selectedOptionIds: z.array(z.string()),
+        flagged: z.boolean().optional(),
+      })
+    )
+    .optional(),
+});
+
+export const logQuizEventSchema = z.object({
+  type: z.nativeEnum(QuizEventType),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const adminOverrideQuizSchema = z.object({
+  action: z.enum(['RESET_ATTEMPTS', 'MANUAL_PASS', 'INVALIDATE_ATTEMPT', 'GRANT_EXTRA_ATTEMPTS']),
+  attemptId: z.string().optional(),
+  studentId: z.string(),
+  reason: z.string().min(5, 'Reason is required for audit logging'),
+  extraAttemptsCount: z.number().int().min(1).max(10).optional(),
 });
 
 export const createAssignmentSchema = z.object({

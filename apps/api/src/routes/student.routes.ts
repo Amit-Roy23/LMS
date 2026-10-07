@@ -11,6 +11,7 @@ import { finalAssessmentController } from '../controllers/final-assessment.contr
 import { certificateController } from '../controllers/certificate.controller.js';
 import { uploadController } from '../controllers/misc.controller.js';
 import { studentPlayerController } from '../controllers/student-player.controller.js';
+import { studentQuizController } from '../controllers/student-quiz.controller.js';
 import { authenticate, requirePasswordChanged } from '../middleware/auth.middleware.js';
 import { validateBody } from '../middleware/validate.middleware.js';
 import { prisma } from '../lib/prisma.js';
@@ -18,6 +19,8 @@ import { sendSuccess } from '../lib/utils.js';
 import {
   updateLessonProgressSchema,
   submitQuizAttemptSchema,
+  saveAttemptAnswersSchema,
+  logQuizEventSchema,
   submitAssignmentSchema,
   checkoutEnrollmentSchema,
   submitMockTestSchema,
@@ -163,7 +166,17 @@ router.get('/enrollments/my', enrollmentController.listMyEnrollments);
 router.post('/enrollments/checkout', validateBody(checkoutEnrollmentSchema), enrollmentController.createCheckout);
 router.post('/enrollments/verify', enrollmentController.verifyPayment);
 
-// Quizzes (MCQ Assessments)
+// Quizzes & Assessment Engine (Prompt 5)
+router.get('/student/modules/:moduleId/quiz', studentQuizController.getModuleQuiz);
+router.get('/student/modules/:moduleId/quiz/history', studentQuizController.getQuizHistory);
+router.post('/student/quizzes/:quizId/attempts', studentQuizController.startAttempt);
+router.put('/student/attempts/:attemptId/answers', validateBody(saveAttemptAnswersSchema), studentQuizController.saveAnswers);
+router.get('/student/attempts/:attemptId', studentQuizController.getAttempt);
+router.post('/student/attempts/:attemptId/submit', studentQuizController.submitAttempt);
+router.get('/student/attempts/:attemptId/result', studentQuizController.getAttemptResult);
+router.post('/student/attempts/:attemptId/events', validateBody(logQuizEventSchema), studentQuizController.logEvent);
+
+// Legacy quiz runner endpoints for backwards compatibility
 router.get('/quizzes/:quizId', quizController.getQuizForRunner);
 router.post('/quizzes/:quizId/attempt', validateBody(submitQuizAttemptSchema), quizController.submitAttempt);
 

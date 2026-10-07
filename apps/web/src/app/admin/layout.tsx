@@ -49,7 +49,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { href: '/admin/dashboard', label: 'Dashboard & Analytics', icon: LayoutDashboard },
     { href: '/admin/courses', label: 'Courses & Curriculum', icon: BookOpen },
-    { href: '/admin/reviews', label: 'Review Queue', icon: ClipboardCheck },
+    { href: '/admin/assessments', label: 'Assessments & Quizzes', icon: ClipboardCheck },
+    { href: '/admin/reviews', label: 'Review Queue', icon: UserCheck },
     { href: '/admin/students', label: 'Students & Progress', icon: Users },
     { href: '/admin/enrollments', label: 'Enrollments & Billing', icon: CreditCard },
     { href: '/admin/notifications', label: 'Notifications & Logs', icon: ShieldAlert },
