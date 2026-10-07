@@ -71,7 +71,8 @@ export class EnrollmentController {
       const result = await paymentService.verifyAndCompleteEnrollment(
         paymentId,
         providerRef,
-        signature
+        signature,
+        req.user!.userId
       );
       return sendSuccess(res, result);
     } catch (err) {

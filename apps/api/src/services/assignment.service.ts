@@ -5,24 +5,25 @@ import { Role, SubmissionStatus } from '@academy/shared';
 
 export class AssignmentService {
   async getAssignmentForStudent(assignmentId: string, studentId: string, role: Role) {
-    await progressionService.assertCanAccessAssignment(assignmentId, studentId, role);
-
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: assignmentId },
-      include: {
-        module: { select: { id: true, title: true, courseId: true } },
-      },
-    });
+    // Access check and data loads are independent; Promise.all still rejects if access is denied
+    const [, assignment, submissions] = await Promise.all([
+      progressionService.assertCanAccessAssignment(assignmentId, studentId, role),
+      prisma.assignment.findUnique({
+        where: { id: assignmentId },
+        include: {
+          module: { select: { id: true, title: true, courseId: true } },
+        },
+      }),
+      prisma.assignmentSubmission.findMany({
+        where: { assignmentId, studentId },
+        orderBy: { version: 'desc' },
+        include: {
+          reviewer: { select: { id: true, name: true, email: true, avatar: true } },
+        },
+      }),
+    ]);
 
     if (!assignment) throw new NotFoundError('Assignment not found');
-
-    const submissions = await prisma.assignmentSubmission.findMany({
-      where: { assignmentId, studentId },
-      orderBy: { version: 'desc' },
-      include: {
-        reviewer: { select: { id: true, name: true, email: true, avatar: true } },
-      },
-    });
 
     const latestSubmission = submissions[0] || null;
     const isApproved = latestSubmission?.status === SubmissionStatus.APPROVED;
@@ -43,19 +44,19 @@ export class AssignmentService {
     files?: string[];
     linkUrl?: string | null;
   }) {
-    await progressionService.assertCanAccessAssignment(params.assignmentId, params.studentId, params.role);
-
-    const assignment = await prisma.assignment.findUnique({
-      where: { id: params.assignmentId },
-      include: { module: true },
-    });
+    const [, assignment, latest] = await Promise.all([
+      progressionService.assertCanAccessAssignment(params.assignmentId, params.studentId, params.role),
+      prisma.assignment.findUnique({
+        where: { id: params.assignmentId },
+        include: { module: { select: { courseId: true } } },
+      }),
+      prisma.assignmentSubmission.findFirst({
+        where: { assignmentId: params.assignmentId, studentId: params.studentId },
+        orderBy: { version: 'desc' },
+      }),
+    ]);
 
     if (!assignment) throw new NotFoundError('Assignment not found');
-
-    const latest = await prisma.assignmentSubmission.findFirst({
-      where: { assignmentId: params.assignmentId, studentId: params.studentId },
-      orderBy: { version: 'desc' },
-    });
 
     if (latest && latest.status === SubmissionStatus.APPROVED) {
       throw new BadRequestError('This assignment has already been approved.');

@@ -122,6 +122,19 @@ describe('Authentication Flow & Service Test Suite', () => {
       expect(cookieHeader).toBeDefined();
     });
 
+    it('POST /api/v1/auth/login twice at the same moment succeeds both times', async () => {
+      const login = () =>
+        fetch(`${baseUrl}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'admin@creativeit.academy', password: 'Admin@123' }),
+        });
+
+      const [first, second] = await Promise.all([login(), login()]);
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+    });
+
     it('GET /api/v1/auth/me with valid Bearer token returns 200 and user profile', async () => {
       const res = await fetch(`${baseUrl}/api/v1/auth/me`, {
         headers: { Authorization: `Bearer ${adminAccessToken}` },

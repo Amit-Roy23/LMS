@@ -404,7 +404,7 @@ export class ProgressionService {
           orderBy: { order: 'asc' },
           include: {
             lessons: { orderBy: { order: 'asc' } },
-            quiz: { include: { questions: true } },
+            quiz: true,
             assignment: true,
           },
         },
@@ -427,7 +427,7 @@ export class ProgressionService {
       finalAssessmentPassingPercent: 80,
     });
 
-    // Fetch student enrollment & progress data in parallel
+    // Fetch student enrollment & progress data for this course in parallel
     const [
       enrollment,
       lessonProgresses,
@@ -437,23 +437,46 @@ export class ProgressionService {
       projectSubmissions,
       examAttempts,
       certificate,
+      storedModuleProgress,
     ] = await Promise.all([
       prisma.enrollment.findUnique({
         where: { studentId_courseId: { studentId, courseId } },
       }),
-      prisma.lessonProgress.findMany({ where: { studentId } }),
-      prisma.quizAttempt.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
-      prisma.assignmentSubmission.findMany({ where: { studentId }, orderBy: { version: 'desc' } }),
-      prisma.mockTestAttempt.findMany({ where: { studentId }, orderBy: { scorePercent: 'desc' } }),
-      prisma.projectSubmission.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
-      prisma.examAttempt.findMany({ where: { studentId }, orderBy: { scorePercent: 'desc' } }),
+      prisma.lessonProgress.findMany({ where: { studentId, lesson: { module: { courseId } } } }),
+      prisma.quizAttempt.findMany({
+        where: { studentId, quiz: { module: { courseId } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.assignmentSubmission.findMany({
+        where: { studentId, assignment: { module: { courseId } } },
+        orderBy: { version: 'desc' },
+      }),
+      prisma.mockTestAttempt.findMany({
+        where: { studentId, mockTest: { courseId } },
+        orderBy: { scorePercent: 'desc' },
+      }),
+      prisma.projectSubmission.findMany({
+        where: { studentId, project: { courseId } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.examAttempt.findMany({
+        where: { studentId, finalAssessment: { courseId } },
+        orderBy: { scorePercent: 'desc' },
+      }),
       prisma.certificate.findUnique({ where: { studentId_courseId: { studentId, courseId } } }),
+      prisma.moduleProgress.findMany({ where: { studentId, module: { courseId } } }),
     ]);
 
-    const isAccessAllowed = !enrollment || canAccessEnrollmentContent({
-      paymentStatus: enrollment.paymentStatus,
-      accessStatus: enrollment.accessStatus,
-    });
+    const storedModuleStatus = new Map(storedModuleProgress.map((mp) => [mp.moduleId, mp.status]));
+    const moduleProgressWrites: Promise<unknown>[] = [];
+
+    // Content is only unlocked for students holding a paid, active enrollment in this course
+    const isAccessAllowed =
+      !!enrollment &&
+      canAccessEnrollmentContent({
+        paymentStatus: enrollment.paymentStatus,
+        accessStatus: enrollment.accessStatus,
+      });
 
     const lessonProgressMap = new Map<string, { watchedSeconds: number; percent: number; completedAt: Date | null }>();
     lessonProgresses.forEach((lp) => {
@@ -610,20 +633,26 @@ export class ProgressionService {
           : null,
       });
 
-      // Update module progress record in database asynchronously
-      await prisma.moduleProgress.upsert({
-        where: { studentId_moduleId: { studentId, moduleId: mod.id } },
-        update: { status, completedAt: status === ModuleStatus.COMPLETED ? new Date() : null },
-        create: {
-          studentId,
-          moduleId: mod.id,
-          status,
-          completedAt: status === ModuleStatus.COMPLETED ? new Date() : null,
-        },
-      });
+      // Persist the module status only when it changed (keeps reads cheap)
+      if (storedModuleStatus.get(mod.id) !== status) {
+        moduleProgressWrites.push(
+          prisma.moduleProgress.upsert({
+            where: { studentId_moduleId: { studentId, moduleId: mod.id } },
+            update: { status, completedAt: status === ModuleStatus.COMPLETED ? new Date() : null },
+            create: {
+              studentId,
+              moduleId: mod.id,
+              status,
+              completedAt: status === ModuleStatus.COMPLETED ? new Date() : null,
+            },
+          })
+        );
+      }
 
       isPreviousModuleCompleted = status === ModuleStatus.COMPLETED;
     }
+
+    await Promise.all(moduleProgressWrites);
 
     const totalModules = course.modules.length;
     const completedModules = moduleStatusList.filter((m) => m.status === ModuleStatus.COMPLETED).length;
@@ -655,6 +684,7 @@ export class ProgressionService {
     return {
       courseId,
       studentId,
+      hasAccess: isAccessAllowed,
       totalModules,
       completedModules,
       coursePercent: totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0,
@@ -678,25 +708,20 @@ export class ProgressionService {
 
   // Server-side guard for Lesson Access
   async assertCanAccessLesson(lessonId: string, studentId: string, role: Role) {
-    if (role === Role.ADMIN || role === Role.INSTRUCTOR) return true;
+    if (role === Role.ADMIN || role === Role.INSTRUCTOR) return null;
 
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
-      include: { module: { include: { course: true } } },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!lesson) throw new NotFoundError('Lesson not found');
 
     // Check enrollment payment/access
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: lesson.module.courseId } },
-    });
-
-    if (enrollment && !canAccessEnrollmentContent({ paymentStatus: enrollment.paymentStatus, accessStatus: enrollment.accessStatus })) {
+    const progression = await this.getCourseProgression(lesson.module.courseId, studentId);
+    if (!progression.hasAccess) {
       throw new ProgressionLockedError('Active paid enrollment required to access course lessons.');
     }
-
-    const progression = await this.getCourseProgression(lesson.module.courseId, studentId);
     const mod = progression.modules.find((m) => m.id === lesson.moduleId);
     if (!mod || mod.isLocked) {
       throw new ProgressionLockedError('This module is locked. Complete the previous module first.');
@@ -707,7 +732,7 @@ export class ProgressionService {
       throw new ProgressionLockedError('This lesson is locked. Complete the preceding lessons first.');
     }
 
-    return true;
+    return progression;
   }
 
   // Server-side guard for Quiz Submission
@@ -716,20 +741,15 @@ export class ProgressionService {
 
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
-      include: { module: { include: { course: true } } },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!quiz) throw new NotFoundError('Quiz not found');
 
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: quiz.module.courseId } },
-    });
-
-    if (enrollment && !canAccessEnrollmentContent({ paymentStatus: enrollment.paymentStatus, accessStatus: enrollment.accessStatus })) {
+    const progression = await this.getCourseProgression(quiz.module.courseId, studentId);
+    if (!progression.hasAccess) {
       throw new ProgressionLockedError('Active paid enrollment required to access module quiz.');
     }
-
-    const progression = await this.getCourseProgression(quiz.module.courseId, studentId);
     const mod = progression.modules.find((m) => m.id === quiz.moduleId);
     if (!mod || mod.isLocked) {
       throw new ProgressionLockedError('This module is locked.');
@@ -748,20 +768,15 @@ export class ProgressionService {
 
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
-      include: { module: { include: { course: true } } },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!assignment) throw new NotFoundError('Assignment not found');
 
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: assignment.module.courseId } },
-    });
-
-    if (enrollment && !canAccessEnrollmentContent({ paymentStatus: enrollment.paymentStatus, accessStatus: enrollment.accessStatus })) {
+    const progression = await this.getCourseProgression(assignment.module.courseId, studentId);
+    if (!progression.hasAccess) {
       throw new ProgressionLockedError('Active paid enrollment required to submit assignments.');
     }
-
-    const progression = await this.getCourseProgression(assignment.module.courseId, studentId);
     const mod = progression.modules.find((m) => m.id === assignment.moduleId);
     if (!mod || mod.isLocked) {
       throw new ProgressionLockedError('This module is locked.');
