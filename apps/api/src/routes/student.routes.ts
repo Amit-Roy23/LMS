@@ -10,6 +10,7 @@ import { finalProjectController } from '../controllers/final-project.controller.
 import { finalAssessmentController } from '../controllers/final-assessment.controller.js';
 import { certificateController } from '../controllers/certificate.controller.js';
 import { uploadController } from '../controllers/misc.controller.js';
+import { studentPlayerController } from '../controllers/student-player.controller.js';
 import { authenticate, requirePasswordChanged } from '../middleware/auth.middleware.js';
 import { validateBody } from '../middleware/validate.middleware.js';
 import { prisma } from '../lib/prisma.js';
@@ -24,10 +25,17 @@ import {
   submitFinalAssessmentSchema,
   changePasswordSchema,
   updateProfileSchema,
+  createLessonNoteSchema,
+  updatePracticeProgressSchema,
 } from '@academy/shared';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
 const router = Router();
+
+// ==========================================
+// Public/Pre-Auth Storage Download Link
+// ==========================================
+router.get('/storage/download', studentPlayerController.downloadResource);
 
 // Apply authentication to all student portal routes
 router.use(authenticate);
@@ -123,7 +131,29 @@ router.get('/student/receipts', async (req: Request, res: Response, next: NextFu
 // ==========================================
 router.use(requirePasswordChanged);
 
-// Course & Progression (ONLY enrolled courses accessible)
+// Course Player & Progression Routes (Layer 2)
+router.get('/student/courses', studentPlayerController.getMyCourses);
+router.get('/student/courses/:courseId/curriculum', studentPlayerController.getCourseCurriculum);
+router.get('/student/lessons/:lessonId', studentPlayerController.getLesson);
+router.post('/student/lessons/:lessonId/progress', validateBody(updateLessonProgressSchema), studentPlayerController.updateProgress);
+router.post('/student/lessons/:lessonId/complete', studentPlayerController.markLessonComplete);
+router.post('/student/lessons/:lessonId/bookmark', studentPlayerController.toggleBookmark);
+router.delete('/student/lessons/:lessonId/bookmark', studentPlayerController.toggleBookmark);
+
+// Notes CRUD
+router.get('/student/lessons/:lessonId/notes', studentPlayerController.getLessonNotes);
+router.post('/student/lessons/:lessonId/notes', validateBody(createLessonNoteSchema), studentPlayerController.createLessonNote);
+router.delete('/student/notes/:noteId', studentPlayerController.deleteLessonNote);
+
+// Personal Practice Tasks
+router.put('/student/practice/:taskId', validateBody(updatePracticeProgressSchema), studentPlayerController.updatePracticeProgress);
+
+// Live Classes
+router.get('/student/live-sessions', studentPlayerController.listLiveSessions);
+router.get('/student/live-sessions/:id/join', studentPlayerController.joinLiveSession);
+router.get('/student/live-sessions/:id/ical', studentPlayerController.getLiveSessionICal);
+
+// Legacy course progress / progression routes
 router.get('/courses/id/:id', courseController.getCourseById);
 router.get('/courses/:id/progression', courseController.getCourseProgression);
 router.post('/lessons/:lessonId/progress', validateBody(updateLessonProgressSchema), courseController.updateLessonProgress);
@@ -161,3 +191,4 @@ router.post('/certificates/claim', certificateController.claimCertificate);
 router.post('/uploads', upload.single('file'), uploadController.uploadFile);
 
 export { router as studentRouter };
+

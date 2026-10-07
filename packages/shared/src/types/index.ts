@@ -22,6 +22,12 @@ import {
   NotificationChannel,
   NotificationStatus,
   NotificationType,
+  LessonType,
+  VideoProvider,
+  PracticeTaskType,
+  PracticeStatus,
+  CompletionSource,
+  ResourceType,
 } from '../enums/index';
 
 export interface ApiResponse<T = any> {
@@ -77,6 +83,8 @@ export interface CourseSettings {
   lessonCompletionThresholdPercent: number; // default 90
   mockTestPassingPercent: number; // e.g. 75
   finalAssessmentPassingPercent: number; // e.g. 80
+  requirePracticeDone?: boolean;
+  watermarkEnabled?: boolean;
 }
 
 export interface CourseSummary {
@@ -144,6 +152,8 @@ export interface LiveSessionDetail {
   status: LiveSessionStatus;
   batchName?: string;
   moduleTitle?: string;
+  canJoin?: boolean;
+  attendanceRecorded?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -157,10 +167,54 @@ export interface LiveAttendanceDetail {
   status: AttendanceStatus;
 }
 
+export interface LessonResourceDetail {
+  id: string;
+  lessonId: string;
+  title: string;
+  type: ResourceType;
+  url: string;
+  sizeBytes?: number | null;
+  createdAt?: string;
+}
+
+export interface PracticeProgressDetail {
+  id: string;
+  studentId: string;
+  practiceTaskId: string;
+  status: PracticeStatus;
+  notes?: string | null;
+  attachmentKey?: string | null;
+  completedAt?: string | null;
+  updatedAt: string;
+}
+
+export interface PracticeTaskDetail {
+  id: string;
+  lessonId?: string | null;
+  moduleId?: string | null;
+  title: string;
+  instructions: string;
+  type: PracticeTaskType;
+  expectedOutcome?: string | null;
+  order: number;
+  myProgress?: PracticeProgressDetail | null;
+  createdAt?: string;
+}
+
+export interface LessonNoteDetail {
+  id: string;
+  studentId: string;
+  lessonId: string;
+  timestampSeconds?: number | null;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LessonResource {
   title: string;
   url: string;
-  type: 'pdf' | 'link' | 'zip' | 'code';
+  type: 'pdf' | 'link' | 'zip' | 'code' | ResourceType;
 }
 
 export interface LessonDetail {
@@ -168,14 +222,27 @@ export interface LessonDetail {
   moduleId: string;
   title: string;
   description?: string | null;
-  videoUrl: string;
+  type?: LessonType;
+  videoProvider?: VideoProvider;
+  videoUrl?: string;
+  playableUrl?: string;
   durationSeconds: number;
   order: number;
-  resources: LessonResource[];
+  isPreview?: boolean;
+  resources: LessonResourceDetail[] | LessonResource[];
+  practiceTasks?: PracticeTaskDetail[];
+  notes?: LessonNoteDetail[];
+  notesCount?: number;
   isCompleted?: boolean;
   isLocked?: boolean;
+  isBookmarked?: boolean;
   progressPercent?: number;
+  lastPositionSeconds?: number;
+  watchedSeconds?: number;
+  lockReasonCode?: string | null;
+  lockMessage?: string | null;
 }
+
 
 export interface OptionDetail {
   id: string;
@@ -253,7 +320,9 @@ export interface ModuleDetail {
   order: number;
   requiresAssignment: boolean;
   requiresQuiz: boolean;
+  requirePracticeDone?: boolean;
   lessons: LessonDetail[];
+  practiceTasks?: PracticeTaskDetail[];
   quiz?: QuizDetail | null;
   assignment?: AssignmentDetail | null;
   status: ModuleStatus;

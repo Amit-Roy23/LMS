@@ -155,6 +155,12 @@ Default development environments are pre-configured:
   SMS_PROVIDER="LOG"
   MSG91_AUTH_KEY=""
   MSG91_SENDER_ID="OCACAD"
+
+  # Layer 2 Storage & Security Configuration
+  STORAGE_DRIVER="LOCAL" # LOCAL | S3 | CLOUDINARY
+  STORAGE_SECRET="academy-lms-secure-storage-secret-key"
+  SIGNED_URL_TTL="3600" # URL expiry in seconds (default 1 hour)
+  LIVE_JOIN_WINDOW_MINUTES="15" # Minutes before class start when join button activates
   ```
 - `apps/web/.env.local` (`NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1`)
 
@@ -170,10 +176,13 @@ npm run db:push
 npm run db:seed
 ```
 
-### 5. Run Automated Tests
+### 5. Run Automated Tests & Heartbeat Simulation Script
 ```bash
-# Run all unit, integration, and E2E admission tests
-npm test
+# Run Layer 2 unit tests (heartbeat anti-cheat, access control matrix, live join window)
+npx vitest run tests/heartbeat-anti-cheat.test.ts tests/student-player.test.ts tests/progression.service.test.ts
+
+# Run the automated tamper-proof heartbeat watch simulation script
+npx tsx scripts/simulate-watch.ts
 ```
 
 ### 6. Start the Development Servers
@@ -197,11 +206,36 @@ Use the **⚡ 1-Click Demo Login** button on the navbar/login page, or log in ma
 
 | Role | Email | Password | Pre-configured State |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@creativeit.academy` | `Admin@123` | Full access to users, batches, inquiries & certificates |
+| **Admin** | `admin@creativeit.academy` | `Admin@123` | Full access to users, batches, content management & certificates |
 | **Instructor** | `instructor@creativeit.academy` | `Instructor@123` | Access to assigned batches, review queue & student progression |
-| **Student 1** | `student1@creativeit.academy` | `Student@123` | Active paid enrollment (Recorded Track), module 1 in progress |
-| **Student 2** | `student2@creativeit.academy` | `Student@123` | Active paid enrollment (Live Evening Cohort), excellent performance |
-| **Student 3** | `student3@creativeit.academy` | `Student@123` | Pending payment / unpaid registration testing state |
+| **Student 1** | `student1@creativeit.academy` | `Student@123` | Active paid enrollment (Recorded Track), Module 1 completed, Module 2 in progress |
+| **Student 2** | `student2@creativeit.academy` | `Student@123` | Active paid enrollment (Live Evening Cohort Alpha), Certified Graduate |
+| **Student 3** | `student3@creativeit.academy` | `Student@123` | Live student with passed retake quiz & pending assignment review |
+| **Student 4** | `student4@creativeit.academy` | `Student@123` | Active student with 40% watch progress (Quiz is locked until 90% threshold) |
+| **Student Pending** | `student_pending@creativeit.academy` | `Student@123` | Applicant with pending payment (`PAYMENT_PENDING` 403 guard) |
+
+---
+
+## 🧪 How to Test Layer 2 Student LMS Manually
+
+1. **Tamper-Resistant Video Watch & Auto-Completion**:
+   - Log in as `student4@creativeit.academy` (`Student@123`).
+   - Open `/student/courses` → open the course.
+   - Observe Lesson 1.1 is in progress (40%).
+   - Play the video. Notice the floating anti-piracy watermark displaying Student ID.
+   - Skip forward to 500s: notice the server **does NOT grant 500 seconds of watch credit**; only contiguous played intervals are merged.
+   - Run `npx tsx scripts/simulate-watch.ts` to see simulated honest watching reach 90% and auto-unlock the module quiz.
+
+2. **Sequential Lock & Module Gate**:
+   - Try directly accessing Lesson 1.2 or Module 2 before completing Lesson 1.1.
+   - Notice the friendly restricted screen with machine-readable reason code `PREVIOUS_LESSON_INCOMPLETE` or `MODULE_LOCKED`.
+
+3. **Live Class Schedule & Attendance**:
+   - Log in as `student2@creativeit.academy` or `student3@creativeit.academy`.
+   - Open `/student/schedule` to view upcoming, live now, and past sessions.
+   - Change timezones (IST, UTC, EST) and see live countdown updates.
+   - Click **iCal** to download calendar invite (`.ics`).
+   - Click **Join Live Class** within the 15-minute window to enter session and record attendance.
 
 ---
 
@@ -210,10 +244,11 @@ Use the **⚡ 1-Click Demo Login** button on the navbar/login page, or log in ma
 See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for full matrix and open decisions (D1–D6):
 
 - **R1 (Three Layers)**: L1 Marketing (`/`, `/courses`, `/contact`, `/verify`), L2 Student (`/student/*`), L3 Admin (`/admin/*`).
-- **R2 (Delivery Modes)**: `RECORDED` (self-paced) & `LIVE` (scheduled batches with `LiveSession` links).
+- **R2 (Delivery Modes)**: `RECORDED` (self-paced) & `LIVE` (scheduled batches with `LiveSession` links, join window, and attendance).
 - **R3 (Registration & Notifications)**: Idempotent admissions with user account creation and notification logs.
-- **R4 (Enrolled Student View)**: Student sees enrolled courses, video player with watch telemetry ($\ge 90\%$).
+- **R4 (Enrolled Student View)**: Student sees enrolled courses, multi-provider video player with moving watermark, telemetry watch tracking ($\ge 90\%$), practice tasks, notes, bookmarks, and signed resource links.
 - **R5 (Module Quizzes)**: MCQ quizzes strictly after video lessons with configurable `questionCount` and `passPercentage` ($70\%$).
 - **R6 (Module Progression)**: $\ge 70\%$ unlocks next module (14/20 pass, 13/20 fail).
 - **R7 (L3 Student Filter)**: Filter students by section, class, batch, schedule, payment status, and performance level.
-- **R8 (Learning Flow & Toggles)**: Video → Quiz → Assignment → Review → Next Module → Final Stages with `requiresAssignment` and `requiresQuiz` toggles.
+- **R8 (Learning Flow & Toggles)**: Video → Quiz → Assignment → Review → Next Module → Final Stages with `requiresAssignment`, `requiresQuiz`, and `requirePracticeDone` toggles.
+

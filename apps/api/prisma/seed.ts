@@ -22,6 +22,12 @@ import {
   SubmissionStatus,
   ModuleStatus,
   CertificateStatus,
+  LessonType,
+  VideoProvider,
+  PracticeTaskType,
+  PracticeStatus,
+  CompletionSource,
+  ResourceType,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
@@ -54,11 +60,17 @@ async function main() {
   await prisma.option.deleteMany();
   await prisma.question.deleteMany();
   await prisma.quiz.deleteMany();
+  await prisma.practiceProgress.deleteMany();
+  await prisma.practiceTask.deleteMany();
+  await prisma.lessonNote.deleteMany();
+  await prisma.lessonBookmark.deleteMany();
+  await prisma.lessonResource.deleteMany();
   await prisma.lessonProgress.deleteMany();
   await prisma.moduleProgress.deleteMany();
   await prisma.lesson.deleteMany();
   await prisma.liveAttendance.deleteMany();
   await prisma.liveSession.deleteMany();
+
   await prisma.module.deleteMany();
   await prisma.registration.deleteMany();
   await prisma.inquiry.deleteMany();
@@ -327,7 +339,7 @@ async function main() {
     data: {
       batchId: liveBatchAlpha.id,
       title: 'Live Workshop 01: System Architecture & Monorepos Kickoff',
-      startsAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      startsAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago (Past)
       durationMinutes: 90,
       provider: LiveProvider.ZOOM,
       joinUrl: 'https://zoom.us/j/98765432101?pwd=mockPassword123',
@@ -340,10 +352,22 @@ async function main() {
     data: {
       batchId: liveBatchAlpha.id,
       title: 'Live Workshop 02: PostgreSQL Indexing & Prisma State Machine',
-      startsAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow
-      durationMinutes: 90,
+      startsAt: new Date(Date.now() - 5 * 60 * 1000), // Started 5 mins ago (LIVE NOW)
+      durationMinutes: 60,
       provider: LiveProvider.MEET,
       joinUrl: 'https://meet.google.com/abc-defg-hij',
+      status: LiveSessionStatus.LIVE,
+    },
+  });
+
+  const session3 = await prisma.liveSession.create({
+    data: {
+      batchId: liveBatchAlpha.id,
+      title: 'Live Workshop 03: Microservices & Event-Driven Subscriptions',
+      startsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days in future (UPCOMING)
+      durationMinutes: 90,
+      provider: LiveProvider.ZOOM,
+      joinUrl: 'https://zoom.us/j/98765432102?pwd=mockPassword456',
       status: LiveSessionStatus.SCHEDULED,
     },
   });
@@ -369,6 +393,7 @@ async function main() {
       order: 1,
       requiresAssignment: true,
       requiresQuiz: true,
+      requirePracticeDone: false,
     },
   });
 
@@ -377,9 +402,12 @@ async function main() {
       moduleId: module1.id,
       title: '1.1 HTTP Protocols, RESTful API Principles & Monorepos',
       description: 'Deep dive into HTTP/2, idempotent verbs, status codes, and npm/pnpm monorepo structure.',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.MP4,
       videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
       durationSeconds: 600,
       order: 1,
+      isPreview: true,
     },
   });
 
@@ -388,9 +416,12 @@ async function main() {
       moduleId: module1.id,
       title: '1.2 TypeScript Mastery, Generics & Runtime Zod Schema Validation',
       description: 'How to write bulletproof types and share single source of truth schemas across API and Client.',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.MP4,
       videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
       durationSeconds: 720,
       order: 2,
+      isPreview: false,
     },
   });
 
@@ -399,11 +430,66 @@ async function main() {
       moduleId: module1.id,
       title: '1.3 Database Modeling with Prisma ORM & PostgreSQL',
       description: 'Relational database schema design, foreign keys, indexes, migrations, and query optimization.',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.MP4,
       videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
       durationSeconds: 840,
       order: 3,
+      isPreview: false,
     },
   });
+
+  // Seed Lesson Resources
+  await prisma.lessonResource.createMany({
+    data: [
+      {
+        lessonId: lesson1_1.id,
+        title: 'Module 1 Architecture Diagram & HTTP Verbs Cheatsheet',
+        type: ResourceType.PDF,
+        url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        sizeBytes: 1048576,
+      },
+      {
+        lessonId: lesson1_1.id,
+        title: 'Starter Code Repository & Environment Setup',
+        type: ResourceType.LINK,
+        url: 'https://github.com/example/fullstack-starter',
+      },
+      {
+        lessonId: lesson1_2.id,
+        title: 'Advanced TypeScript & Zod Utility Types Pack',
+        type: ResourceType.ZIP,
+        url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        sizeBytes: 2097152,
+      },
+    ],
+  });
+
+  // Seed Practice Tasks
+  const practiceTask1 = await prisma.practiceTask.create({
+    data: {
+      lessonId: lesson1_1.id,
+      moduleId: module1.id,
+      title: 'Personal Practice 1: Initialize Monorepo & Configure Workspaces',
+      instructions: 'Create a root package.json with workspaces for `apps/*` and `packages/*`. Set up TypeScript base configuration with strict mode.',
+      type: PracticeTaskType.CHECKLIST,
+      expectedOutcome: 'A compiling TypeScript monorepo with shared validation schemas.',
+      order: 1,
+    },
+  });
+
+  const practiceTask2 = await prisma.practiceTask.create({
+    data: {
+      lessonId: lesson1_2.id,
+      moduleId: module1.id,
+      title: 'Personal Practice 2: Write Zod Schemas for Custom Entities',
+      instructions: 'Define runtime schemas with refine guards and export the inferred static TypeScript types.',
+      type: PracticeTaskType.EXERCISE,
+      expectedOutcome: 'Zero-runtime type mismatches between client forms and backend validation.',
+      order: 2,
+    },
+  });
+
 
   // Quiz 1 with 20 questions
   const quiz1 = await prisma.quiz.create({
@@ -493,7 +579,9 @@ async function main() {
       moduleId: module2.id,
       title: '2.1 Next.js App Router, Server Components & Streaming SSR',
       description: 'Understand the difference between React Server Components (RSC) and Client Components with Suspense boundaries.',
-      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.YOUTUBE,
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       durationSeconds: 650,
       order: 1,
     },
@@ -504,6 +592,8 @@ async function main() {
       moduleId: module2.id,
       title: '2.2 Server State Management with TanStack Query & Optimistic Updates',
       description: 'Query caching, mutation lifecycle, cache invalidation, and seamless optimistic UI rollbacks.',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.MP4,
       videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
       durationSeconds: 700,
       order: 2,
@@ -515,7 +605,9 @@ async function main() {
       moduleId: module2.id,
       title: '2.3 Responsive Design Systems with Tailwind CSS & Micro-Animations',
       description: 'Design tokens, dark/light themes, accessible modal dialogs, and smooth interactive micro-interactions.',
-      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.VIMEO,
+      videoUrl: 'https://vimeo.com/76979871',
       durationSeconds: 750,
       order: 3,
     },
@@ -584,6 +676,8 @@ async function main() {
       moduleId: module3.id,
       title: '3.1 Server-Enforced State Machines & Progression Logic',
       description: 'Design deterministic state transitions where client input is never trusted for progression unlocking.',
+      type: LessonType.VIDEO,
+      videoProvider: VideoProvider.MP4,
       videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
       durationSeconds: 700,
       order: 1,
@@ -595,8 +689,10 @@ async function main() {
       moduleId: module3.id,
       title: '3.2 Vector PDF Diploma Generation with Embedded Anti-Tamper QR Codes',
       description: 'Use pdf-lib to render high-resolution certificate diplomas with dynamic verification links.',
-      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-      durationSeconds: 800,
+      type: LessonType.READING,
+      videoProvider: VideoProvider.OTHER,
+      videoUrl: '',
+      durationSeconds: 400,
       order: 2,
     },
   });
@@ -763,12 +859,91 @@ async function main() {
   // Student 1 watched Module 1 lessons 100%
   await prisma.lessonProgress.createMany({
     data: [
-      { studentId: student1.id, lessonId: lesson1_1.id, watchedSeconds: 600, percent: 100, completedAt: new Date() },
-      { studentId: student1.id, lessonId: lesson1_2.id, watchedSeconds: 720, percent: 100, completedAt: new Date() },
-      { studentId: student1.id, lessonId: lesson1_3.id, watchedSeconds: 840, percent: 100, completedAt: new Date() },
+      {
+        studentId: student1.id,
+        lessonId: lesson1_1.id,
+        watchedSeconds: 600,
+        lastPositionSeconds: 600,
+        watchedSegments: [{ start: 0, end: 600 }],
+        percent: 100,
+        completedAt: new Date(),
+        completionSource: CompletionSource.AUTO,
+      },
+      {
+        studentId: student1.id,
+        lessonId: lesson1_2.id,
+        watchedSeconds: 720,
+        lastPositionSeconds: 720,
+        watchedSegments: [{ start: 0, end: 720 }],
+        percent: 100,
+        completedAt: new Date(),
+        completionSource: CompletionSource.AUTO,
+      },
+      {
+        studentId: student1.id,
+        lessonId: lesson1_3.id,
+        watchedSeconds: 840,
+        lastPositionSeconds: 840,
+        watchedSegments: [{ start: 0, end: 840 }],
+        percent: 100,
+        completedAt: new Date(),
+        completionSource: CompletionSource.AUTO,
+      },
       // Started watching Module 2 lesson 1
-      { studentId: student1.id, lessonId: lesson2_1.id, watchedSeconds: 250, percent: 38, completedAt: null },
+      {
+        studentId: student1.id,
+        lessonId: lesson2_1.id,
+        watchedSeconds: 250,
+        lastPositionSeconds: 250,
+        watchedSegments: [{ start: 0, end: 250 }],
+        percent: 38,
+        completedAt: null,
+      },
     ],
+  });
+
+  // Student 1 Practice Progress
+  await prisma.practiceProgress.createMany({
+    data: [
+      {
+        studentId: student1.id,
+        practiceTaskId: practiceTask1.id,
+        status: PracticeStatus.DONE,
+        notes: 'Monorepo workspace setup completed with TypeScript strict configuration and pnpm/npm filters.',
+      },
+      {
+        studentId: student1.id,
+        practiceTaskId: practiceTask2.id,
+        status: PracticeStatus.IN_PROGRESS,
+        notes: 'Drafted Zod schemas, refining email regex and nested transform pipelines.',
+      },
+    ],
+  });
+
+  // Student 1 Lesson Notes
+  await prisma.lessonNote.createMany({
+    data: [
+      {
+        studentId: student1.id,
+        lessonId: lesson1_1.id,
+        timestampSeconds: 125,
+        text: 'PUT vs PATCH: PUT replaces the full resource (idempotent), PATCH modifies fields.',
+      },
+      {
+        studentId: student1.id,
+        lessonId: lesson1_1.id,
+        timestampSeconds: 340,
+        text: 'Monorepo layout: shared packages must be linked under packages/shared and referenced in tsconfig paths.',
+      },
+    ],
+  });
+
+  // Student 1 Bookmark
+  await prisma.lessonBookmark.create({
+    data: {
+      studentId: student1.id,
+      lessonId: lesson1_2.id,
+    },
   });
 
   // Student 1 passed Quiz 1 with 18/20 (90%)

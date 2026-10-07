@@ -175,3 +175,51 @@ export const NotificationType = {
   LIVE_CLASS_REMINDER: 'LIVE_CLASS_REMINDER',
 } as const;
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
+
+export const LessonType = {
+  VIDEO: 'VIDEO',
+  LIVE_CLASS: 'LIVE_CLASS',
+  READING: 'READING',
+} as const;
+export type LessonType = (typeof LessonType)[keyof typeof LessonType];
+
+export const VideoProvider = {
+  YOUTUBE: 'YOUTUBE',
+  VIMEO: 'VIMEO',
+  MP4: 'MP4',
+  HLS: 'HLS',
+  OTHER: 'OTHER',
+} as const;
+export type VideoProvider = (typeof VideoProvider)[keyof typeof VideoProvider];
+
+export const PracticeTaskType = {
+  CHECKLIST: 'CHECKLIST',
+  EXERCISE: 'EXERCISE',
+  UPLOAD_OPTIONAL: 'UPLOAD_OPTIONAL',
+} as const;
+export type PracticeTaskType = (typeof PracticeTaskType)[keyof typeof PracticeTaskType];
+
+export const PracticeStatus = {
+  NOT_STARTED: 'NOT_STARTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+} as const;
+export type PracticeStatus = (typeof PracticeStatus)[keyof typeof PracticeStatus];
+
+export const CompletionSource = {
+  AUTO: 'AUTO',
+  MANUAL: 'MANUAL',
+  LIVE_ATTENDANCE: 'LIVE_ATTENDANCE',
+  ADMIN: 'ADMIN',
+} as const;
+export type CompletionSource = (typeof CompletionSource)[keyof typeof CompletionSource];
+
+export const ResourceType = {
+  PDF: 'PDF',
+  ZIP: 'ZIP',
+  LINK: 'LINK',
+  IMAGE: 'IMAGE',
+  CODE: 'CODE',
+} as const;
+export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
+

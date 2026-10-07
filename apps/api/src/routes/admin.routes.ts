@@ -46,11 +46,28 @@ router.delete('/admin/courses/:id', courseController.deleteCourse);
 router.post('/admin/modules', validateBody(createModuleSchema), courseController.createModule);
 router.put('/admin/modules/:moduleId', courseController.updateModule);
 router.delete('/admin/modules/:moduleId', courseController.deleteModule);
+router.post('/admin/modules/reorder', courseController.reorderModules);
 
 // Lessons Management
 router.post('/admin/lessons', validateBody(createLessonSchema), courseController.createLesson);
 router.put('/admin/lessons/:lessonId', courseController.updateLesson);
 router.delete('/admin/lessons/:lessonId', courseController.deleteLesson);
+router.post('/admin/lessons/reorder', courseController.reorderLessons);
+
+// Lesson Resources
+router.post('/admin/lessons/:lessonId/resources', courseController.createLessonResource);
+router.delete('/admin/resources/:resourceId', courseController.deleteLessonResource);
+
+// Practice Tasks Management
+router.post('/admin/practice-tasks', courseController.createPracticeTask);
+router.put('/admin/practice-tasks/:id', courseController.updatePracticeTask);
+router.delete('/admin/practice-tasks/:id', courseController.deletePracticeTask);
+
+// Live Sessions Management
+router.post('/admin/live-sessions', courseController.createLiveSession);
+router.put('/admin/live-sessions/:id', courseController.updateLiveSession);
+router.delete('/admin/live-sessions/:id', courseController.deleteLiveSession);
+
 
 // Batches & Cohorts Management
 router.get('/admin/batches', adminStudentController.listBatches);

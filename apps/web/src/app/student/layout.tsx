@@ -8,6 +8,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   BookOpen,
+  Calendar,
   Award,
   User,
   LogOut,
@@ -48,6 +49,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const navItems = [
     { href: '/student/dashboard', label: 'Dashboard & Progress', icon: LayoutDashboard },
     { href: '/student/courses', label: 'My Enrolled Courses', icon: BookOpen },
+    { href: '/student/schedule', label: 'Live Schedule', icon: Calendar },
     { href: '/student/certificates', label: 'My Certificates', icon: Award },
     { href: '/student/profile', label: 'Account Profile', icon: User },
   ];

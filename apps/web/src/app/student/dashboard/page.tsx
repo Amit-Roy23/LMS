@@ -36,21 +36,25 @@ export default function StudentDashboardPage() {
   const [selectedReceipt, setSelectedReceipt] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [liveSessions, setLiveSessions] = useState<any[]>([]);
+
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        const [enrollmentRes, certRes, receiptsRes] = await Promise.all([
-          apiClient<any[]>('/enrollments/my'),
+        const [enrollmentRes, certRes, receiptsRes, liveRes] = await Promise.all([
+          apiClient<any[]>('/student/courses').catch(() => []),
           apiClient<any[]>('/certificates/my').catch(() => []),
           apiClient<{ payments: any[]; registrations: any[] }>('/student/receipts').catch(() => ({
             payments: [],
             registrations: [],
           })),
+          apiClient<any[]>('/student/live-sessions').catch(() => []),
         ]);
         setEnrollments(enrollmentRes || []);
         setCertificates(certRes || []);
         setReceiptsData(receiptsRes || { payments: [], registrations: [] });
+        setLiveSessions(liveRes || []);
       } catch (err) {
         console.error('Failed to load dashboard data', err);
       } finally {
@@ -61,6 +65,9 @@ export default function StudentDashboardPage() {
   }, []);
 
   const activeEnrollment = enrollments[0];
+  const upcomingLive = liveSessions.find(
+    (s) => new Date(s.startsAt).getTime() + (s.durationMinutes || 60) * 60000 >= Date.now()
+  );
 
   const handlePrintReceipt = () => {
     window.print();
@@ -91,14 +98,43 @@ export default function StudentDashboardPage() {
         </div>
 
         {activeEnrollment && (
-          <Link href={`/student/courses/${activeEnrollment.courseId}/learn`}>
-            <Button variant="primary" size="lg" className="gap-2 shrink-0">
+          <Link href={`/student/courses/${activeEnrollment.id}/learn`}>
+            <Button variant="primary" size="lg" className="gap-2 shrink-0 shadow-lg shadow-blue-500/20">
               <PlayCircle className="w-4 h-4" />
               <span>Continue Learning</span>
             </Button>
           </Link>
         )}
       </div>
+
+      {/* Today's Live Class Banner if Scheduled */}
+      {upcomingLive && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-purple-900/10 via-indigo-900/5 to-purple-900/10 border border-purple-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 border border-purple-200">
+              <Radio className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold uppercase text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                  Scheduled Live Class
+                </span>
+                <span className="text-xs text-slate-500 font-mono">
+                  {new Date(upcomingLive.startsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 mt-0.5">{upcomingLive.title}</h3>
+            </div>
+          </div>
+
+          <Link href="/student/schedule">
+            <Button variant="primary" size="sm" className="gap-1.5 shrink-0 text-xs shadow-sm">
+              <Radio className="w-3.5 h-3.5" />
+              <span>View Live Schedule</span>
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

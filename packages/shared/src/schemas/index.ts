@@ -15,6 +15,12 @@ import {
   RegistrationStatus,
   PerformanceLevel,
   NotificationChannel,
+  LessonType,
+  VideoProvider,
+  PracticeTaskType,
+  PracticeStatus,
+  CompletionSource,
+  ResourceType,
 } from '../enums/index';
 
 export const registerSchema = z.object({
@@ -83,6 +89,8 @@ export const courseSettingsSchema = z.object({
   mockTestPassingPercent: z.number().min(0).max(100).default(75),
   finalAssessmentPassingPercent: z.number().min(0).max(100).default(80),
   timeGatedByLiveSession: z.boolean().default(false),
+  requirePracticeDone: z.boolean().default(false),
+  watermarkEnabled: z.boolean().default(true),
 });
 
 export const createCourseSchema = z.object({
@@ -179,34 +187,100 @@ export const createModuleSchema = z.object({
   order: z.number().int().min(1),
   requiresAssignment: z.boolean().default(true),
   requiresQuiz: z.boolean().default(true),
+  requirePracticeDone: z.boolean().default(false),
 });
 
 export const updateModuleSchema = createModuleSchema.partial();
+
+export const reorderModulesSchema = z.object({
+  orders: z.array(
+    z.object({
+      id: z.string().uuid(),
+      order: z.number().int().min(1),
+    })
+  ),
+});
 
 export const createLessonSchema = z.object({
   moduleId: z.string().uuid(),
   title: z.string().min(2, 'Lesson title is required').max(200),
   description: z.string().optional().nullable(),
-  videoUrl: z.string().url('Must be a valid video URL'),
+  type: z.nativeEnum(LessonType).default(LessonType.VIDEO),
+  videoProvider: z.nativeEnum(VideoProvider).default(VideoProvider.YOUTUBE),
+  videoUrl: z.string().optional().default(''),
   durationSeconds: z.number().int().min(0).default(0),
   order: z.number().int().min(1),
-  resources: z
-    .array(
-      z.object({
-        title: z.string(),
-        url: z.string(),
-        type: z.enum(['pdf', 'link', 'zip', 'code']),
-      })
-    )
-    .default([]),
+  isPreview: z.boolean().default(false),
+  resources: z.any().optional().default([]),
+});
+
+export const updateLessonSchema = createLessonSchema.partial();
+
+export const reorderLessonsSchema = z.object({
+  orders: z.array(
+    z.object({
+      id: z.string().uuid(),
+      order: z.number().int().min(1),
+    })
+  ),
+});
+
+export const heartbeatProgressSchema = z.object({
+  positionSeconds: z.number().min(0),
+  playedIntervals: z.array(z.tuple([z.number().min(0), z.number().min(0)])).optional().default([]),
+  playbackRate: z.number().min(0.25).max(4.0).optional().default(1.0),
+});
+
+export const completeLessonSchema = z.object({
+  notes: z.string().optional().nullable(),
+});
+
+export const createPracticeTaskSchema = z.object({
+  lessonId: z.string().uuid().optional().nullable(),
+  moduleId: z.string().uuid().optional().nullable(),
+  title: z.string().min(2, 'Title is required').max(200),
+  instructions: z.string().min(5, 'Instructions must be at least 5 characters'),
+  type: z.nativeEnum(PracticeTaskType).default(PracticeTaskType.CHECKLIST),
+  expectedOutcome: z.string().optional().nullable(),
+  order: z.number().int().min(1).default(1),
+});
+
+export const updatePracticeTaskSchema = createPracticeTaskSchema.partial();
+
+export const updatePracticeProgressSchema = z.object({
+  status: z.nativeEnum(PracticeStatus),
+  notes: z.string().optional().nullable(),
+  attachmentKey: z.string().optional().nullable(),
+});
+
+export const createLessonNoteSchema = z.object({
+  text: z.string().min(1, 'Note text cannot be empty').max(5000),
+  timestampSeconds: z.number().int().min(0).optional().nullable(),
+});
+
+export const updateLessonNoteSchema = z.object({
+  text: z.string().min(1).max(5000),
+  timestampSeconds: z.number().int().min(0).optional().nullable(),
+});
+
+export const createLessonResourceSchema = z.object({
+  lessonId: z.string().uuid(),
+  title: z.string().min(2).max(200),
+  type: z.nativeEnum(ResourceType).default(ResourceType.PDF),
+  url: z.string().min(1),
+  sizeBytes: z.number().int().optional().nullable(),
 });
 
 export const updateLessonProgressSchema = z.object({
-  lessonId: z.string().uuid(),
-  watchedSeconds: z.number().min(0),
-  percent: z.number().min(0).max(100),
+  lessonId: z.string().uuid().optional(),
+  watchedSeconds: z.number().min(0).optional(),
+  percent: z.number().min(0).max(100).optional(),
   markComplete: z.boolean().optional().default(false),
+  positionSeconds: z.number().min(0).optional(),
+  playedIntervals: z.array(z.tuple([z.number().min(0), z.number().min(0)])).optional(),
+  playbackRate: z.number().min(0.25).max(4.0).optional(),
 });
+
 
 export const createQuizOptionSchema = z.object({
   text: z.string().min(1, 'Option text cannot be empty'),

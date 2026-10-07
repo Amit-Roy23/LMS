@@ -163,6 +163,47 @@ enum NotificationType {
   LIVE_CLASS_REMINDER
 }
 
+enum LessonType {
+  VIDEO
+  LIVE_CLASS
+  READING
+}
+
+enum VideoProvider {
+  YOUTUBE
+  VIMEO
+  MP4
+  HLS
+  OTHER
+}
+
+enum PracticeTaskType {
+  CHECKLIST
+  EXERCISE
+  UPLOAD_OPTIONAL
+}
+
+enum PracticeStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  DONE
+}
+
+enum CompletionSource {
+  AUTO
+  MANUAL
+  LIVE_ATTENDANCE
+  ADMIN
+}
+
+enum ResourceType {
+  PDF
+  ZIP
+  LINK
+  IMAGE
+  CODE
+}
+
 model User {
   id                  String      @id @default(uuid())
   studentId           String?     @unique
@@ -203,6 +244,9 @@ model User {
   notifications            Notification[]
   notificationLogs         NotificationLog[]
   liveAttendances          LiveAttendance[]
+  practiceProgresses       PracticeProgress[]
+  lessonNotes              LessonNote[]
+  lessonBookmarks          LessonBookmark[]
   feedbacks                Feedback[]
   auditLogs                AuditLog[]
 
@@ -409,19 +453,21 @@ model Inquiry {
 }
 
 model Module {
-  id                 String   @id @default(uuid())
-  courseId           String
-  title              String
-  description        String?
-  order              Int      @default(1)
-  requiresAssignment Boolean  @default(true)
-  requiresQuiz       Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  deletedAt          DateTime?
+  id                  String   @id @default(uuid())
+  courseId            String
+  title               String
+  description         String?
+  order               Int      @default(1)
+  requiresAssignment  Boolean  @default(true)
+  requiresQuiz        Boolean  @default(true)
+  requirePracticeDone Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
 
   course         Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons        Lesson[]
+  practiceTasks  PracticeTask[]
   quiz           Quiz?
   assignment     Assignment?
   liveSessions   LiveSession[]
@@ -432,23 +478,115 @@ model Module {
 }
 
 model Lesson {
-  id              String   @id @default(uuid())
+  id              String        @id @default(uuid())
   moduleId        String
   title           String
   description     String?
-  videoUrl        String
-  durationSeconds Int      @default(0)
-  order           Int      @default(1)
-  resources       Json     @default("[]")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  type            LessonType    @default(VIDEO)
+  videoProvider   VideoProvider @default(YOUTUBE)
+  videoUrl        String        @default("")
+  durationSeconds Int           @default(0)
+  order           Int           @default(1)
+  isPreview       Boolean       @default(false)
+  resources       Json          @default("[]")
+  liveSessionId   String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?
 
-  module   Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  progress LessonProgress[]
+  module          Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress        LessonProgress[]
+  lessonResources LessonResource[]
+  practiceTasks   PracticeTask[]
+  notes           LessonNote[]
+  bookmarks       LessonBookmark[]
 
   @@index([moduleId])
   @@index([order])
+}
+
+model LessonResource {
+  id        String       @id @default(uuid())
+  lessonId  String
+  title     String
+  type      ResourceType @default(PDF)
+  url       String
+  sizeBytes Int?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+}
+
+model PracticeTask {
+  id              String           @id @default(uuid())
+  lessonId        String?
+  moduleId        String?
+  title           String
+  instructions    String
+  type            PracticeTaskType @default(CHECKLIST)
+  expectedOutcome String?
+  order           Int              @default(1)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  lesson   Lesson?            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  module   Module?            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress PracticeProgress[]
+
+  @@index([lessonId])
+  @@index([moduleId])
+}
+
+model PracticeProgress {
+  id             String         @id @default(uuid())
+  studentId      String
+  practiceTaskId String
+  status         PracticeStatus @default(NOT_STARTED)
+  notes          String?
+  attachmentKey  String?
+  completedAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  student      User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  practiceTask PracticeTask @relation(fields: [practiceTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, practiceTaskId])
+  @@index([studentId])
+  @@index([practiceTaskId])
+}
+
+model LessonNote {
+  id               String   @id @default(uuid())
+  studentId        String
+  lessonId         String
+  timestampSeconds Int?
+  text             String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([lessonId])
+}
+
+model LessonBookmark {
+  id        String   @id @default(uuid())
+  studentId String
+  lessonId  String
+  createdAt DateTime @default(now())
+
+  student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, lessonId])
+  @@index([studentId])
+  @@index([lessonId])
 }
 
 model Enrollment {
@@ -502,14 +640,17 @@ model Payment {
 }
 
 model LessonProgress {
-  id             String    @id @default(uuid())
-  studentId      String
-  lessonId       String
-  watchedSeconds Int       @default(0)
-  percent        Float     @default(0.0)
-  completedAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                  String           @id @default(uuid())
+  studentId           String
+  lessonId            String
+  watchedSeconds      Int              @default(0)
+  lastPositionSeconds Float            @default(0.0)
+  watchedSegments     Json             @default("[]")
+  percent             Float            @default(0.0)
+  completionSource    CompletionSource @default(AUTO)
+  completedAt         DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   student User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   lesson  Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)

@@ -69,9 +69,43 @@ export interface PasswordResetRequestedEvent {
   occurredAt: Date;
 }
 
+export interface LessonCompletedEvent {
+  studentId: string;
+  lessonId: string;
+  moduleId: string;
+  courseId: string;
+  completionSource: string;
+  percent: number;
+  occurredAt: Date;
+}
+
+export interface ModuleLessonsCompletedEvent {
+  studentId: string;
+  moduleId: string;
+  courseId: string;
+  occurredAt: Date;
+}
+
+export interface LiveSessionReminderDueEvent {
+  sessionId: string;
+  batchId: string;
+  courseId: string;
+  courseTitle: string;
+  batchName: string;
+  sessionTitle: string;
+  startsAt: Date;
+  joinUrl: string;
+  reminderType: '24H' | '1H';
+  occurredAt: Date;
+}
+
 export interface DomainEventsMap {
   'payment.succeeded': PaymentSucceededEvent;
   'account.created': AccountCreatedEvent;
   'enrollment.created': EnrollmentCreatedEvent;
   'password.reset_requested': PasswordResetRequestedEvent;
+  'lesson.completed': LessonCompletedEvent;
+  'module.lessons_completed': ModuleLessonsCompletedEvent;
+  'live_session.reminder_due': LiveSessionReminderDueEvent;
 }
+
