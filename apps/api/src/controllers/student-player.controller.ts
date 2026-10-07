@@ -147,43 +147,44 @@ export class StudentPlayerController {
       const role = req.user!.role as Role;
       const lessonId = req.params.lessonId as string;
 
-      // Enforce server-side guard
-      await progressionService.assertCanAccessLesson(lessonId, studentId, role);
-
-      const lesson = await prisma.lesson.findUnique({
-        where: { id: lessonId },
-        include: {
-          module: {
-            include: {
-              course: true,
-              lessons: {
-                where: { deletedAt: null },
-                orderBy: { order: 'asc' },
-                select: { id: true, title: true, order: true, durationSeconds: true },
+      // Enforce the server-side guard while loading the lesson (Promise.all rejects if access is denied)
+      const [, lesson] = await Promise.all([
+        progressionService.assertCanAccessLesson(lessonId, studentId, role),
+        prisma.lesson.findUnique({
+          where: { id: lessonId },
+          include: {
+            module: {
+              include: {
+                course: true,
+                lessons: {
+                  where: { deletedAt: null },
+                  orderBy: { order: 'asc' },
+                  select: { id: true, title: true, order: true, durationSeconds: true },
+                },
               },
             },
-          },
-          lessonResources: true,
-          practiceTasks: {
-            orderBy: { order: 'asc' },
-            include: {
-              progress: {
-                where: { studentId },
+            lessonResources: true,
+            practiceTasks: {
+              orderBy: { order: 'asc' },
+              include: {
+                progress: {
+                  where: { studentId },
+                },
               },
             },
+            notes: {
+              where: { studentId },
+              orderBy: { createdAt: 'desc' },
+            },
+            bookmarks: {
+              where: { studentId },
+            },
+            progress: {
+              where: { studentId },
+            },
           },
-          notes: {
-            where: { studentId },
-            orderBy: { createdAt: 'desc' },
-          },
-          bookmarks: {
-            where: { studentId },
-          },
-          progress: {
-            where: { studentId },
-          },
-        },
-      });
+        }),
+      ]);
 
       if (!lesson) {
         throw new NotFoundError('Lesson not found');
@@ -303,28 +304,28 @@ export class StudentPlayerController {
       const lessonId = (req.params.lessonId || req.body.lessonId) as string;
       const { positionSeconds, playedIntervals, playbackRate } = req.body;
 
-      // Assert access
-      await progressionService.assertCanAccessLesson(lessonId, studentId, role);
-
-      const lesson = await prisma.lesson.findUnique({
-        where: { id: lessonId },
-        include: {
-          module: {
-            include: {
-              course: true,
-              lessons: { where: { deletedAt: null } },
+      // Access check, lesson and existing progress are independent lookups: run them together
+      const [progressionBefore, lesson, existingProgress] = await Promise.all([
+        progressionService.assertCanAccessLesson(lessonId, studentId, role),
+        prisma.lesson.findUnique({
+          where: { id: lessonId },
+          include: {
+            module: {
+              include: {
+                course: true,
+                lessons: { where: { deletedAt: null } },
+              },
             },
           },
-        },
-      });
+        }),
+        prisma.lessonProgress.findUnique({
+          where: { studentId_lessonId: { studentId, lessonId } },
+        }),
+      ]);
 
       if (!lesson) {
         throw new NotFoundError('Lesson not found');
       }
-
-      const existingProgress = await prisma.lessonProgress.findUnique({
-        where: { studentId_lessonId: { studentId, lessonId } },
-      });
 
       const existingSegments = (existingProgress?.watchedSegments as [number, number][]) || [];
       const incomingIntervals: [number, number][] = playedIntervals || [];
@@ -417,11 +418,13 @@ export class StudentPlayerController {
         }
       }
 
-      // Re-evaluate progression state
-      const progression = await progressionService.getCourseProgression(
-        lesson.module.courseId,
-        studentId
-      );
+      // Only a newly completed lesson can change the progression; ordinary heartbeats reuse
+      // the progression computed by the access check.
+      const newlyCompleted = isComplete && !existingProgress?.completedAt;
+      const progression =
+        newlyCompleted || !progressionBefore
+          ? await progressionService.getCourseProgression(lesson.module.courseId, studentId)
+          : progressionBefore;
 
       return sendSuccess(res, {
         progress: {

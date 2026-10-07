@@ -154,6 +154,8 @@ router.put('/student/practice/:taskId', validateBody(updatePracticeProgressSchem
 // Live Classes
 router.get('/student/live-sessions', studentPlayerController.listLiveSessions);
 router.get('/student/live-sessions/:id/join', studentPlayerController.joinLiveSession);
+// Joining records attendance, so the web app uses POST
+router.post('/student/live-sessions/:id/join', studentPlayerController.joinLiveSession);
 router.get('/student/live-sessions/:id/ical', studentPlayerController.getLiveSessionICal);
 
 // Legacy course progress / progression routes

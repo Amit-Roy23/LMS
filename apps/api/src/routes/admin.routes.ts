@@ -100,6 +100,7 @@ router.post('/admin/notifications/:id/retry', notificationController.retryNotifi
 // Quizzes & Assessment Engine (Prompt 5)
 router.get('/admin/modules/:moduleId/quiz', adminQuizController.getQuizConfig);
 router.get('/admin/quizzes/:quizId/config', adminQuizController.getQuizConfig);
+router.get('/admin/quizzes/:quizId', adminQuizController.getQuizConfig);
 router.put('/admin/quizzes/:quizId', validateBody(updateQuizSettingsSchema), adminQuizController.updateQuizSettings);
 router.post('/admin/quizzes/:quizId/publish', adminQuizController.publishQuiz);
 

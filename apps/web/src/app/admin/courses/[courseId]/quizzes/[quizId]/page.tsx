@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { apiClient } from '../../../../../../lib/api';
+import { apiClient, apiText } from '../../../../../../lib/api';
 import { Button } from '../../../../../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../../../../components/ui/card';
 import { Badge } from '../../../../../../components/ui/badge';
@@ -295,7 +295,7 @@ export default function AdminQuizEditorPage() {
     if (!csvFileContent) return;
     try {
       setIsProcessingCsv(true);
-      const res = await apiClient<any>(`/admin/quizzes/${quizId}/questions/import-csv`, {
+      const res = await apiClient<any>(`/admin/quizzes/${quizId}/questions/import`, {
         method: 'POST',
         body: JSON.stringify({
           csvContent: csvFileContent,
@@ -320,7 +320,7 @@ export default function AdminQuizEditorPage() {
     if (!csvFileContent) return;
     try {
       setIsProcessingCsv(true);
-      const res = await apiClient<any>(`/admin/quizzes/${quizId}/questions/import-csv`, {
+      const res = await apiClient<any>(`/admin/quizzes/${quizId}/questions/import`, {
         method: 'POST',
         body: JSON.stringify({
           csvContent: csvFileContent,
@@ -342,14 +342,12 @@ export default function AdminQuizEditorPage() {
   // Download CSV Template
   const handleDownloadTemplate = async () => {
     try {
-      const res = await apiClient<{ csvTemplate: string; filename: string }>(
-        '/admin/questions/template-csv'
-      );
-      const blob = new Blob([res.csvTemplate], { type: 'text/csv;charset=utf-8;' });
+      const csvTemplate = await apiText('/admin/quizzes/template/csv');
+      const blob = new Blob([csvTemplate], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', res.filename || 'quiz-questions-template.csv');
+      link.setAttribute('download', 'quiz-questions-template.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

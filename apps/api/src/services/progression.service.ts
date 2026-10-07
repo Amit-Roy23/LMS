@@ -683,6 +683,10 @@ export const checkCertificateEligibility = isCertificateEligible;
  */
 export class ProgressionService {
   async getCourseProgression(courseId: string, studentId: string) {
+    // Load the course tree together with this student's records at every level in a single
+    // query (relationJoins turns the nested includes into one SQL statement). Serverless
+    // deployments usually run with a tiny connection pool, so one round trip matters.
+    const mine = { where: { studentId } };
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
@@ -695,18 +699,35 @@ export class ProgressionService {
               orderBy: { order: 'asc' },
               include: {
                 lessonResources: true,
-                practiceTasks: { orderBy: { order: 'asc' } },
+                practiceTasks: { orderBy: { order: 'asc' }, include: { progress: mine } },
+                progress: mine,
+                notes: mine,
+                bookmarks: mine,
               },
             },
-            practiceTasks: { orderBy: { order: 'asc' } },
-            quiz: { include: { _count: { select: { questions: true } } } },
-            assignment: true,
+            practiceTasks: { orderBy: { order: 'asc' }, include: { progress: mine } },
+            quiz: {
+              include: {
+                _count: { select: { questions: true } },
+                attempts: { where: { studentId }, orderBy: { createdAt: 'desc' } },
+              },
+            },
+            assignment: {
+              include: { submissions: { where: { studentId }, orderBy: { version: 'desc' } } },
+            },
             liveSessions: { orderBy: { startsAt: 'asc' } },
+            moduleProgress: mine,
           },
         },
-        mockTest: true,
-        finalProject: true,
-        finalAssessment: true,
+        mockTest: { include: { attempts: { where: { studentId }, orderBy: { scorePercent: 'desc' } } } },
+        finalProject: {
+          include: { submissions: { where: { studentId }, orderBy: { createdAt: 'desc' } } },
+        },
+        finalAssessment: {
+          include: { attempts: { where: { studentId }, orderBy: { scorePercent: 'desc' } } },
+        },
+        enrollments: { where: { studentId }, include: { batch: true } },
+        certificates: mine,
       },
     });
 
@@ -727,60 +748,24 @@ export class ProgressionService {
           watermarkEnabled: true,
         });
 
-    // Fetch student enrollment, progress, practice, notes and bookmarks for this course in parallel
-    const [
-      enrollment,
-      lessonProgresses,
-      practiceProgresses,
-      quizAttempts,
-      assignmentSubmissions,
-      mockTestAttempts,
-      projectSubmissions,
-      examAttempts,
-      certificate,
-      storedModuleProgress,
-      lessonNotes,
-      lessonBookmarks,
-    ] = await Promise.all([
-      prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId, courseId } },
-        include: { batch: true },
-      }),
-      prisma.lessonProgress.findMany({ where: { studentId, lesson: { module: { courseId } } } }),
-      prisma.practiceProgress.findMany({
-        where: {
-          studentId,
-          OR: [
-            { practiceTask: { module: { courseId } } },
-            { practiceTask: { lesson: { module: { courseId } } } },
-          ],
-        },
-      }),
-      prisma.quizAttempt.findMany({
-        where: { studentId, quiz: { module: { courseId } } },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.assignmentSubmission.findMany({
-        where: { studentId, assignment: { module: { courseId } } },
-        orderBy: { version: 'desc' },
-      }),
-      prisma.mockTestAttempt.findMany({
-        where: { studentId, mockTest: { courseId } },
-        orderBy: { scorePercent: 'desc' },
-      }),
-      prisma.projectSubmission.findMany({
-        where: { studentId, project: { courseId } },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.examAttempt.findMany({
-        where: { studentId, finalAssessment: { courseId } },
-        orderBy: { scorePercent: 'desc' },
-      }),
-      prisma.certificate.findUnique({ where: { studentId_courseId: { studentId, courseId } } }),
-      prisma.moduleProgress.findMany({ where: { studentId, module: { courseId } } }),
-      prisma.lessonNote.findMany({ where: { studentId, lesson: { module: { courseId } } } }),
-      prisma.lessonBookmark.findMany({ where: { studentId, lesson: { module: { courseId } } } }),
-    ]);
+    // Flatten the student's records out of the course tree
+    const modules = course.modules;
+    const allLessons = modules.flatMap((m) => m.lessons);
+    const enrollment = course.enrollments[0] || null;
+    const certificate = course.certificates[0] || null;
+    const lessonProgresses = allLessons.flatMap((l) => l.progress);
+    const practiceProgresses = [
+      ...modules.flatMap((m) => m.practiceTasks.flatMap((t) => t.progress)),
+      ...allLessons.flatMap((l) => l.practiceTasks.flatMap((t) => t.progress)),
+    ];
+    const quizAttempts = modules.flatMap((m) => m.quiz?.attempts || []);
+    const assignmentSubmissions = modules.flatMap((m) => m.assignment?.submissions || []);
+    const mockTestAttempts = course.mockTest?.attempts || [];
+    const projectSubmissions = course.finalProject?.submissions || [];
+    const examAttempts = course.finalAssessment?.attempts || [];
+    const storedModuleProgress = modules.flatMap((m) => m.moduleProgress);
+    const lessonNotes = allLessons.flatMap((l) => l.notes);
+    const lessonBookmarks = allLessons.flatMap((l) => l.bookmarks);
 
     const storedModuleStatus = new Map(storedModuleProgress.map((mp) => [mp.moduleId, mp.status]));
     const moduleProgressWrites: Promise<unknown>[] = [];

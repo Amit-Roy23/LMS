@@ -156,7 +156,7 @@ export default function LessonPlayerPage() {
   // Delete Note
   const handleDeleteNote = async (noteId: string) => {
     try {
-      await apiClient(`/student/lessons/${lessonId}/notes/${noteId}`, { method: 'DELETE' });
+      await apiClient(`/student/notes/${noteId}`, { method: 'DELETE' });
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
       info('Note deleted');
     } catch (err) {
