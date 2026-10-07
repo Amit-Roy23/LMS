@@ -69,11 +69,7 @@ export default function StudentDashboardPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Welcome Hero */}
-<<<<<<< HEAD
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#fffbf4] border border-[#e7d5bd] shadow-xl">
-=======
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-xl bg-white border border-[#efdfd4] shadow-sm">
->>>>>>> 78fb95b (chnages)
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-[#efdfd4] shadow-soft">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider">

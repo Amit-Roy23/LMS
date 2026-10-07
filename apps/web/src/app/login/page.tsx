@@ -118,15 +118,9 @@ export default function LoginPage() {
           </Card>
 
           {/* Fast 1-Click Demo Logins */}
-<<<<<<< HEAD
           <div className="p-5 rounded-3xl bg-plum text-cream space-y-3 shadow-soft">
             <div className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-cream">
               <Zap className="w-3.5 h-3.5 text-peach-500" />
-=======
-          <div className="p-4 rounded-lg bg-[#ffffff] border border-[#f0e2d8] space-y-3 shadow-sm">
-            <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-600">
-              <Zap className="w-3.5 h-3.5 text-amber-500" />
->>>>>>> 78fb95b (chnages)
               <span>INSTANT 1-CLICK DEMO ACCESS</span>
             </div>
 
@@ -137,11 +131,7 @@ export default function LoginPage() {
                 onClick={() => handleDemoLogin('student1')}
                 className="p-3.5 rounded-2xl bg-cream-50 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-<<<<<<< HEAD
                 <p className="font-display text-base font-extrabold">
-=======
-                <p className="text-xs font-bold text-blue-600">
->>>>>>> 78fb95b (chnages)
                   Student 1 (Enrolled)
                 </p>
                 <p className="text-[11px] opacity-75">Active Course Progress</p>
@@ -153,11 +143,7 @@ export default function LoginPage() {
                 onClick={() => handleDemoLogin('student2')}
                 className="p-3.5 rounded-2xl bg-pink-500 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-<<<<<<< HEAD
                 <p className="font-display text-base font-extrabold">
-=======
-                <p className="text-xs font-bold text-cyan-600">
->>>>>>> 78fb95b (chnages)
                   Student 2 (Fresh)
                 </p>
                 <p className="text-[11px] opacity-75">New Admission</p>
@@ -169,11 +155,7 @@ export default function LoginPage() {
                 onClick={() => handleDemoLogin('instructor')}
                 className="p-3.5 rounded-2xl bg-peach-500 text-plum text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-<<<<<<< HEAD
                 <p className="font-display text-base font-extrabold">
-=======
-                <p className="text-xs font-bold text-violet-600">
->>>>>>> 78fb95b (chnages)
                   Instructor
                 </p>
                 <p className="text-[11px] opacity-75">Submissions Review</p>
@@ -185,17 +167,10 @@ export default function LoginPage() {
                 onClick={() => handleDemoLogin('admin')}
                 className="p-3.5 rounded-2xl bg-rust text-cream text-left transition-transform hover:-translate-y-0.5 disabled:opacity-50"
               >
-<<<<<<< HEAD
                 <p className="font-display text-base font-extrabold">
                   Administrator
                 </p>
                 <p className="text-[11px] opacity-75">Full System Control</p>
-=======
-                <p className="text-xs font-bold text-emerald-600">
-                  Administrator
-                </p>
-                <p className="text-[10px] font-mono text-slate-400">AMS & Provisioning</p>
->>>>>>> 78fb95b (chnages)
               </button>
             </div>
           </div>
