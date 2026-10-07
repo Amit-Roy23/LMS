@@ -175,3 +175,102 @@ export const NotificationType = {
   LIVE_CLASS_REMINDER: 'LIVE_CLASS_REMINDER',
 } as const;
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
+
+export const LessonType = {
+  VIDEO: 'VIDEO',
+  LIVE_CLASS: 'LIVE_CLASS',
+  READING: 'READING',
+} as const;
+export type LessonType = (typeof LessonType)[keyof typeof LessonType];
+
+export const VideoProvider = {
+  YOUTUBE: 'YOUTUBE',
+  VIMEO: 'VIMEO',
+  MP4: 'MP4',
+  HLS: 'HLS',
+  OTHER: 'OTHER',
+} as const;
+export type VideoProvider = (typeof VideoProvider)[keyof typeof VideoProvider];
+
+export const PracticeTaskType = {
+  CHECKLIST: 'CHECKLIST',
+  EXERCISE: 'EXERCISE',
+  UPLOAD_OPTIONAL: 'UPLOAD_OPTIONAL',
+} as const;
+export type PracticeTaskType = (typeof PracticeTaskType)[keyof typeof PracticeTaskType];
+
+export const PracticeStatus = {
+  NOT_STARTED: 'NOT_STARTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+} as const;
+export type PracticeStatus = (typeof PracticeStatus)[keyof typeof PracticeStatus];
+
+export const CompletionSource = {
+  AUTO: 'AUTO',
+  MANUAL: 'MANUAL',
+  LIVE_ATTENDANCE: 'LIVE_ATTENDANCE',
+  ADMIN: 'ADMIN',
+} as const;
+export type CompletionSource = (typeof CompletionSource)[keyof typeof CompletionSource];
+
+export const ResourceType = {
+  PDF: 'PDF',
+  ZIP: 'ZIP',
+  LINK: 'LINK',
+  IMAGE: 'IMAGE',
+  CODE: 'CODE',
+} as const;
+export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
+
+export const QuestionDifficulty = {
+  EASY: 'EASY',
+  MEDIUM: 'MEDIUM',
+  HARD: 'HARD',
+} as const;
+export type QuestionDifficulty = (typeof QuestionDifficulty)[keyof typeof QuestionDifficulty];
+
+export const QuestionStatus = {
+  ACTIVE: 'ACTIVE',
+  ARCHIVED: 'ARCHIVED',
+} as const;
+export type QuestionStatus = (typeof QuestionStatus)[keyof typeof QuestionStatus];
+
+export const AnswerReviewPolicy = {
+  NEVER: 'NEVER',
+  AFTER_PASS: 'AFTER_PASS',
+  AFTER_EACH_ATTEMPT: 'AFTER_EACH_ATTEMPT',
+  AFTER_MAX_ATTEMPTS: 'AFTER_MAX_ATTEMPTS',
+} as const;
+export type AnswerReviewPolicy = (typeof AnswerReviewPolicy)[keyof typeof AnswerReviewPolicy];
+
+export const ScoringMode = {
+  ALL_OR_NOTHING: 'ALL_OR_NOTHING',
+  PARTIAL: 'PARTIAL',
+} as const;
+export type ScoringMode = (typeof ScoringMode)[keyof typeof ScoringMode];
+
+export const QuizAttemptStatus = {
+  IN_PROGRESS: 'IN_PROGRESS',
+  SUBMITTED: 'SUBMITTED',
+  EXPIRED: 'EXPIRED',
+  ABANDONED: 'ABANDONED',
+} as const;
+export type QuizAttemptStatus = (typeof QuizAttemptStatus)[keyof typeof QuizAttemptStatus];
+
+export const QuizEventType = {
+  TAB_HIDDEN: 'TAB_HIDDEN',
+  TAB_VISIBLE: 'TAB_VISIBLE',
+  COPY_ATTEMPT: 'COPY_ATTEMPT',
+  FULLSCREEN_EXIT: 'FULLSCREEN_EXIT',
+} as const;
+export type QuizEventType = (typeof QuizEventType)[keyof typeof QuizEventType];
+
+export const QuizStatus = {
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED',
+} as const;
+export type QuizStatus = (typeof QuizStatus)[keyof typeof QuizStatus];
+
+

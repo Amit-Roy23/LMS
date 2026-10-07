@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
-import { UnauthorizedError } from '../lib/errors.js';
+import { UnauthorizedError, ForbiddenError } from '../lib/errors.js';
 import { Role } from '@academy/shared';
 
 export interface AuthUser {
@@ -9,6 +9,8 @@ export interface AuthUser {
   email: string;
   role: Role;
   name: string;
+  studentId?: string | null;
+  mustChangePassword?: boolean;
 }
 
 declare global {
@@ -68,6 +70,23 @@ export function optionalAuthenticate(req: Request, res: Response, next: NextFunc
     }
   } catch (error) {
     // Ignore error for optional auth
+  }
+  next();
+}
+
+/**
+ * Middleware that enforces password change if mustChangePassword === true
+ */
+export function requirePasswordChanged(req: Request, res: Response, next: NextFunction) {
+  if (req.user?.mustChangePassword) {
+    // Allow password change and identity check endpoints
+    const path = req.path || '';
+    if (path.includes('/auth/change-password') || path.includes('/auth/me') || path.includes('/auth/logout')) {
+      return next();
+    }
+    return next(
+      new ForbiddenError('Password change required. You must change your temporary password at /student/change-password before accessing courses.')
+    );
   }
   next();
 }

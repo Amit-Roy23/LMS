@@ -7,27 +7,31 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
+  Minimize2,
   RotateCcw,
   CheckCircle2,
   FastForward,
   ShieldCheck,
-  Code2,
-  Terminal,
   Sparkles,
   AlertCircle,
-  RefreshCw,
+  Clock,
+  Lock,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { apiClient } from '../../lib/api';
 import { formatDuration } from '../../lib/utils';
 import { useToast } from '../../providers/toast-provider';
+import { VideoProvider } from '@academy/shared';
 
 export interface VideoPlayerProps {
   lessonId: string;
   videoUrl: string;
+  videoProvider?: VideoProvider | string;
   title: string;
+  studentId?: string;
+  studentName?: string;
+  watermarkEnabled?: boolean;
   initialPercent?: number;
   initialWatchedSeconds?: number;
   isCompleted?: boolean;
@@ -35,17 +39,14 @@ export interface VideoPlayerProps {
   onComplete?: () => void;
 }
 
-// Reliable fallback MP4 sources across CDNs
-const FALLBACK_VIDEOS = [
-  'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
-  'https://www.w3schools.com/html/mov_bbb.mp4',
-  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-];
-
 export function VideoPlayer({
   lessonId,
   videoUrl,
+  videoProvider = VideoProvider.MP4,
   title,
+  studentId = 'STU-STUDENT',
+  studentName = 'Student',
+  watermarkEnabled = true,
   initialPercent = 0,
   initialWatchedSeconds = 0,
   isCompleted = false,
@@ -54,400 +55,424 @@ export function VideoPlayer({
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { success, error: toastError } = useToast();
+  const { success, error: toastError, info } = useToast();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(initialWatchedSeconds);
-  const [duration, setDuration] = useState(600); // Default 10 mins
+  const [duration, setDuration] = useState(600);
   const [watchPercent, setWatchPercent] = useState(initialPercent);
   const [completed, setCompleted] = useState(isCompleted);
   const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasVideoError, setHasVideoError] = useState(false);
-  const [currentVideoSrc, setCurrentVideoSrc] = useState(videoUrl || FALLBACK_VIDEOS[0]);
+  const [showControls, setShowControls] = useState(true);
+  const [watermarkPos, setWatermarkPos] = useState({ top: 15, left: 15 });
 
-  // Check if URL is YouTube
-  const ytMatch = videoUrl ? videoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/) : null;
-  const isYouTube = !!ytMatch;
-  const ytEmbedUrl = ytMatch ? `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?enablejsapi=1&rel=0` : null;
+  // Played interval tracking for tamper-proof heartbeat
+  const currentIntervalStartRef = useRef<number | null>(null);
+  const playedIntervalsRef = useRef<{ start: number; end: number }[]>([]);
+  const lastHeartbeatTimeRef = useRef<number>(Date.now());
+  const hideControlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync when lessonId or isCompleted changes
+  // Dynamic floating watermark position animation
+  useEffect(() => {
+    if (!watermarkEnabled) return;
+    const interval = setInterval(() => {
+      // Random gentle drift across corners
+      const top = Math.floor(Math.random() * 70) + 10;
+      const left = Math.floor(Math.random() * 70) + 10;
+      setWatermarkPos({ top, left });
+    }, 12000);
+    return () => clearInterval(interval);
+  }, [watermarkEnabled]);
+
+  // Sync props when lesson changes
   useEffect(() => {
     setWatchPercent(initialPercent);
     setCompleted(isCompleted);
     setCurrentTime(initialWatchedSeconds);
-    setHasVideoError(false);
-    setCurrentVideoSrc(videoUrl || FALLBACK_VIDEOS[0]);
     setIsPlaying(false);
+    playedIntervalsRef.current = [];
+    currentIntervalStartRef.current = null;
 
     if (videoRef.current) {
       try {
         videoRef.current.currentTime = initialWatchedSeconds;
-      } catch (e) {
-        // Ignore seek error during re-mount
-      }
+      } catch (e) {}
     }
-  }, [lessonId, initialPercent, initialWatchedSeconds, isCompleted, videoUrl]);
+  }, [lessonId, initialPercent, initialWatchedSeconds, isCompleted]);
 
-  // Save progress to server
-  const saveProgressToServer = useCallback(
-    async (seconds: number, pct: number, markComplete = false) => {
+  // Send tamper-proof heartbeat to server
+  const sendHeartbeat = useCallback(
+    async (position: number, flushInterval = false) => {
+      // Flush currently active interval
+      if (currentIntervalStartRef.current !== null) {
+        const start = currentIntervalStartRef.current;
+        const end = position;
+        if (end > start) {
+          playedIntervalsRef.current.push({
+            start: Math.round(start * 10) / 10,
+            end: Math.round(end * 10) / 10,
+          });
+        }
+        currentIntervalStartRef.current = isPlaying ? position : null;
+      }
+
+      if (playedIntervalsRef.current.length === 0 && !flushInterval) {
+        return;
+      }
+
+      const payload = {
+        positionSeconds: Math.round(position),
+        playedIntervals: [...playedIntervalsRef.current],
+        playbackRate: playbackSpeed,
+      };
+
+      // Reset local intervals buffer after sending
+      playedIntervalsRef.current = [];
+
       try {
         setIsSaving(true);
-        const res = await apiClient<{ progress: any; isCompleted: boolean; coursePercent: number }>(
-          `/lessons/${lessonId}/progress`,
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              lessonId,
-              watchedSeconds: Math.round(seconds),
-              percent: Math.min(100, Math.round(pct)),
-              markComplete,
-            }),
-          }
-        );
+        const res = await apiClient<{
+          percent: number;
+          watchedSeconds: number;
+          isCompleted: boolean;
+          newlyCompleted?: boolean;
+        }>(`/student/lessons/${lessonId}/progress`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+
+        if (res.percent !== undefined) {
+          setWatchPercent(res.percent);
+        }
 
         if (res.isCompleted && !completed) {
           setCompleted(true);
-          confetti({
-            particleCount: 80,
-            spread: 60,
-            origin: { y: 0.7 },
-          });
-          success('🎉 Lesson Completed!', 'You have completed this video lesson.');
+          info('Lesson Completed', 'You have met the required watch threshold.');
           onComplete?.();
         }
 
-        onProgressUpdate?.(pct, res.isCompleted);
+        onProgressUpdate?.(res.percent, res.isCompleted);
       } catch (err) {
-        console.error('Failed to sync lesson progress', err);
+        console.warn('Heartbeat sync deferred', err);
       } finally {
         setIsSaving(false);
       }
     },
-    [lessonId, completed, success, onComplete, onProgressUpdate]
+    [lessonId, isPlaying, playbackSpeed, completed, onComplete, onProgressUpdate, info]
   );
 
-  // Time update throttle
-  const lastSyncRef = useRef<number>(0);
-  const handleTimeUpdate = () => {
+  // Send beacon on page unload / hide
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && videoRef.current) {
+        sendHeartbeat(videoRef.current.currentTime, true);
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleVisibilityChange);
+    };
+  }, [sendHeartbeat]);
+
+  // Handle Play / Pause
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+    }
+  };
+
+  const onPlay = () => {
+    setIsPlaying(true);
+    if (videoRef.current) {
+      currentIntervalStartRef.current = videoRef.current.currentTime;
+    }
+  };
+
+  const onPause = () => {
+    setIsPlaying(false);
+    if (videoRef.current) {
+      sendHeartbeat(videoRef.current.currentTime, true);
+    }
+  };
+
+  const onTimeUpdate = () => {
     if (!videoRef.current) return;
     const curr = videoRef.current.currentTime;
     const dur = videoRef.current.duration || duration || 600;
     setCurrentTime(curr);
+    setDuration(dur);
 
-    const pct = Math.min(100, (curr / dur) * 100);
-    setWatchPercent((prev) => Math.max(prev, pct));
-
-    // Sync to backend every 10 seconds or when reaching 90%
+    // Send periodic heartbeat every 12 seconds
     const now = Date.now();
-    if (now - lastSyncRef.current > 10000 || (pct >= 90 && !completed)) {
-      lastSyncRef.current = now;
-      saveProgressToServer(curr, Math.max(watchPercent, pct), pct >= 90);
+    if (now - lastHeartbeatTimeRef.current > 12000) {
+      lastHeartbeatTimeRef.current = now;
+      sendHeartbeat(curr);
     }
   };
 
-  // Safe Play/Pause Handler
-  const togglePlay = () => {
-    if (hasVideoError || isYouTube) {
-      // For simulated or YouTube mode, toggle simulation playback
-      setIsPlaying((prev) => !prev);
-      return;
-    }
-
-    if (!videoRef.current) return;
-
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch((err) => {
-            console.warn('Playback error, falling back to Interactive Studio mode:', err);
-            setHasVideoError(true);
-            setIsPlaying(true);
-          });
-      }
-    }
-  };
-
-  // Simulated playback ticker when in error or interactive mode
-  useEffect(() => {
-    let interval: any;
-    if (isPlaying && (hasVideoError || isYouTube)) {
-      interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          const next = prev + playbackSpeed;
-          const dur = duration || 600;
-          const pct = Math.min(100, (next / dur) * 100);
-          setWatchPercent((old) => Math.max(old, pct));
-
-          const now = Date.now();
-          if (now - lastSyncRef.current > 10000 || (pct >= 90 && !completed)) {
-            lastSyncRef.current = now;
-            saveProgressToServer(next, pct, pct >= 90);
-          }
-
-          if (next >= dur) {
-            setIsPlaying(false);
-            saveProgressToServer(dur, 100, true);
-            return dur;
-          }
-          return next;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, hasVideoError, isYouTube, playbackSpeed, duration, completed, saveProgressToServer]);
-
+  // Seeking
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const target = parseFloat(e.target.value);
-    setCurrentTime(target);
-    if (videoRef.current && !hasVideoError) {
-      try {
-        videoRef.current.currentTime = target;
-      } catch (e) {
-        // Ignore seek error
-      }
-    }
-  };
-
-  const toggleMute = () => {
     if (!videoRef.current) return;
-    videoRef.current.muted = !isMuted;
-    setIsMuted(!isMuted);
+    const target = parseFloat(e.target.value);
+    // Flush interval prior to seek
+    if (currentIntervalStartRef.current !== null && target !== currentIntervalStartRef.current) {
+      const end = videoRef.current.currentTime;
+      if (end > currentIntervalStartRef.current) {
+        playedIntervalsRef.current.push({
+          start: Math.round(currentIntervalStartRef.current * 10) / 10,
+          end: Math.round(end * 10) / 10,
+        });
+      }
+      currentIntervalStartRef.current = isPlaying ? target : null;
+    }
+    videoRef.current.currentTime = target;
+    setCurrentTime(target);
   };
 
-  const changeSpeed = () => {
-    const speeds = [1, 1.25, 1.5, 2];
-    const nextIdx = (speeds.indexOf(playbackSpeed) + 1) % speeds.length;
-    const nextSpeed = speeds[nextIdx];
-    setPlaybackSpeed(nextSpeed);
-    if (videoRef.current && !hasVideoError) {
-      videoRef.current.playbackRate = nextSpeed;
+  // Speed changing
+  const handleSpeedChange = (speed: number) => {
+    setPlaybackSpeed(speed);
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
     }
   };
 
+  // Fullscreen toggle
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
       containerRef.current.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
     } else {
       document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
     }
   };
 
-  const handleManualComplete = () => {
-    const finalSec = duration || 600;
-    setCurrentTime(finalSec);
-    setWatchPercent(100);
-    saveProgressToServer(finalSec, 100, true);
+  // Keyboard shortcuts handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept when typing in inputs/textareas
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+
+      if (e.code === 'Space' || e.key === 'k') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === 'ArrowRight' || e.key === 'l') {
+        e.preventDefault();
+        if (videoRef.current) videoRef.current.currentTime += 10;
+      } else if (e.key === 'ArrowLeft' || e.key === 'j') {
+        e.preventDefault();
+        if (videoRef.current) videoRef.current.currentTime -= 10;
+      } else if (e.key === 'm') {
+        e.preventDefault();
+        setIsMuted((prev) => !prev);
+      } else if (e.key === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Provider detection & Embed rendering
+  const isYouTube =
+    videoProvider === VideoProvider.YOUTUBE ||
+    (videoUrl && (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')));
+  const isVimeo =
+    videoProvider === VideoProvider.VIMEO || (videoUrl && videoUrl.includes('vimeo.com'));
+
+  const getYouTubeEmbed = (url: string) => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    return match ? `https://www.youtube-nocookie.com/embed/${match[1]}?enablejsapi=1&rel=0&modestbranding=1` : url;
   };
 
-  const handleVideoError = () => {
-    console.warn('Video source failed to load, activating interactive presentation mode.');
-    setHasVideoError(true);
+  const getVimeoEmbed = (url: string) => {
+    const match = url.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+    return match ? `https://player.vimeo.com/video/${match[1]}?dnt=1&title=0&byline=0` : url;
   };
 
   return (
-    <div className="w-full space-y-4">
-      {/* Video Container */}
-      <div
-        ref={containerRef}
-        className="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#fbf3e6] border border-slate-800 shadow-2xl group select-none"
-      >
-        {isYouTube && ytEmbedUrl ? (
-          /* YouTube Embed Player */
-          <div className="w-full h-full relative bg-black">
-            <iframe
-              src={ytEmbedUrl}
-              title={title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full border-0"
-            />
-          </div>
-        ) : !hasVideoError ? (
-          /* HTML5 Video Player */
-          <video
-            ref={videoRef}
-            src={currentVideoSrc}
-            playsInline
-            onError={handleVideoError}
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={() => {
-              if (videoRef.current && videoRef.current.duration) {
-                setDuration(videoRef.current.duration);
-              }
-            }}
-            onEnded={() => {
-              setIsPlaying(false);
-              saveProgressToServer(duration || 600, 100, true);
-            }}
-            className="w-full h-full object-contain cursor-pointer bg-black"
-            onClick={togglePlay}
-          />
-        ) : (
-          /* Interactive Code & Studio Presentation Mode (Graceful Offline / Video Fallback) */
-          <div
-            onClick={togglePlay}
-            className="w-full h-full flex flex-col justify-between p-6 bg-gradient-to-br from-[#f8eedd] via-[#ffffff] to-[#fbf3e6] text-slate-100 cursor-pointer relative overflow-hidden"
-          >
-            {/* Background Grid Accent */}
-            <div className="absolute inset-0 tech-dot-grid opacity-30 pointer-events-none" />
+    <div
+      ref={containerRef}
+      onContextMenu={(e) => e.preventDefault()} // Anti-piracy right-click lock
+      onMouseMove={() => {
+        setShowControls(true);
+        if (hideControlsTimeoutRef.current) clearTimeout(hideControlsTimeoutRef.current);
+        hideControlsTimeoutRef.current = setTimeout(() => {
+          if (isPlaying) setShowControls(false);
+        }, 3000);
+      }}
+      className="relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-800 select-none group"
+    >
+      {/* 1. Video Player Element / Embed */}
+      {isYouTube ? (
+        <iframe
+          src={getYouTubeEmbed(videoUrl)}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full border-0"
+        />
+      ) : isVimeo ? (
+        <iframe
+          src={getVimeoEmbed(videoUrl)}
+          title={title}
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full border-0"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          playsInline
+          muted={isMuted}
+          onPlay={onPlay}
+          onPause={onPause}
+          onTimeUpdate={onTimeUpdate}
+          onLoadedMetadata={() => {
+            if (videoRef.current) setDuration(videoRef.current.duration);
+          }}
+          onClick={togglePlay}
+          className="w-full h-full object-contain cursor-pointer"
+        />
+      )}
 
-            {/* Top Bar of Studio Player */}
-            <div className="flex items-center justify-between z-10">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-mono font-semibold text-slate-300">
-                  INTERACTIVE ACADEMY WORKSHOP STUDIO
-                </span>
-              </div>
-              <Badge variant="cyan" className="text-[10px]">
-                {isPlaying ? '▶ STREAMING' : '⏸ PAUSED'}
-              </Badge>
+      {/* 2. Anti-Piracy Dynamic Floating Watermark (Student ID & Timestamp) */}
+      {watermarkEnabled && (
+        <div
+          style={{
+            top: `${watermarkPos.top}%`,
+            left: `${watermarkPos.left}%`,
+            transition: 'top 4s ease-in-out, left 4s ease-in-out',
+          }}
+          className="absolute pointer-events-none z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-mono font-medium text-white/50 tracking-wider shadow-lg select-none"
+        >
+          <ShieldCheck className="w-3 h-3 text-indigo-400/60" />
+          <span>{studentId}</span>
+          <span className="text-white/20">•</span>
+          <span>{studentName}</span>
+        </div>
+      )}
+
+      {/* 3. HTML5 Custom Controls Overlay (for native/HLS MP4 streams) */}
+      {!isYouTube && !isVimeo && (
+        <div
+          className={`absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/30 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-4 ${
+            showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          {/* Top Bar: Title & Status */}
+          <div className="flex items-center justify-between pointer-events-auto">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-white drop-shadow truncate max-w-md">{title}</h3>
+              {completed && (
+                <Badge variant="success" className="gap-1 py-0.5 text-[10px]">
+                  <CheckCircle2 className="w-3 h-3" /> Completed
+                </Badge>
+              )}
             </div>
 
-            {/* Middle Terminal Content Animation */}
-            <div className="z-10 max-w-xl mx-auto text-center space-y-3 my-auto">
-              <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-blue-400 flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
-                <Code2 className="w-7 h-7" />
-              </div>
-              <h2 className="text-lg md:text-xl font-extrabold text-ink tracking-tight">
-                {title}
-              </h2>
-              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                Click anywhere on the player to start streaming. Watch telemetry automatically syncs your progress with the progression engine.
-              </p>
-
-              {/* Code Snippet Walkthrough Box */}
-              <div className="text-left bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/80 font-mono text-[11px] text-slate-300 shadow-inner max-w-md mx-auto space-y-1">
-                <div className="flex items-center gap-1.5 text-slate-500 pb-1 border-b border-slate-900">
-                  <Terminal className="w-3.5 h-3.5 text-blue-400" />
-                  <span>lesson_telemetry.ts</span>
-                </div>
-                <p className="text-blue-400">export function <span className="text-amber-300">trackWatchProgress</span>() {'{'}</p>
-                <p className="pl-4 text-slate-400">// Progress: <span className="text-emerald-400 font-bold">{Math.round(watchPercent)}%</span> of 90% required</p>
-                <p className="pl-4 text-indigo-300">await progressionService.recordProgress(lessonId);</p>
-                <p className="text-blue-400">{'}'}</p>
-              </div>
-            </div>
-
-            <div className="text-[11px] text-slate-500 text-center z-10">
-              Online Creative & IT Academy • High Definition Multi-Track Streaming
+            <div className="flex items-center gap-2 text-xs text-slate-300 font-mono bg-slate-900/60 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-700/50">
+              <Clock className="w-3.5 h-3.5 text-indigo-400" />
+              <span>{Math.round(watchPercent)}% watched</span>
             </div>
           </div>
-        )}
 
-        {/* Center Play Overlay when Paused */}
-        {!isPlaying && (
-          <div
-            onClick={togglePlay}
-            className="absolute inset-0 flex items-center justify-center bg-black/40 cursor-pointer backdrop-blur-[2px] transition-all z-20"
-          >
-            <div className="w-16 h-16 rounded-full bg-blue-600/90 hover:bg-blue-500 flex items-center justify-center text-cream shadow-xl shadow-blue-600/50 hover:scale-110 transition-transform">
-              <Play className="w-7 h-7 ml-1 fill-white" />
-            </div>
-          </div>
-        )}
-
-        {/* Custom Player Controls Bar */}
-        <div className="absolute bottom-0 inset-x-0 bg-[#fbf3e6]/95 border-t border-[#eadac4] p-3 flex flex-col gap-2 opacity-95 group-hover:opacity-100 transition-opacity z-30">
-          {/* Progress Timeline Slider */}
-          <div className="relative w-full flex items-center group/slider">
-            <input
-              type="range"
-              min={0}
-              max={duration || 600}
-              value={currentTime}
-              onChange={handleSeek}
-              className="w-full h-1 bg-[#eadac4] rounded appearance-none cursor-pointer accent-blue-500 hover:h-1.5 transition-all"
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-xs text-slate-200">
-            {/* Left Controls */}
-            <div className="flex items-center gap-3">
+          {/* Center Play/Pause Trigger */}
+          <div className="flex items-center justify-center pointer-events-auto">
+            {!isPlaying && (
               <button
                 onClick={togglePlay}
-                title={isPlaying ? 'Pause' : 'Play'}
-                className="p-1 rounded hover:text-blue-400 transition-colors"
+                className="w-16 h-16 rounded-full bg-indigo-600/90 hover:bg-indigo-500 text-white flex items-center justify-center shadow-2xl shadow-indigo-500/50 transition-transform transform hover:scale-110 active:scale-95 border border-indigo-400/30"
               >
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                <Play className="w-8 h-8 fill-current ml-1" />
               </button>
+            )}
+          </div>
 
-              <button
-                onClick={toggleMute}
-                title={isMuted ? 'Unmute' : 'Mute'}
-                className="p-1 rounded hover:text-blue-400 transition-colors"
-              >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-              </button>
-
-              <span className="font-mono text-[11px] text-slate-300">
-                {formatDuration(currentTime)} / {formatDuration(duration || 600)}
+          {/* Bottom Controls Bar */}
+          <div className="space-y-2 pointer-events-auto">
+            {/* Scrubber Progress Bar */}
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-mono text-slate-300 min-w-[42px]">
+                {formatDuration(currentTime)}
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={duration || 600}
+                step={0.1}
+                value={currentTime}
+                onChange={handleSeek}
+                className="w-full h-1.5 bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all"
+              />
+              <span className="text-xs font-mono text-slate-400 min-w-[42px]">
+                {formatDuration(duration)}
               </span>
             </div>
 
-            {/* Right Controls */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={changeSpeed}
-                title="Change Speed"
-                className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
-              >
-                {playbackSpeed}x
-              </button>
+            {/* Bottom Actions Row */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={togglePlay}
+                  className="text-white hover:text-indigo-400 transition-colors p-1"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-current" />}
+                </button>
 
-              <button
-                onClick={toggleFullscreen}
-                title="Fullscreen"
-                className="p-1 rounded hover:text-blue-400 transition-colors"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </button>
+                <button
+                  onClick={() => setIsMuted((m) => !m)}
+                  className="text-white hover:text-indigo-400 transition-colors p-1"
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5" />}
+                </button>
+
+                {/* Speed Selector */}
+                <div className="flex items-center gap-1 bg-slate-900/70 rounded-lg p-0.5 border border-slate-700/40">
+                  {[0.75, 1, 1.25, 1.5, 2].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => handleSpeedChange(s)}
+                      className={`px-2 py-0.5 text-[11px] font-bold rounded ${
+                        playbackSpeed === s
+                          ? 'bg-indigo-600 text-white shadow'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {s}x
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleFullscreen}
+                  className="text-white hover:text-indigo-400 transition-colors p-1"
+                >
+                  {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Video Footer Status & Manual Completion Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-[#fdf7ec] border border-slate-800">
-        <div>
-          <h3 className="font-bold text-ink text-sm">{title}</h3>
-          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
-            <span>Watch Progress: <b className="text-blue-400">{Math.round(watchPercent)}%</b></span>
-            <span>•</span>
-            <span className="text-slate-300 font-medium">90% required to unlock module quiz</span>
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {completed ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              Lesson Completed
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleManualComplete}
-              className="border-blue-500/40 text-blue-300 hover:bg-blue-600/20 text-xs"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-blue-400" />
-              Mark Complete
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

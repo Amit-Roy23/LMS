@@ -1,5 +1,6 @@
 import { Role } from '@academy/shared';
 import { Request, Response, NextFunction } from 'express';
+import { prisma } from '../lib/prisma.js';
 import { courseService } from '../services/course.service.js';
 import { progressionService } from '../services/progression.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
@@ -183,6 +184,156 @@ export class CourseController {
     }
   }
 
+  // Reordering
+  async reorderModules(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orders } = req.body;
+      await Promise.all(
+        orders.map((item: { id: string; order: number }) =>
+          prisma.module.update({
+            where: { id: item.id },
+            data: { order: item.order },
+          })
+        )
+      );
+      return sendSuccess(res, { message: 'Modules reordered successfully' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async reorderLessons(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { orders } = req.body;
+      await Promise.all(
+        orders.map((item: { id: string; order: number }) =>
+          prisma.lesson.update({
+            where: { id: item.id },
+            data: { order: item.order },
+          })
+        )
+      );
+      return sendSuccess(res, { message: 'Lessons reordered successfully' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Resources
+  async createLessonResource(req: Request, res: Response, next: NextFunction) {
+    try {
+      const lessonId = req.params.lessonId || req.body.lessonId;
+      const { title, type, url, sizeBytes } = req.body;
+      const resource = await prisma.lessonResource.create({
+        data: {
+          lessonId,
+          title,
+          type: type || 'PDF',
+          url,
+          sizeBytes: sizeBytes || null,
+        },
+      });
+      return sendSuccess(res, resource, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deleteLessonResource(req: Request, res: Response, next: NextFunction) {
+    try {
+      const resourceId = req.params.resourceId as string;
+      await prisma.lessonResource.delete({ where: { id: resourceId } });
+      return sendSuccess(res, { message: 'Resource deleted' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Practice Tasks
+  async createPracticeTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { lessonId, moduleId, title, instructions, type, expectedOutcome, order } = req.body;
+      const task = await prisma.practiceTask.create({
+        data: {
+          lessonId: lessonId || null,
+          moduleId: moduleId || null,
+          title,
+          instructions,
+          type: type || 'CHECKLIST',
+          expectedOutcome: expectedOutcome || null,
+          order: order || 1,
+        },
+      });
+      return sendSuccess(res, task, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updatePracticeTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const task = await prisma.practiceTask.update({
+        where: { id },
+        data: req.body,
+      });
+      return sendSuccess(res, task);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deletePracticeTask(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      await prisma.practiceTask.delete({ where: { id } });
+      return sendSuccess(res, { message: 'Practice task deleted' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // Live Sessions
+  async createLiveSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const session = await prisma.liveSession.create({
+        data: {
+          ...req.body,
+          startsAt: new Date(req.body.startsAt),
+        },
+      });
+      return sendSuccess(res, session, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateLiveSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const session = await prisma.liveSession.update({
+        where: { id },
+        data: {
+          ...req.body,
+          ...(req.body.startsAt ? { startsAt: new Date(req.body.startsAt) } : {}),
+        },
+      });
+      return sendSuccess(res, session);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async deleteLiveSession(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      await prisma.liveSession.delete({ where: { id } });
+      return sendSuccess(res, { message: 'Live session deleted' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   // Lesson Progress
   async updateLessonProgress(req: Request, res: Response, next: NextFunction) {
     try {
@@ -204,3 +355,4 @@ export class CourseController {
 }
 
 export const courseController = new CourseController();
+

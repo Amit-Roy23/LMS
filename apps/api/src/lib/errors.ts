@@ -54,3 +54,13 @@ export class ProgressionLockedError extends AppError {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+export class LessonAccessDeniedError extends AppError {
+  public readonly reasonCode: string;
+  constructor(reasonCode: string, message: string, details?: any) {
+    super(message, 403, reasonCode, { reasonCode, ...(details || {}) });
+    this.reasonCode = reasonCode;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+

@@ -520,6 +520,7 @@ export default function CoursePlayerPage() {
               <VideoPlayer
                 lessonId={activeLesson.id}
                 videoUrl={activeLesson.videoUrl}
+                videoProvider={activeLesson.videoProvider}
                 title={activeLesson.title}
                 initialPercent={activeLesson.progressPercent || 0}
                 initialWatchedSeconds={0}

@@ -22,6 +22,19 @@ import {
   NotificationChannel,
   NotificationStatus,
   NotificationType,
+  LessonType,
+  VideoProvider,
+  PracticeTaskType,
+  PracticeStatus,
+  CompletionSource,
+  ResourceType,
+  QuestionDifficulty,
+  QuestionStatus,
+  AnswerReviewPolicy,
+  ScoringMode,
+  QuizAttemptStatus,
+  QuizEventType,
+  QuizStatus,
 } from '../enums/index';
 
 export interface ApiResponse<T = any> {
@@ -44,12 +57,14 @@ export interface PaginatedResponse<T> {
 
 export interface UserSummary {
   id: string;
+  studentId?: string | null;
   email: string;
   name: string;
   role: Role;
   phone?: string | null;
   avatar?: string | null;
   status: UserStatus;
+  mustChangePassword?: boolean;
   createdAt: string;
   studentProfile?: StudentProfileDetail | null;
 }
@@ -75,6 +90,8 @@ export interface CourseSettings {
   lessonCompletionThresholdPercent: number; // default 90
   mockTestPassingPercent: number; // e.g. 75
   finalAssessmentPassingPercent: number; // e.g. 80
+  requirePracticeDone?: boolean;
+  watermarkEnabled?: boolean;
 }
 
 export interface CourseSummary {
@@ -142,6 +159,8 @@ export interface LiveSessionDetail {
   status: LiveSessionStatus;
   batchName?: string;
   moduleTitle?: string;
+  canJoin?: boolean;
+  attendanceRecorded?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -155,10 +174,54 @@ export interface LiveAttendanceDetail {
   status: AttendanceStatus;
 }
 
+export interface LessonResourceDetail {
+  id: string;
+  lessonId: string;
+  title: string;
+  type: ResourceType;
+  url: string;
+  sizeBytes?: number | null;
+  createdAt?: string;
+}
+
+export interface PracticeProgressDetail {
+  id: string;
+  studentId: string;
+  practiceTaskId: string;
+  status: PracticeStatus;
+  notes?: string | null;
+  attachmentKey?: string | null;
+  completedAt?: string | null;
+  updatedAt: string;
+}
+
+export interface PracticeTaskDetail {
+  id: string;
+  lessonId?: string | null;
+  moduleId?: string | null;
+  title: string;
+  instructions: string;
+  type: PracticeTaskType;
+  expectedOutcome?: string | null;
+  order: number;
+  myProgress?: PracticeProgressDetail | null;
+  createdAt?: string;
+}
+
+export interface LessonNoteDetail {
+  id: string;
+  studentId: string;
+  lessonId: string;
+  timestampSeconds?: number | null;
+  text: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LessonResource {
   title: string;
   url: string;
-  type: 'pdf' | 'link' | 'zip' | 'code';
+  type: 'pdf' | 'link' | 'zip' | 'code' | ResourceType;
 }
 
 export interface LessonDetail {
@@ -166,18 +229,31 @@ export interface LessonDetail {
   moduleId: string;
   title: string;
   description?: string | null;
-  videoUrl: string;
+  type?: LessonType;
+  videoProvider?: VideoProvider;
+  videoUrl?: string;
+  playableUrl?: string;
   durationSeconds: number;
   order: number;
-  resources: LessonResource[];
+  isPreview?: boolean;
+  resources: LessonResourceDetail[] | LessonResource[];
+  practiceTasks?: PracticeTaskDetail[];
+  notes?: LessonNoteDetail[];
+  notesCount?: number;
   isCompleted?: boolean;
   isLocked?: boolean;
+  isBookmarked?: boolean;
   progressPercent?: number;
+  lastPositionSeconds?: number;
+  watchedSeconds?: number;
+  lockReasonCode?: string | null;
+  lockMessage?: string | null;
 }
+
 
 export interface OptionDetail {
   id: string;
-  questionId: string;
+  questionId?: string;
   text: string;
   isCorrect?: boolean;
 }
@@ -191,6 +267,11 @@ export interface QuestionDetail {
   order: number;
   points: number;
   marks?: number;
+  difficulty?: QuestionDifficulty;
+  tags?: string[];
+  imageUrl?: string | null;
+  status?: QuestionStatus;
+  version?: number;
   options: OptionDetail[];
 }
 
@@ -201,11 +282,18 @@ export interface QuizDetail {
   description?: string | null;
   questionCount?: number | null;
   passPercentage: number;
-  passingScorePercent: number;
+  passingScorePercent?: number;
   maxAttempts?: number | null;
+  cooldownMinutes?: number;
+  timeLimitMinutes?: number | null;
   shuffleQuestions?: boolean;
   shuffleOptions?: boolean;
-  showAnswersAfterSubmit?: boolean;
+  showAnswersAfterSubmit?: AnswerReviewPolicy | boolean;
+  scoringMode?: ScoringMode;
+  negativeMarking?: boolean;
+  negativeMarkValue?: number;
+  status?: QuizStatus;
+  allowRetakeAfterPass?: boolean;
   questions: QuestionDetail[];
   attemptsCount?: number;
   userBestScore?: number | null;
@@ -251,7 +339,9 @@ export interface ModuleDetail {
   order: number;
   requiresAssignment: boolean;
   requiresQuiz: boolean;
+  requirePracticeDone?: boolean;
   lessons: LessonDetail[];
+  practiceTasks?: PracticeTaskDetail[];
   quiz?: QuizDetail | null;
   assignment?: AssignmentDetail | null;
   status: ModuleStatus;
@@ -416,6 +506,7 @@ export interface NotificationTemplateDetail {
   id: string;
   key: string;
   channel: NotificationChannel;
+  locale: string;
   subject?: string | null;
   body: string;
   createdAt: string;
@@ -427,9 +518,134 @@ export interface NotificationLogDetail {
   channel: NotificationChannel;
   to: string;
   templateKey: string;
+  locale: string;
   status: NotificationStatus;
   provider?: string | null;
+  providerMessageId?: string | null;
   error?: string | null;
+  attempts: number;
+  idempotencyKey?: string | null;
   userId?: string | null;
+  metadata?: any;
+  createdAt: string;
+  updatedAt: string;
+  user?: UserSummary | null;
+}
+
+export interface SettingDetail {
+  key: string;
+  value: string;
+  category: string;
+  description?: string | null;
+  updatedAt: string;
+}
+
+export interface VerificationTokenDetail {
+  id: string;
+  userId: string;
+  type: string;
+  expiresAt: string;
+  usedAt?: string | null;
   createdAt: string;
 }
+
+export interface QuizQuestionSnapshotItem {
+  id: string;
+  text: string;
+  type: QuestionType;
+  order: number;
+  points: number;
+  explanation?: string | null;
+  difficulty: QuestionDifficulty;
+  tags: string[];
+  imageUrl?: string | null;
+  options: { id: string; text: string }[];
+  correctOptionIds: string[];
+}
+
+export interface QuizAttemptAnswerDetail {
+  id?: string;
+  questionId: string;
+  selectedOptionIds: string[];
+  isCorrect?: boolean;
+  awardedMarks?: number;
+  pointsEarned?: number;
+  answeredAt?: string;
+  flagged?: boolean;
+}
+
+export interface QuizAttemptDetail {
+  id: string;
+  quizId: string;
+  studentId: string;
+  attemptNumber: number;
+  status: QuizAttemptStatus;
+  startedAt: string;
+  expiresAt?: string | null;
+  submittedAt?: string | null;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passed: boolean;
+  remainingSeconds?: number;
+  questions?: Omit<QuizQuestionSnapshotItem, 'correctOptionIds' | 'explanation'>[];
+  answers?: QuizAttemptAnswerDetail[];
+}
+
+export interface QuizResultDetail {
+  attemptId: string;
+  quizId: string;
+  attemptNumber: number;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  passed: boolean;
+  passPercentage: number;
+  startedAt: string;
+  submittedAt: string;
+  timeSpentSeconds: number;
+  totalQuestions: number;
+  correctAnswersCount: number;
+  incorrectAnswersCount: number;
+  unansweredCount: number;
+  showAnswers: boolean;
+  questionsReview?: {
+    questionId: string;
+    text: string;
+    type: QuestionType;
+    points: number;
+    awardedMarks: number;
+    isCorrect: boolean;
+    selectedOptionIds: string[];
+    correctOptionIds?: string[];
+    explanation?: string | null;
+    options: { id: string; text: string; isCorrect?: boolean }[];
+    relatedLessonTags?: string[];
+  }[];
+  attemptsLeft: number;
+  cooldownEndsAt?: string | null;
+  nextModuleUnlocked: boolean;
+  assignmentAvailable: boolean;
+}
+
+export interface QuizAnalyticsDetail {
+  quizId: string;
+  quizTitle: string;
+  totalAttempts: number;
+  passedAttempts: number;
+  failedAttempts: number;
+  passRate: number;
+  averageScore: number;
+  averagePercentage: number;
+  averageTimeSpentSeconds: number;
+  questionStats: {
+    questionId: string;
+    text: string;
+    type: QuestionType;
+    difficulty: QuestionDifficulty;
+    totalAnswers: number;
+    correctCount: number;
+    accuracyPercent: number;
+  }[];
+}
+

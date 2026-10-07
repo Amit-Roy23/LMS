@@ -8,13 +8,14 @@ import {
   GraduationCap,
   LayoutDashboard,
   BookOpen,
+  Calendar,
   Award,
   User,
   LogOut,
   ChevronRight,
-  ShieldCheck,
+  KeyRound,
+  FileText,
 } from 'lucide-react';
-import { Role } from '@academy/shared';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
@@ -24,8 +25,14 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/login');
+      return;
     }
-  }, [user, isLoading, router]);
+
+    // Force password change guard
+    if (!isLoading && user?.mustChangePassword && pathname !== '/student/change-password') {
+      router.push('/student/change-password');
+    }
+  }, [user, isLoading, pathname, router]);
 
   if (isLoading) {
     return (
@@ -37,9 +44,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   if (!user) return null;
 
+  const isForcedChangePassword = Boolean(user.mustChangePassword);
+
   const navItems = [
     { href: '/student/dashboard', label: 'Dashboard & Progress', icon: LayoutDashboard },
     { href: '/student/courses', label: 'My Enrolled Courses', icon: BookOpen },
+    { href: '/student/schedule', label: 'Live Schedule', icon: Calendar },
     { href: '/student/certificates', label: 'My Certificates', icon: Award },
     { href: '/student/profile', label: 'Account Profile', icon: User },
   ];
@@ -60,11 +70,32 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             </div>
           </Link>
 
+          {/* Student ID Badge */}
+          {user.studentId && (
+            <div className="px-3 py-2 rounded-lg bg-cream/10 border border-cream/20">
+              <p className="text-[10px] font-mono text-peach-500 font-bold uppercase">STUDENT ID</p>
+              <p className="text-xs font-mono font-extrabold text-cream">{user.studentId}</p>
+            </div>
+          )}
+
           {/* Nav List */}
           <nav className="space-y-1 pt-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href || (pathname ? pathname.startsWith(`${item.href}/`) : false);
+              const isDisabled = isForcedChangePassword && item.href !== '/student/change-password';
+
+              if (isDisabled) {
+                return (
+                  <div
+                    key={item.href}
+                    className="flex items-center gap-3 px-3 py-2 rounded-md text-xs font-semibold text-slate-400 opacity-40 cursor-not-allowed"
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </div>
+                );
+              }
 
               return (
                 <Link
@@ -112,14 +143,20 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header Mobile / Subnav */}
         <header className="h-16 border-b border-[#eadac4] bg-cream/90 backdrop-blur-md px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-ink transition-colors">Academy</Link>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-            <span className="text-slate-200 font-semibold">Student Portal</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-plum font-semibold">Student Portal</span>
+            {user.studentId && (
+              <>
+                <span className="text-slate-300">•</span>
+                <span className="font-mono text-rust font-bold">{user.studentId}</span>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/courses" className="text-xs text-indigo-400 hover:underline">
+            <Link href="/courses" className="text-xs text-rust font-semibold hover:underline">
               Browse More Courses
             </Link>
           </div>

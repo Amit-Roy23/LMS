@@ -15,6 +15,19 @@ import {
   RegistrationStatus,
   PerformanceLevel,
   NotificationChannel,
+  LessonType,
+  VideoProvider,
+  PracticeTaskType,
+  PracticeStatus,
+  CompletionSource,
+  ResourceType,
+  QuestionDifficulty,
+  QuestionStatus,
+  AnswerReviewPolicy,
+  ScoringMode,
+  QuizAttemptStatus,
+  QuizEventType,
+  QuizStatus,
 } from '../enums/index';
 
 export const registerSchema = z.object({
@@ -25,9 +38,43 @@ export const registerSchema = z.object({
   role: z.nativeEnum(Role).default(Role.STUDENT),
 });
 
-export const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
+export const loginSchema = z
+  .object({
+    email: z.string().min(1, 'Email, Student ID, or Phone number is required').optional(),
+    identifier: z.string().min(1, 'Identifier is required').optional(),
+    password: z.string().min(1, 'Password is required'),
+  })
+  .refine((data) => Boolean(data.email || data.identifier), {
+    message: 'Please provide your Email, Student ID, or Phone number',
+    path: ['email'],
+  });
+
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, 'Email or Phone number is required'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  password: z.string().min(8, 'New password must be at least 8 characters'),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
+});
+
+export const resendCredentialsSchema = z.object({
+  channel: z.nativeEnum(NotificationChannel).optional(),
+});
+
+export const notificationFilterSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  channel: z.nativeEnum(NotificationChannel).optional(),
+  status: z.enum(['QUEUED', 'SENT', 'FAILED']).optional(),
+  templateKey: z.string().optional(),
+  userId: z.string().optional(),
+  search: z.string().optional(),
 });
 
 export const updateProfileSchema = z.object({
@@ -49,6 +96,8 @@ export const courseSettingsSchema = z.object({
   mockTestPassingPercent: z.number().min(0).max(100).default(75),
   finalAssessmentPassingPercent: z.number().min(0).max(100).default(80),
   timeGatedByLiveSession: z.boolean().default(false),
+  requirePracticeDone: z.boolean().default(false),
+  watermarkEnabled: z.boolean().default(true),
 });
 
 export const createCourseSchema = z.object({
@@ -145,72 +194,179 @@ export const createModuleSchema = z.object({
   order: z.number().int().min(1),
   requiresAssignment: z.boolean().default(true),
   requiresQuiz: z.boolean().default(true),
+  requirePracticeDone: z.boolean().default(false),
 });
 
 export const updateModuleSchema = createModuleSchema.partial();
+
+export const reorderModulesSchema = z.object({
+  orders: z.array(
+    z.object({
+      id: z.string().uuid(),
+      order: z.number().int().min(1),
+    })
+  ),
+});
 
 export const createLessonSchema = z.object({
   moduleId: z.string().uuid(),
   title: z.string().min(2, 'Lesson title is required').max(200),
   description: z.string().optional().nullable(),
-  videoUrl: z.string().url('Must be a valid video URL'),
+  type: z.nativeEnum(LessonType).default(LessonType.VIDEO),
+  videoProvider: z.nativeEnum(VideoProvider).default(VideoProvider.YOUTUBE),
+  videoUrl: z.string().optional().default(''),
   durationSeconds: z.number().int().min(0).default(0),
   order: z.number().int().min(1),
-  resources: z
-    .array(
-      z.object({
-        title: z.string(),
-        url: z.string(),
-        type: z.enum(['pdf', 'link', 'zip', 'code']),
-      })
-    )
-    .default([]),
+  isPreview: z.boolean().default(false),
+  resources: z.any().optional().default([]),
+});
+
+export const updateLessonSchema = createLessonSchema.partial();
+
+export const reorderLessonsSchema = z.object({
+  orders: z.array(
+    z.object({
+      id: z.string().uuid(),
+      order: z.number().int().min(1),
+    })
+  ),
+});
+
+export const heartbeatProgressSchema = z.object({
+  positionSeconds: z.number().min(0),
+  playedIntervals: z.array(z.tuple([z.number().min(0), z.number().min(0)])).optional().default([]),
+  playbackRate: z.number().min(0.25).max(4.0).optional().default(1.0),
+});
+
+export const completeLessonSchema = z.object({
+  notes: z.string().optional().nullable(),
+});
+
+export const createPracticeTaskSchema = z.object({
+  lessonId: z.string().uuid().optional().nullable(),
+  moduleId: z.string().uuid().optional().nullable(),
+  title: z.string().min(2, 'Title is required').max(200),
+  instructions: z.string().min(5, 'Instructions must be at least 5 characters'),
+  type: z.nativeEnum(PracticeTaskType).default(PracticeTaskType.CHECKLIST),
+  expectedOutcome: z.string().optional().nullable(),
+  order: z.number().int().min(1).default(1),
+});
+
+export const updatePracticeTaskSchema = createPracticeTaskSchema.partial();
+
+export const updatePracticeProgressSchema = z.object({
+  status: z.nativeEnum(PracticeStatus),
+  notes: z.string().optional().nullable(),
+  attachmentKey: z.string().optional().nullable(),
+});
+
+export const createLessonNoteSchema = z.object({
+  text: z.string().min(1, 'Note text cannot be empty').max(5000),
+  timestampSeconds: z.number().int().min(0).optional().nullable(),
+});
+
+export const updateLessonNoteSchema = z.object({
+  text: z.string().min(1).max(5000),
+  timestampSeconds: z.number().int().min(0).optional().nullable(),
+});
+
+export const createLessonResourceSchema = z.object({
+  lessonId: z.string().uuid(),
+  title: z.string().min(2).max(200),
+  type: z.nativeEnum(ResourceType).default(ResourceType.PDF),
+  url: z.string().min(1),
+  sizeBytes: z.number().int().optional().nullable(),
 });
 
 export const updateLessonProgressSchema = z.object({
-  lessonId: z.string().uuid(),
-  watchedSeconds: z.number().min(0),
-  percent: z.number().min(0).max(100),
+  lessonId: z.string().uuid().optional(),
+  watchedSeconds: z.number().min(0).optional(),
+  percent: z.number().min(0).max(100).optional(),
   markComplete: z.boolean().optional().default(false),
+  positionSeconds: z.number().min(0).optional(),
+  playedIntervals: z.array(z.tuple([z.number().min(0), z.number().min(0)])).optional(),
+  playbackRate: z.number().min(0.25).max(4.0).optional(),
 });
 
+
 export const createQuizOptionSchema = z.object({
+  id: z.string().optional(),
   text: z.string().min(1, 'Option text cannot be empty'),
-  isCorrect: z.boolean(),
+  isCorrect: z.boolean().default(false),
 });
 
 export const createQuizQuestionSchema = z.object({
   text: z.string().min(3, 'Question text must be at least 3 characters'),
   explanation: z.string().optional().nullable(),
   type: z.nativeEnum(QuestionType).default(QuestionType.SINGLE_CHOICE),
-  order: z.number().int().min(1),
-  points: z.number().min(1).default(1),
-  marks: z.number().min(1).default(1),
+  order: z.number().int().min(1).default(1),
+  points: z.number().min(0.5).default(1),
+  marks: z.number().min(0.5).default(1),
+  difficulty: z.nativeEnum(QuestionDifficulty).default(QuestionDifficulty.MEDIUM),
+  tags: z.array(z.string()).default([]),
+  imageUrl: z.string().url().optional().nullable(),
+  status: z.nativeEnum(QuestionStatus).default(QuestionStatus.ACTIVE),
   options: z.array(createQuizOptionSchema).min(2, 'Must have at least 2 options'),
 });
 
-export const createQuizSchema = z.object({
-  moduleId: z.string().uuid(),
-  title: z.string().min(2).max(200),
+export const updateQuizQuestionSchema = createQuizQuestionSchema.partial();
+
+export const updateQuizSettingsSchema = z.object({
+  title: z.string().min(2).max(200).optional(),
   description: z.string().optional().nullable(),
   questionCount: z.number().int().min(1).optional().nullable(),
   passPercentage: z.number().min(0).max(100).default(70),
-  passingScorePercent: z.number().min(0).max(100).default(70),
   maxAttempts: z.number().int().min(1).optional().nullable().default(3),
-  shuffleQuestions: z.boolean().default(false),
-  shuffleOptions: z.boolean().default(false),
-  showAnswersAfterSubmit: z.boolean().default(true),
-  questions: z.array(createQuizQuestionSchema).min(1, 'Must include at least 1 question'),
+  cooldownMinutes: z.number().int().min(0).default(0),
+  timeLimitMinutes: z.number().int().min(1).optional().nullable(),
+  shuffleQuestions: z.boolean().default(true),
+  shuffleOptions: z.boolean().default(true),
+  showAnswersAfterSubmit: z.nativeEnum(AnswerReviewPolicy).default(AnswerReviewPolicy.AFTER_PASS),
+  scoringMode: z.nativeEnum(ScoringMode).default(ScoringMode.ALL_OR_NOTHING),
+  negativeMarking: z.boolean().default(false),
+  negativeMarkValue: z.number().min(0).max(5).default(0.25),
+  status: z.nativeEnum(QuizStatus).default(QuizStatus.PUBLISHED),
+  allowRetakeAfterPass: z.boolean().default(false),
+});
+
+export const createQuizSchema = updateQuizSettingsSchema.extend({
+  moduleId: z.string(),
+  questions: z.array(createQuizQuestionSchema).optional(),
+});
+
+export const saveAttemptAnswersSchema = z.object({
+  answers: z.array(
+    z.object({
+      questionId: z.string(),
+      selectedOptionIds: z.array(z.string()),
+      flagged: z.boolean().optional(),
+    })
+  ),
 });
 
 export const submitQuizAttemptSchema = z.object({
-  quizId: z.string().uuid(),
-  answers: z.array(
-    z.object({
-      questionId: z.string().uuid(),
-      selectedOptionIds: z.array(z.string().uuid()),
-    })
-  ),
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string(),
+        selectedOptionIds: z.array(z.string()),
+        flagged: z.boolean().optional(),
+      })
+    )
+    .optional(),
+});
+
+export const logQuizEventSchema = z.object({
+  type: z.nativeEnum(QuizEventType),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const adminOverrideQuizSchema = z.object({
+  action: z.enum(['RESET_ATTEMPTS', 'MANUAL_PASS', 'INVALIDATE_ATTEMPT', 'GRANT_EXTRA_ATTEMPTS']),
+  attemptId: z.string().optional(),
+  studentId: z.string(),
+  reason: z.string().min(5, 'Reason is required for audit logging'),
+  extraAttemptsCount: z.number().int().min(1).max(10).optional(),
 });
 
 export const createAssignmentSchema = z.object({

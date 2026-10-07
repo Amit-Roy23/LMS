@@ -1,32 +1,32 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { QuestionType } from '@academy/shared';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { CheckCircle2, XCircle, HelpCircle, ArrowRight, RotateCcw, Award, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  ArrowRight,
+  ArrowLeft,
+  RotateCcw,
+  Award,
+  AlertCircle,
+  Loader2,
+  Clock,
+  Flag,
+  Sparkles,
+  Check,
+  ShieldCheck,
+} from 'lucide-react';
 import { apiClient } from '../../lib/api';
 import { useToast } from '../../providers/toast-provider';
 import confetti from 'canvas-confetti';
+import Link from 'next/link';
 
 export interface QuizRunnerProps {
-  quiz: {
-    id: string;
-    title: string;
-    description?: string | null;
-    passingScorePercent?: number;
-    passPercentage?: number;
-    maxAttempts?: number | null;
-    attemptsCount?: number;
-    questions?: {
-      id: string;
-      text: string;
-      type: QuestionType | string;
-      points: number;
-      options: { id: string; text: string }[];
-    }[];
-  };
+  quiz?: any;
   courseId: string;
   moduleId: string;
   attemptsCount?: number;
@@ -36,7 +36,7 @@ export interface QuizRunnerProps {
 }
 
 export function QuizRunner({
-  quiz,
+  quiz: initialQuiz,
   courseId,
   moduleId,
   attemptsCount = 0,
@@ -46,297 +46,457 @@ export function QuizRunner({
 }: QuizRunnerProps) {
   const { success, error: toastError } = useToast();
 
-  const [fullQuiz, setFullQuiz] = useState<any>(quiz);
-  const [isLoadingQuiz, setIsLoadingQuiz] = useState(!quiz.questions || quiz.questions.length === 0);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'overview' | 'active' | 'result'>('overview');
+  const [quizInfo, setQuizInfo] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Active attempt state
+  const [activeAttempt, setActiveAttempt] = useState<any>(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<{
-    scorePercent: number;
-    isPassed: boolean;
-    passingScorePercent: number;
-    remainingAttempts: number;
-  } | null>(null);
+  const [result, setResult] = useState<any>(null);
 
-  // Fetch full quiz questions from API if not already present in props
-  const fetchFullQuiz = useCallback(async () => {
-    if (!quiz?.id) return;
+  // Load Quiz Info
+  const loadQuizInfo = useCallback(async () => {
+    if (!moduleId) return;
     try {
-      setIsLoadingQuiz(true);
-      setLoadError(null);
-      const res = await apiClient<{
-        quiz: any;
-        attemptsCount: number;
-        maxAttempts: number;
-        isPassed: boolean;
-      }>(`/quizzes/${quiz.id}`);
-
-      if (res?.quiz) {
-        setFullQuiz(res.quiz);
+      setIsLoading(true);
+      const res = await apiClient<any>(`/student/modules/${moduleId}/quiz`);
+      setQuizInfo(res);
+      if (res.state === 'PASSED') {
+        // If passed and not starting a new one, show overview with passed status
       }
     } catch (err: any) {
-      console.error('Failed to load quiz details', err);
-      setLoadError(err.message || 'Could not load quiz questions. Complete video lessons first if locked.');
+      console.error('Failed to load quiz info', err);
     } finally {
-      setIsLoadingQuiz(false);
+      setIsLoading(false);
     }
-  }, [quiz?.id]);
+  }, [moduleId]);
 
   useEffect(() => {
-    if (!quiz.questions || quiz.questions.length === 0) {
-      fetchFullQuiz();
-    } else {
-      setFullQuiz(quiz);
-      setIsLoadingQuiz(false);
+    loadQuizInfo();
+  }, [loadQuizInfo]);
+
+  // Start / Resume Attempt
+  const handleStartAttempt = async () => {
+    if (!quizInfo?.quizId) return;
+    try {
+      setIsLoading(true);
+      const res = await apiClient<any>(`/student/quizzes/${quizInfo.quizId}/attempts`, {
+        method: 'POST',
+      });
+
+      setActiveAttempt(res);
+      const answersMap: Record<string, string[]> = {};
+      const flagMap: Record<string, boolean> = {};
+      res.savedAnswers?.forEach((a: any) => {
+        answersMap[a.questionId] = a.selectedOptionIds;
+        if (a.flagged) flagMap[a.questionId] = true;
+      });
+      setSelectedAnswers(answersMap);
+      setFlaggedQuestions(flagMap);
+      if (res.remainingSeconds !== null && res.remainingSeconds !== undefined) {
+        setRemainingTime(res.remainingSeconds);
+      }
+      setCurrentIdx(0);
+      setMode('active');
+    } catch (err: any) {
+      toastError('Cannot Start Attempt', err.message || 'Failed to start quiz attempt.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [quiz, fetchFullQuiz]);
+  };
 
-  const questions = fullQuiz?.questions || [];
-  const passingScore = fullQuiz?.passingScorePercent || fullQuiz?.passPercentage || quiz.passingScorePercent || 70;
-  const attemptsLimit = fullQuiz?.maxAttempts ?? maxAttempts ?? 3;
+  // Timer Countdown
+  useEffect(() => {
+    if (mode !== 'active' || remainingTime === null || remainingTime === undefined) return;
+    if (remainingTime <= 0) {
+      handleSubmitAttempt();
+      return;
+    }
+    const timer = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timer);
+          handleSubmitAttempt();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [mode, remainingTime]);
 
-  const handleOptionSelect = (questionId: string, optionId: string, isMultiple = false) => {
+  // Autosave
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const triggerAutosave = useCallback(
+    (updatedAnswers: Record<string, string[]>, updatedFlags: Record<string, boolean>) => {
+      if (!activeAttempt?.attemptId) return;
+      setSaveStatus('saving');
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+
+      saveTimeoutRef.current = setTimeout(async () => {
+        try {
+          const payload = Object.entries(updatedAnswers).map(([questionId, selectedOptionIds]) => ({
+            questionId,
+            selectedOptionIds,
+            flagged: !!updatedFlags[questionId],
+          }));
+          await apiClient(`/student/attempts/${activeAttempt.attemptId}/answers`, {
+            method: 'PUT',
+            body: JSON.stringify({ answers: payload }),
+          });
+          setSaveStatus('saved');
+        } catch (err) {
+          setSaveStatus('error');
+        }
+      }, 400);
+    },
+    [activeAttempt?.attemptId]
+  );
+
+  const handleOptionToggle = (questionId: string, optionId: string, isMultiple: boolean) => {
     setSelectedAnswers((prev) => {
       const current = prev[questionId] || [];
+      let next: string[];
       if (isMultiple) {
-        if (current.includes(optionId)) {
-          return { ...prev, [questionId]: current.filter((id) => id !== optionId) };
-        } else {
-          return { ...prev, [questionId]: [...current, optionId] };
-        }
+        next = current.includes(optionId) ? current.filter((id) => id !== optionId) : [...current, optionId];
       } else {
-        return { ...prev, [questionId]: [optionId] };
+        next = [optionId];
       }
+      const updated = { ...prev, [questionId]: next };
+      triggerAutosave(updated, flaggedQuestions);
+      return updated;
     });
   };
 
-  const handleSubmit = async () => {
-    // Validate that all questions are answered
-    const unanswered = questions.filter((q: any) => !selectedAnswers[q.id] || selectedAnswers[q.id].length === 0);
-    if (unanswered.length > 0) {
-      toastError('Incomplete Quiz', `Please answer all questions before submitting (${unanswered.length} remaining).`);
-      return;
-    }
+  const handleToggleFlag = (questionId: string) => {
+    setFlaggedQuestions((prev) => {
+      const updated = { ...prev, [questionId]: !prev[questionId] };
+      triggerAutosave(selectedAnswers, updated);
+      return updated;
+    });
+  };
 
+  const handleSubmitAttempt = async () => {
+    if (!activeAttempt?.attemptId) return;
     try {
       setIsSubmitting(true);
-      const payload = {
-        quizId: quiz.id,
-        answers: Object.entries(selectedAnswers).map(([questionId, selectedOptionIds]) => ({
-          questionId,
-          selectedOptionIds,
-        })),
-      };
+      const answersPayload = Object.entries(selectedAnswers).map(([questionId, selectedOptionIds]) => ({
+        questionId,
+        selectedOptionIds,
+        flagged: !!flaggedQuestions[questionId],
+      }));
 
-      const res = await apiClient<{
-        scorePercent: number;
-        isPassed: boolean;
-        passingScorePercent: number;
-        remainingAttempts: number;
-      }>(`/quizzes/${quiz.id}/attempt`, {
+      const res = await apiClient<any>(`/student/attempts/${activeAttempt.attemptId}/submit`, {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ answers: answersPayload }),
       });
 
       setResult(res);
+      setMode('result');
 
-      if (res.isPassed) {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        success('🎉 Quiz Passed!', `You scored ${res.scorePercent}% (Passing mark: ${res.passingScorePercent}%)`);
+      if (res.passed) {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        success('🎉 Assessment Passed!', `You scored ${res.score} / ${res.maxScore} (${res.percentage}%).`);
+        if (onQuizCompleted) onQuizCompleted();
       } else {
-        toastError('Quiz Not Passed', `You scored ${res.scorePercent}%. Minimum ${res.passingScorePercent}% required.`);
+        toastError('Assessment Not Passed', `You scored ${res.percentage}%. Minimum pass mark is ${res.passPercentage}%.`);
       }
-
-      onQuizCompleted?.();
     } catch (err: any) {
-      toastError('Submission Failed', err.message || 'Could not submit quiz attempt');
+      toastError('Submission Error', err.message || 'Failed to submit quiz attempt.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resetQuiz = () => {
-    setSelectedAnswers({});
-    setResult(null);
+  const formatTimer = (secs: number) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  if (isLoadingQuiz) {
+  // Render Overview
+  if (mode === 'overview') {
     return (
-      <Card className="border-slate-800 bg-[#fffbf4] p-12 text-center">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-3" />
-        <h3 className="text-sm font-bold text-ink">Loading Assessment Questions...</h3>
-        <p className="text-xs text-slate-400 mt-1">Retrieving questions and options for {quiz.title}.</p>
-      </Card>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <Card className="border-rose-900/50 bg-rose-950/20 p-8 text-center space-y-4">
-        <AlertCircle className="w-10 h-10 text-rose-400 mx-auto" />
-        <div>
-          <h3 className="text-base font-bold text-ink">Assessment Access Blocked</h3>
-          <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto">{loadError}</p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={fetchFullQuiz} className="text-xs gap-1.5 mx-auto">
-          <RotateCcw className="w-3.5 h-3.5" /> Retry Assessment Access
-        </Button>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="w-full space-y-6">
-      {/* Quiz Header Card */}
-      <Card className="border-[#e7d5bd] bg-[#fffbf4]">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <Card className="bg-slate-900/90 border-slate-800 shadow-xl text-slate-100">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <Badge variant="purple">MODULE MCQ ASSESSMENT</Badge>
-                {isPassed && (
-                  <Badge variant="success" className="gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Passed
-                  </Badge>
-                )}
+              <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 mb-2">Module Assessment</Badge>
+              <CardTitle className="text-xl md:text-2xl font-bold text-white">
+                {quizInfo?.title || initialQuiz?.title || 'Knowledge Assessment'}
+              </CardTitle>
+            </div>
+            {quizInfo?.state === 'PASSED' && (
+              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 px-3 py-1 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" /> PASSED
+              </Badge>
+            )}
+          </div>
+          <p className="text-slate-400 text-sm mt-1">
+            {quizInfo?.description || 'Test your comprehension of this module to unlock further course content.'}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-950/60 border border-slate-800">
+            <div>
+              <div className="text-xs text-slate-400">Questions</div>
+              <div className="text-lg font-bold text-white">{quizInfo?.questionCount || 20} MCQs</div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Pass Mark</div>
+              <div className="text-lg font-bold text-emerald-400">{quizInfo?.passPercentage || 70}%</div>
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Time Limit</div>
+              <div className="text-lg font-bold text-white">
+                {quizInfo?.timeLimitMinutes ? `${quizInfo.timeLimitMinutes} Mins` : 'Untimed'}
               </div>
-              <CardTitle className="text-lg mt-2 text-ink font-bold">{fullQuiz.title || quiz.title}</CardTitle>
-              {(fullQuiz.description || quiz.description) && (
-                <p className="text-xs text-slate-400 mt-1">{fullQuiz.description || quiz.description}</p>
-              )}
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Attempts Left</div>
+              <div className="text-lg font-bold text-white">
+                {quizInfo?.attemptsRemaining !== null && quizInfo?.attemptsRemaining !== undefined
+                  ? quizInfo.attemptsRemaining
+                  : 'Unlimited'}
+              </div>
+            </div>
+          </div>
+
+          {quizInfo?.state === 'LOCKED' && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
+              <div className="text-sm">
+                <div className="font-semibold text-white">Assessment Locked</div>
+                <div>{quizInfo.lockReason || 'Complete all video lessons in this module to unlock this assessment.'}</div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            {quizInfo?.state === 'AVAILABLE' && (
+              <Button
+                onClick={handleStartAttempt}
+                disabled={isLoading}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6"
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                Start Assessment
+              </Button>
+            )}
+
+            {quizInfo?.state === 'IN_PROGRESS' && (
+              <Button
+                onClick={handleStartAttempt}
+                disabled={isLoading}
+                className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6"
+              >
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RotateCcw className="w-4 h-4 mr-2" />}
+                Resume Attempt
+              </Button>
+            )}
+
+            {quizInfo?.state === 'PASSED' && (
+              <div className="text-sm text-emerald-400 font-medium flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" /> You have successfully passed this assessment!
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Render Active Attempt
+  if (mode === 'active' && activeAttempt) {
+    const questions = activeAttempt.questions || [];
+    const currentQ = questions[currentIdx];
+    const totalQ = questions.length;
+    const isMultiple = currentQ?.type === 'MULTIPLE_CHOICE';
+    const currentSelected = selectedAnswers[currentQ?.id] || [];
+    const isFlagged = !!flaggedQuestions[currentQ?.id];
+    const answeredCount = Object.keys(selectedAnswers).filter((k) => selectedAnswers[k]?.length > 0).length;
+
+    return (
+      <Card className="bg-slate-900/90 border-slate-800 shadow-2xl text-slate-100">
+        <CardHeader className="pb-3 border-b border-slate-800">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-amber-400">
+                Question {currentIdx + 1} of {totalQ}
+              </span>
+              <Badge variant="outline" className="text-[10px] text-slate-400 border-slate-700">
+                {isMultiple ? 'Checkbox' : 'Radio'}
+              </Badge>
             </div>
 
-            <div className="flex items-center gap-3 text-xs bg-[#fbf3e6] p-3 rounded-lg border border-[#eadac4]">
-              <div>
-                <p className="text-slate-400">Pass Mark</p>
-                <p className="font-bold text-blue-400 text-sm">{passingScore}%</p>
+            <div className="flex items-center gap-3">
+              <div className="text-xs text-slate-400 flex items-center gap-1">
+                {saveStatus === 'saving' && <Loader2 className="w-3 h-3 animate-spin text-amber-400" />}
+                {saveStatus === 'saved' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                <span>{saveStatus === 'saving' ? 'Saving...' : 'Saved'}</span>
               </div>
-              <div className="h-8 w-px bg-slate-800" />
-              <div>
-                <p className="text-slate-400">Questions</p>
-                <p className="font-bold text-slate-200 text-sm">{questions.length}</p>
-              </div>
-              <div className="h-8 w-px bg-slate-800" />
-              <div>
-                <p className="text-slate-400">Attempts</p>
-                <p className="font-bold text-slate-200 text-sm">
-                  {attemptsCount} / {attemptsLimit}
-                </p>
-              </div>
+
+              {remainingTime !== null && (
+                <Badge className="bg-sky-500/10 text-sky-400 border-sky-500/20 font-mono text-xs">
+                  <Clock className="w-3 h-3 mr-1" /> {formatTimer(remainingTime)}
+                </Badge>
+              )}
             </div>
           </div>
         </CardHeader>
-      </Card>
 
-      {/* Result Display Banner */}
-      {result && (
-        <div
-          className={`p-6 rounded-2xl border ${
-            result.isPassed
-              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200'
-              : 'bg-rose-950/40 border-rose-500/40 text-rose-200'
-          }`}
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              {result.isPassed ? (
-                <Award className="w-10 h-10 text-emerald-400 shrink-0" />
-              ) : (
-                <XCircle className="w-10 h-10 text-rose-400 shrink-0" />
-              )}
-              <div>
-                <h4 className="text-lg font-bold text-ink">
-                  {result.isPassed ? 'Congratulations! You Passed!' : 'Assessment Incomplete'}
-                </h4>
-                <p className="text-xs text-slate-300 mt-1">
-                  Your Score: <span className="font-bold text-base">{result.scorePercent}%</span> (Passing score: {result.passingScorePercent}%)
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Remaining attempts: {result.remainingAttempts}
-                </p>
-              </div>
-            </div>
+        <CardContent className="space-y-6 pt-4">
+          <div className="text-base md:text-lg font-medium text-slate-100">{currentQ?.text}</div>
 
-            {!result.isPassed && result.remainingAttempts > 0 && (
-              <Button variant="secondary" size="sm" onClick={resetQuiz} className="gap-2">
-                <RotateCcw className="w-4 h-4" /> Try Again
+          {isMultiple && (
+            <div className="text-xs text-amber-300 font-medium">* Select all correct options that apply.</div>
+          )}
+
+          {/* Options */}
+          <div className="space-y-2.5">
+            {currentQ?.options?.map((opt: any) => {
+              const isChecked = currentSelected.includes(opt.id);
+              return (
+                <div
+                  key={opt.id}
+                  onClick={() => currentQ && handleOptionToggle(currentQ.id, opt.id, isMultiple)}
+                  className={`p-3.5 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
+                    isChecked
+                      ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-sm'
+                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                  }`}
+                >
+                  <div className="pt-0.5">
+                    {isMultiple ? (
+                      <div
+                        className={`w-4 h-4 rounded border flex items-center justify-center ${
+                          isChecked ? 'bg-amber-500 border-amber-500 text-slate-950' : 'border-slate-600'
+                        }`}
+                      >
+                        {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </div>
+                    ) : (
+                      <div
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                          isChecked ? 'border-amber-400 bg-amber-400/20' : 'border-slate-600'
+                        }`}
+                      >
+                        {isChecked && <div className="w-2 h-2 rounded-full bg-amber-400" />}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm leading-relaxed">{opt.text}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentIdx((p) => Math.max(0, p - 1))}
+              disabled={currentIdx === 0}
+              className="border-slate-800 text-slate-300"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Prev
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => currentQ && handleToggleFlag(currentQ.id)}
+              className={isFlagged ? 'text-amber-400 bg-amber-400/10' : 'text-slate-400'}
+            >
+              <Flag className="w-3.5 h-3.5 mr-1" /> {isFlagged ? 'Flagged' : 'Flag'}
+            </Button>
+
+            {currentIdx < totalQ - 1 ? (
+              <Button
+                size="sm"
+                onClick={() => setCurrentIdx((p) => Math.min(totalQ - 1, p + 1))}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+              >
+                Next <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleSubmitAttempt}
+                disabled={isSubmitting}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+              >
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Check className="w-3.5 h-3.5 mr-1" />}
+                Submit
               </Button>
             )}
           </div>
-        </div>
-      )}
+        </CardContent>
+      </Card>
+    );
+  }
 
-      {/* Question List */}
-      <div className="space-y-4">
-        {questions.map((question: any, qIdx: number) => {
-          const selected = selectedAnswers[question.id] || [];
-          const isMulti = question.type === QuestionType.MULTIPLE_CHOICE || question.type === 'MULTIPLE_CHOICE';
+  // Render Result
+  if (mode === 'result' && result) {
+    return (
+      <Card
+        className={`border shadow-2xl ${
+          result.passed ? 'bg-slate-900/90 border-emerald-500/40' : 'bg-slate-900/90 border-rose-500/40'
+        }`}
+      >
+        <CardContent className="pt-6 pb-6 text-center space-y-4">
+          <div className="flex justify-center">
+            {result.passed ? (
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Award className="w-8 h-8" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                <XCircle className="w-8 h-8" />
+              </div>
+            )}
+          </div>
 
-          return (
-            <Card key={question.id} className="border-slate-800 bg-[#fdf7ec]">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-blue-400">
-                    Question {qIdx + 1} of {questions.length}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {question.points || 1} {question.points === 1 ? 'Point' : 'Points'}
-                  </span>
-                </div>
-                <h4 className="text-base font-semibold text-ink mt-1 leading-relaxed">
-                  {question.text}
-                </h4>
-              </CardHeader>
+          <div>
+            <h3 className="text-2xl font-bold text-white">{result.passed ? 'Assessment Passed! 🎉' : 'Assessment Failed'}</h3>
+            <p className="text-slate-400 text-sm mt-1">
+              Score: <span className="font-bold text-white">{result.score} / {result.maxScore}</span> ({result.percentage}%)
+              | Pass mark: {result.passPercentage}%
+            </p>
+          </div>
 
-              <CardContent className="space-y-2.5 pt-2">
-                {(question.options || []).map((option: any) => {
-                  const isChecked = selected.includes(option.id);
+          {result.passed && (
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4" /> Next module unlocked!
+            </div>
+          )}
 
-                  return (
-                    <div
-                      key={option.id}
-                      onClick={() => !result && handleOptionSelect(question.id, option.id, isMulti)}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
-                        isChecked
-                          ? 'bg-blue-600/20 border-blue-500/60 text-ink shadow-md shadow-blue-600/10'
-                          : 'bg-slate-950/80 border-slate-800 hover:border-slate-700 text-slate-300'
-                      }`}
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-md flex items-center justify-center border transition-all ${
-                          isChecked
-                            ? 'bg-blue-600 border-blue-500 text-cream'
-                            : 'border-slate-700 bg-slate-800'
-                        }`}
-                      >
-                        {isChecked && <CheckCircle2 className="w-3.5 h-3.5 fill-current text-ink" />}
-                      </div>
-                      <span className="text-sm font-medium">{option.text}</span>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+          <div className="flex justify-center gap-3 pt-2">
+            {!result.passed && result.canRetake && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setMode('overview');
+                  loadQuizInfo();
+                }}
+                className="border-slate-700 text-slate-200"
+              >
+                <RotateCcw className="w-4 h-4 mr-1.5" /> Retake
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-      {/* Submit Button Bar */}
-      {!result && (
-        <div className="flex justify-end pt-2">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
-            className="w-full sm:w-auto"
-          >
-            <span>Submit Assessment</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-      )}
-    </div>
-  );
+  return null;
 }

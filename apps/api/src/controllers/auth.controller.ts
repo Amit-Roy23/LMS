@@ -53,6 +53,39 @@ export class AuthController {
     }
   }
 
+  async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { identifier } = req.body;
+      const result = await authService.forgotPassword(identifier);
+      return sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, password } = req.body;
+      const result = await authService.resetPassword(token, password);
+      return sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user || !req.user.userId) {
+        throw new UnauthorizedError('Authentication required');
+      }
+      const { currentPassword, newPassword } = req.body;
+      const result = await authService.changePassword(req.user.userId, currentPassword, newPassword);
+      return sendSuccess(res, result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async refreshToken(req: Request, res: Response, next: NextFunction) {
     try {
       const token = req.cookies?.refreshToken || req.body?.refreshToken;
@@ -85,6 +118,20 @@ export class AuthController {
       res.clearCookie('refreshToken');
       res.clearCookie('accessToken');
       return sendSuccess(res, { message: 'Logged out successfully' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async logoutEverywhere(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user?.userId) {
+        throw new UnauthorizedError('Authentication required');
+      }
+      const result = await authService.logoutEverywhere(req.user.userId);
+      res.clearCookie('refreshToken');
+      res.clearCookie('accessToken');
+      return sendSuccess(res, result);
     } catch (err) {
       next(err);
     }

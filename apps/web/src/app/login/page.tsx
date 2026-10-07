@@ -6,33 +6,32 @@ import { Navbar } from '../../components/common/navbar';
 import { Footer } from '../../components/common/footer';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Card } from '../../components/ui/card';
 import { useAuth } from '../../providers/auth-provider';
 import { useToast } from '../../providers/toast-provider';
-import { GraduationCap, Zap, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Zap, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, loginAsDemo } = useAuth();
   const { error: toastError, success } = useToast();
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toastError('Missing Fields', 'Please provide both email and password.');
+    if (!identifier || !password) {
+      toastError('Missing Fields', 'Please provide your Student ID/Email/Phone and password.');
       return;
     }
 
     try {
       setIsLoading(true);
-      await login({ email, password });
+      await login({ identifier, password });
       success('Welcome Back!', 'Logged in successfully.');
     } catch (err: any) {
-      toastError('Login Failed', err.message || 'Invalid email or password.');
+      toastError('Login Failed', err.message || 'Invalid credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -69,22 +68,34 @@ export default function LoginPage() {
           <Card className="border-transparent bg-cream-50 p-7 space-y-6 rounded-3xl shadow-soft">
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                label="Email Address"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                label="Student ID / Email / Phone"
+                type="text"
+                placeholder="e.g. OCA-2026-000123 or student@example.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
               />
 
-              <Input
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[11px] font-mono font-bold text-slate-600 uppercase tracking-wider">
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-[11px] text-blue-600 hover:underline font-semibold"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
               <Button
                 type="submit"
@@ -98,10 +109,10 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div className="text-center text-xs text-slate-400">
+            <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
               Don't have an account?{' '}
-              <Link href="/register" className="text-blue-400 font-semibold hover:underline">
-                Create an account
+              <Link href="/courses" className="text-blue-600 font-semibold hover:underline">
+                Explore Courses & Enroll
               </Link>
             </div>
           </Card>
