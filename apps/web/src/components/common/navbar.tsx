@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../../providers/auth-provider';
+import { useToast } from '../../providers/toast-provider';
 import { Role } from '@academy/shared';
 import { Button } from '../ui/button';
+import { DEMO_ACCOUNTS, DemoAccountKey } from '../../lib/demo-accounts';
 import {
   GraduationCap,
   Sparkles,
@@ -12,244 +15,252 @@ import {
   Briefcase,
   Award,
   LogOut,
-  User,
   LayoutDashboard,
   Menu,
   X,
   ChevronDown,
+  Zap,
+  Loader2,
 } from 'lucide-react';
+
+const NAV_LINKS = [
+  { href: '/courses', label: 'Courses', icon: BookOpen },
+  { href: '/ai', label: 'AI & Labs', icon: Sparkles },
+  { href: '/career', label: 'Career', icon: Briefcase },
+  { href: '/verify/CERT-2026-AI-001', label: 'Verify Certificate', icon: Award },
+];
 
 export function Navbar() {
   const { user, logout, loginAsDemo } = useAuth();
+  const { error: toastError } = useToast();
+  const pathname = usePathname() || '';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoMenuOpen, setDemoMenuOpen] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<DemoAccountKey | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const demoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close the demo menu on outside click / Escape
+  useEffect(() => {
+    if (!demoMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (demoRef.current && !demoRef.current.contains(e.target as Node)) setDemoMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setDemoMenuOpen(false);
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [demoMenuOpen]);
+
+  // Lock page scroll while the mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  const isStaff = user && (user.role === Role.ADMIN || user.role === Role.INSTRUCTOR);
+  const dashboardHref = isStaff ? '/admin/dashboard' : '/student/dashboard';
+
+  const demoLogin = async (key: DemoAccountKey) => {
+    try {
+      setDemoLoading(key);
+      await loginAsDemo(key);
+      setDemoMenuOpen(false);
+      setMobileMenuOpen(false);
+    } catch (err: any) {
+      toastError('Demo login failed', err.message || 'Please check that the API is running.');
+    } finally {
+      setDemoLoading(null);
+    }
+  };
+
+  const DemoList = ({ compact = false }: { compact?: boolean }) => (
+    <div className={compact ? 'grid grid-cols-1 gap-1' : 'grid grid-cols-1 gap-0.5'}>
+      {DEMO_ACCOUNTS.map((a) => (
+        <button
+          key={a.key}
+          type="button"
+          disabled={!!demoLoading}
+          onClick={() => demoLogin(a.key)}
+          className="flex items-center gap-3 w-full text-left px-2.5 py-2 rounded-lg hover:bg-indigo-50 transition-colors disabled:opacity-60"
+        >
+          <span
+            className={`w-8 h-8 shrink-0 rounded-lg bg-gradient-to-br ${a.tone} text-white text-xs font-bold flex items-center justify-center`}
+          >
+            {demoLoading === a.key ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : a.label.charAt(0)}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-ink truncate">{a.label}</span>
+            <span className="block text-xs text-slate-500 truncate">{a.persona}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-[#eadac4] bg-cream/90 backdrop-blur-xl">
+    <nav
+      className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+        scrolled ? 'glass border-b border-[#e2e8f0] shadow-card' : 'bg-white/60 backdrop-blur border-b border-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-rust flex items-center justify-center shadow-soft group-hover:bg-plum transition-colors">
-              <GraduationCap className="w-5 h-5 text-cream" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-display font-extrabold text-lg tracking-tight text-plum flex items-center gap-1.5">
-                Creative & IT Academy
-                <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[9px] font-bold bg-peach-500 text-plum">
-                  EST. 2026
-                </span>
-              </span>
-              <span className="text-[10px] tracking-wider text-slate-400 uppercase">
-                ENGINEERING & DESIGN LMS
-              </span>
-            </div>
+        <div className="flex items-center justify-between h-16 lg:h-[72px]">
+          {/* Brand */}
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
+              <GraduationCap className="w-5 h-5 text-white" />
+            </span>
+            <span className="flex flex-col leading-tight">
+              <span className="font-extrabold text-[15px] sm:text-base tracking-tight text-ink">Creative &amp; IT Academy</span>
+              <span className="hidden sm:block text-[11px] text-slate-500 font-medium">Learn · Build · Get certified</span>
+            </span>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/courses"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-blue-400" /> Courses
-            </Link>
-            <Link
-              href="/ai"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> AI & Labs
-            </Link>
-            <Link
-              href="/career"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
-            >
-              <Briefcase className="w-3.5 h-3.5 text-amber-400" /> Career
-            </Link>
-            <Link
-              href="/verify/CERT-2026-DEMO01"
-              className="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-rust transition-colors flex items-center gap-1.5"
-            >
-              <Award className="w-3.5 h-3.5 text-emerald-400" /> Verification
-            </Link>
+          {/* Desktop links */}
+          <div className="hidden lg:flex items-center gap-1">
+            {NAV_LINKS.map(({ href, label }) => {
+              const active = pathname === href || (href !== '/' && pathname.startsWith(href.split('/').slice(0, 2).join('/')));
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`relative px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    active ? 'text-indigo-400' : 'text-slate-300 hover:text-ink hover:bg-cream-100'
+                  }`}
+                >
+                  {label}
+                  {active && <span className="absolute left-3.5 right-3.5 -bottom-[1px] h-0.5 rounded-full bg-brand-gradient" />}
+                </Link>
+              );
+            })}
           </div>
 
-          {/* Right Action Area */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Quick Demo Switcher */}
-            <div className="relative">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setDemoMenuOpen(!demoMenuOpen)}
-                className="text-xs bg-cream-50 border-[#e7d5bd] hover:border-rust/60"
+          {/* Desktop actions */}
+          <div className="hidden lg:flex items-center gap-2">
+            <div className="relative" ref={demoRef}>
+              <button
+                type="button"
+                onClick={() => setDemoMenuOpen((o) => !o)}
+                aria-expanded={demoMenuOpen}
+                className="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl text-sm font-semibold text-indigo-300 bg-indigo-50 hover:bg-indigo-100 transition-colors"
               >
-                <span>⚡ Demo Logins</span>
-                <ChevronDown className="w-3.5 h-3.5 ml-1 text-slate-400" />
-              </Button>
+                <Zap className="w-4 h-4" />
+                Demo logins
+                <ChevronDown className={`w-4 h-4 transition-transform ${demoMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
 
               {demoMenuOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-[#e7d5bd] bg-[#fffbf4] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95"
-                  onMouseLeave={() => setDemoMenuOpen(false)}
-                >
-                  <p className="px-2 py-1 text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-                    Instant 1-Click Login
+                <div className="absolute right-0 mt-2 w-80 rounded-2xl border border-[#e2e8f0] bg-white p-2 shadow-lift z-50 animate-scale-in origin-top-right">
+                  <p className="px-2.5 pt-1.5 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Explore as any role
                   </p>
-                  <button
-                    onClick={() => {
-                      loginAsDemo('student1');
-                      setDemoMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs rounded-lg text-slate-200 hover:bg-blue-600/20 hover:text-blue-300 transition-colors flex flex-col"
-                  >
-                    <span className="font-semibold">Student 1 (Enrolled)</span>
-                    <span className="text-[10px] text-slate-400">student1@creativeit.academy</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      loginAsDemo('instructor');
-                      setDemoMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs rounded-lg text-slate-200 hover:bg-violet-600/20 hover:text-violet-300 transition-colors flex flex-col"
-                  >
-                    <span className="font-semibold">Instructor (Alex Morgan)</span>
-                    <span className="text-[10px] text-slate-400">instructor@creativeit.academy</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      loginAsDemo('admin');
-                      setDemoMenuOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs rounded-lg text-slate-200 hover:bg-emerald-600/20 hover:text-emerald-300 transition-colors flex flex-col"
-                  >
-                    <span className="font-semibold">Admin (Full Access)</span>
-                    <span className="text-[10px] text-slate-400">admin@creativeit.academy</span>
-                  </button>
+                  <DemoList />
                 </div>
               )}
             </div>
 
             {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href={
-                    user.role === Role.ADMIN || user.role === Role.INSTRUCTOR
-                      ? '/admin/dashboard'
-                      : '/student/dashboard'
-                  }
-                >
-                  <Button variant="primary" size="sm" className="gap-2">
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    {user.role === Role.ADMIN || user.role === Role.INSTRUCTOR
-                      ? 'Admin Panel'
-                      : 'My Learning'}
+              <>
+                <Link href={dashboardHref}>
+                  <Button variant="primary" size="md">
+                    <LayoutDashboard className="w-4 h-4" />
+                    {isStaff ? 'Admin panel' : 'My learning'}
                   </Button>
                 </Link>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={logout}
-                  title="Log out"
-                  className="text-slate-400 hover:text-rose-400"
-                >
+                <Button variant="ghost" size="icon" onClick={logout} title="Log out" aria-label="Log out">
                   <LogOut className="w-4 h-4" />
                 </Button>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center gap-2">
+              <>
                 <Link href="/login">
-                  <Button variant="outline" size="md">
-                    Sign In
+                  <Button variant="ghost" size="md">
+                    Sign in
                   </Button>
                 </Link>
-                <Link href="/register">
-                  <Button variant="white" size="md">
-                    Get Started
+                <Link href="/courses">
+                  <Button variant="primary" size="md">
+                    Get started
                   </Button>
                 </Link>
-              </div>
+              </>
             )}
           </div>
 
-          {/* Mobile menu trigger */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-400 hover:text-ink hover:bg-slate-900"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          {/* Mobile trigger */}
+          <button
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            className="lg:hidden p-2 -mr-2 rounded-lg text-slate-300 hover:bg-cream-100"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#eadac4] bg-cream p-4 space-y-3">
-          <Link
-            href="/courses"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm text-slate-300 hover:text-ink"
-          >
-            Courses
-          </Link>
-          <Link
-            href="/ai"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm text-slate-300 hover:text-ink"
-          >
-            AI & Labs
-          </Link>
-          <Link
-            href="/career"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm text-slate-300 hover:text-ink"
-          >
-            Career
-          </Link>
-          <Link
-            href="/verify/CERT-2026-DEMO01"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block py-2 text-sm text-slate-300 hover:text-ink"
-          >
-            Verify Certificate
-          </Link>
-
-          <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
-            {user ? (
-              <>
+        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 bg-white border-t border-[#e2e8f0] overflow-y-auto animate-fade-in">
+          <div className="p-4 space-y-6">
+            <div className="grid grid-cols-2 gap-2">
+              {NAV_LINKS.map(({ href, label, icon: Icon }) => (
                 <Link
-                  href={
-                    user.role === Role.ADMIN || user.role === Role.INSTRUCTOR
-                      ? '/admin/dashboard'
-                      : '/student/dashboard'
-                  }
+                  key={href}
+                  href={href}
                   onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 p-3 rounded-xl border border-[#e2e8f0] text-sm font-semibold text-ink active:bg-indigo-50"
                 >
-                  <Button variant="primary" size="md" className="w-full">
-                    Open Dashboard ({user.name})
+                  <Icon className="w-4 h-4 text-indigo-400" />
+                  {label}
+                </Link>
+              ))}
+            </div>
+
+            {user ? (
+              <div className="grid gap-2">
+                <Link href={dashboardHref} onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="primary" size="lg" className="w-full">
+                    <LayoutDashboard className="w-4 h-4" /> Open dashboard
                   </Button>
                 </Link>
-                <Button variant="secondary" size="md" onClick={logout} className="w-full">
-                  Log Out
+                <Button variant="secondary" size="lg" onClick={logout} className="w-full">
+                  <LogOut className="w-4 h-4" /> Log out ({user.name})
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="grid grid-cols-2 gap-2">
                 <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" size="md" className="w-full">
-                    Sign In
+                  <Button variant="secondary" size="lg" className="w-full">
+                    Sign in
                   </Button>
                 </Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="primary" size="md" className="w-full">
-                    Register
+                <Link href="/courses" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="primary" size="lg" className="w-full">
+                    Get started
                   </Button>
                 </Link>
-              </>
+              </div>
             )}
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-500" /> One-click demo accounts
+              </p>
+              <DemoList compact />
+            </div>
           </div>
         </div>
       )}

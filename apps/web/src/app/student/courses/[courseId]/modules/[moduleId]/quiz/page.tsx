@@ -442,7 +442,7 @@ export default function StudentModuleQuizPage() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 mb-2">Layer 2 Assessment Engine</Badge>
-                  <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                  <CardTitle className="text-2xl md:text-3xl font-bold tracking-tight text-ink">
                     {quizInfo?.title || 'Module Mastery Assessment'}
                   </CardTitle>
                 </div>
@@ -464,7 +464,7 @@ export default function StudentModuleQuizPage() {
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <HelpCircle className="w-3.5 h-3.5 text-amber-400" /> Questions
                   </div>
-                  <div className="text-xl font-bold text-white">{quizInfo?.questionCount || 20} MCQs</div>
+                  <div className="text-xl font-bold text-ink">{quizInfo?.questionCount || 20} MCQs</div>
                 </div>
 
                 <div className="space-y-1">
@@ -481,7 +481,7 @@ export default function StudentModuleQuizPage() {
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <Clock className="w-3.5 h-3.5 text-sky-400" /> Time Limit
                   </div>
-                  <div className="text-xl font-bold text-white">
+                  <div className="text-xl font-bold text-ink">
                     {quizInfo?.timeLimitMinutes ? `${quizInfo.timeLimitMinutes} Mins` : 'Untimed'}
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export default function StudentModuleQuizPage() {
                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <RotateCcw className="w-3.5 h-3.5 text-indigo-400" /> Attempts Left
                   </div>
-                  <div className="text-xl font-bold text-white">
+                  <div className="text-xl font-bold text-ink">
                     {quizInfo?.attemptsRemaining !== null && quizInfo?.attemptsRemaining !== undefined
                       ? quizInfo.attemptsRemaining
                       : 'Unlimited'}
@@ -504,7 +504,7 @@ export default function StudentModuleQuizPage() {
                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3">
                   <Lock className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
                   <div className="space-y-2">
-                    <div className="font-semibold text-white">Assessment is Currently Locked</div>
+                    <div className="font-semibold text-ink">Assessment is Currently Locked</div>
                     <div className="text-sm text-slate-300">
                       {quizInfo?.lockReason || 'You must complete and watch all video lessons in this module before taking the assessment.'}
                     </div>
@@ -524,7 +524,7 @@ export default function StudentModuleQuizPage() {
                 <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-300 flex items-start gap-3">
                   <Timer className="w-5 h-5 shrink-0 mt-0.5 text-sky-400" />
                   <div>
-                    <div className="font-semibold text-white">Retake Cooldown in Progress</div>
+                    <div className="font-semibold text-ink">Retake Cooldown in Progress</div>
                     <div className="text-sm text-slate-300">
                       Please review your notes. You can attempt this assessment again in{' '}
                       <span className="font-bold text-sky-400">{formatTimer(cooldownTime)}</span>.
@@ -537,7 +537,7 @@ export default function StudentModuleQuizPage() {
                 <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-400" />
                   <div>
-                    <div className="font-semibold text-white">Maximum Attempts Exhausted</div>
+                    <div className="font-semibold text-ink">Maximum Attempts Exhausted</div>
                     <div className="text-sm text-slate-300">
                       You have used all allowed attempts ({quizInfo.maxAttempts}). Please contact your course instructor or support to request an attempt reset.
                     </div>
@@ -588,7 +588,7 @@ export default function StudentModuleQuizPage() {
           {history.length > 0 && (
             <Card className="bg-slate-900/60 border-slate-800">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-bold flex items-center gap-2 text-white">
+                <CardTitle className="text-lg font-bold flex items-center gap-2 text-ink">
                   <History className="w-5 h-5 text-amber-400" /> Assessment History
                 </CardTitle>
               </CardHeader>
@@ -674,7 +674,7 @@ export default function StudentModuleQuizPage() {
         <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="font-bold text-white tracking-wide truncate max-w-[200px] sm:max-w-sm">
+              <div className="font-bold text-ink tracking-wide truncate max-w-[200px] sm:max-w-sm">
                 {quizInfo?.title || 'Assessment'}
               </div>
               <Badge variant="outline" className="text-slate-400 border-slate-700 text-xs hidden sm:inline-flex">
@@ -785,7 +785,7 @@ export default function StudentModuleQuizPage() {
                         onClick={() => currentQ && handleOptionToggle(currentQ.id, option.id, isMultiple)}
                         className={`group flex items-start gap-3.5 p-4 rounded-xl border transition-all cursor-pointer select-none ${
                           isChecked
-                            ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-md shadow-amber-500/5'
+                            ? 'bg-amber-500/10 border-amber-500/40 text-ink shadow-md shadow-amber-500/5'
                             : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-800/40'
                         }`}
                       >
@@ -855,7 +855,7 @@ export default function StudentModuleQuizPage() {
           <div className="space-y-4">
             <Card className="bg-slate-900/80 border-slate-800">
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
+                <CardTitle className="text-sm font-bold text-ink flex items-center justify-between">
                   <span>Question Palette</span>
                   <Badge variant="outline" className="text-xs text-slate-400 border-slate-700">
                     {answeredCount}/{totalQ} Done
@@ -917,10 +917,10 @@ export default function StudentModuleQuizPage() {
         {/* Submit Confirmation Modal */}
         {showSubmitModal && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-scale-in">
               <div className="flex items-center gap-3 text-amber-400">
                 <AlertTriangle className="w-6 h-6" />
-                <h3 className="text-xl font-bold text-white">Submit Assessment?</h3>
+                <h3 className="text-xl font-bold text-ink">Submit Assessment?</h3>
               </div>
 
               <div className="space-y-3 text-sm text-slate-300">
@@ -928,7 +928,7 @@ export default function StudentModuleQuizPage() {
                 <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Total Questions:</span>
-                    <span className="font-semibold text-white">{totalQ}</span>
+                    <span className="font-semibold text-ink">{totalQ}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Answered:</span>
@@ -1013,7 +1013,7 @@ export default function StudentModuleQuizPage() {
 
               {/* Title & Score */}
               <div className="space-y-2">
-                <h2 className="text-3xl md:text-4xl font-extrabold text-white">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-ink">
                   {isPass ? 'Assessment Passed! 🎉' : 'Assessment Not Passed'}
                 </h2>
                 <p className="text-slate-400 max-w-md mx-auto text-sm md:text-base">
@@ -1054,7 +1054,7 @@ export default function StudentModuleQuizPage() {
                 <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 max-w-lg mx-auto flex items-center gap-3 text-left">
                   <Sparkles className="w-6 h-6 text-emerald-400 shrink-0" />
                   <div>
-                    <div className="font-bold text-white">Next Module Unlocked</div>
+                    <div className="font-bold text-ink">Next Module Unlocked</div>
                     <div className="text-xs text-slate-300">
                       {result.requiresAssignment
                         ? 'Your practical assignment step is now ready for submission.'
@@ -1095,7 +1095,7 @@ export default function StudentModuleQuizPage() {
           {result.answersReview && result.answersReview.length > 0 && (
             <Card className="bg-slate-900/80 border-slate-800">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+                <CardTitle className="text-xl font-bold text-ink flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-amber-400" /> Answer Review
                 </CardTitle>
                 <p className="text-xs text-slate-400">

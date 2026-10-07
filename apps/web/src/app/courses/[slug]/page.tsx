@@ -94,11 +94,11 @@ export default function CourseDetailPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fbf3e6] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-100">
       <Navbar />
 
       {/* Header Banner */}
-      <section className="py-14 bg-[#f8eedd] border-b border-[#eadac4] tech-dot-grid">
+      <section className="py-14 bg-[#f1f5f9] border-b border-[#e2e8f0] tech-dot-grid">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             {/* Left 2 Cols: Course Overview */}
@@ -131,7 +131,7 @@ export default function CourseDetailPage() {
             </div>
 
             {/* Right Col: Pricing & Admission Action Card */}
-            <Card className="lg:col-span-1 border-[#e7d5bd] bg-[#fffbf4] p-6 space-y-6 shadow-xl">
+            <Card className="lg:col-span-1 border-[#e2e8f0] bg-[#ffffff] p-6 space-y-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono text-slate-400">TUITION / FEE:</span>
                 <span className="text-2xl font-mono font-bold text-ink">

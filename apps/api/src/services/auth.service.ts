@@ -78,7 +78,8 @@ export class AuthService {
         email: normalizedEmail,
         passwordHash,
         phone: params.phone?.trim() || null,
-        role: (params.role || Role.STUDENT) as Role,
+        // Public sign-up always creates students; staff accounts are created by an admin
+        role: Role.STUDENT,
         status: 'ACTIVE',
         mustChangePassword: false,
       },

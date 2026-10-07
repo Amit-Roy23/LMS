@@ -1,328 +1,329 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Navbar } from '../components/common/navbar';
 import { Footer } from '../components/common/footer';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
+import { Reveal } from '../components/motion/reveal';
+import { CourseCard, CourseCardData, CourseCardSkeleton } from '../components/course/course-card';
+import { apiClient } from '../lib/api';
 import {
-  GraduationCap,
-  Sparkles,
-  ShieldCheck,
-  Award,
-  BookOpen,
   ArrowRight,
+  Award,
+  BarChart3,
+  BookOpen,
   CheckCircle2,
+  ClipboardCheck,
+  GraduationCap,
   Lock,
   PlayCircle,
-  FileCode2,
+  QrCode,
+  ShieldCheck,
+  Sparkles,
+  Star,
   Users,
-  Terminal,
+  Video,
   Zap,
-  Cpu,
-  Layers,
-  Check,
-  Flame,
 } from 'lucide-react';
-import { Burst, Squiggle } from '../components/decor/burst';
 
-const STAGES = [
-  {
-    n: '01',
-    title: 'Video Lessons',
-    desc: 'Sequential playback with automatic heartbeats until 90% threshold.',
-    meta: 'LOCKED: Next Module',
-    icon: PlayCircle,
-    tone: 'bg-plum text-cream border-plum',
-    chip: 'border-cream/40 text-cream',
-    sub: 'text-cream/70',
-  },
-  {
-    n: '02',
-    title: 'Module Quizzes',
-    desc: 'Knowledge assessments unlocked only after 100% lesson completion.',
-    meta: 'BENCHMARK: 70% PASS',
-    icon: Terminal,
-    tone: 'bg-cream-50 text-plum border-[#e7d5bd]',
-    chip: 'border-plum/25 text-plum',
-    sub: 'text-slate-400',
-  },
-  {
-    n: '03',
-    title: 'Assignments',
-    desc: 'Production code repository submission with live demo links.',
-    meta: 'FORMAT: ZIP / GIT / URL',
-    icon: FileCode2,
-    tone: 'bg-peach-500 text-plum border-peach-500',
-    chip: 'border-plum/30 text-plum',
-    sub: 'text-plum/75',
-  },
-  {
-    n: '04',
-    title: 'Instructor Review',
-    desc: 'Human code audit with line-by-line feedback and scoring.',
-    meta: 'STATUS: QUEUED AUDIT',
-    icon: Users,
-    tone: 'bg-rust text-cream border-rust',
-    chip: 'border-cream/40 text-cream',
-    sub: 'text-cream/75',
-  },
-  {
-    n: '05',
-    title: 'Mock & Final Exam',
-    desc: 'Strict countdown timed comprehensive proctoring simulation.',
-    meta: 'BENCHMARK: 75% PASS',
-    icon: Zap,
-    tone: 'bg-cream-50 text-plum border-[#e7d5bd]',
-    chip: 'border-plum/25 text-plum',
-    sub: 'text-slate-400',
-  },
-  {
-    n: '06',
-    title: 'Credential Issuance',
-    desc: 'Server-generated PDF certificate with verifiable live QR code.',
-    meta: 'EXPORT: VECTOR PDF',
-    icon: Award,
-    tone: 'bg-pink-500 text-plum border-pink-500',
-    chip: 'border-plum/30 text-plum',
-    sub: 'text-plum/75',
-  },
+const SKILLS = [
+  'Python', 'Machine Learning', 'Figma', 'UX Research', 'React Native', 'Docker', 'Kubernetes', 'SEO',
+  'Growth Analytics', 'Cybersecurity', 'Brand Identity', 'TypeScript', 'Next.js', 'PostgreSQL', 'CI/CD',
 ];
 
-const TRACKS = [
-  {
-    tag: 'SOFTWARE TRACK',
-    price: '$199.00',
-    title: 'Full-Stack Web Development & Modern AI Engineering',
-    desc: 'Build complete end-to-end applications with Next.js 15, Node.js, TypeScript, PostgreSQL, state machines, and PDF generation.',
-    meta: '3 MODULES • 9 LESSONS',
-    href: '/courses/fullstack-ai-engineering',
-    cta: 'Inspect Syllabus',
-  },
-  {
-    tag: 'AI ARCHITECTURE',
-    price: '$249.00',
-    title: 'Autonomous AI Agents & Multi-Model Systems',
-    desc: 'Master tool orchestration, vector retrieval, embeddings, semantic cache, and agentic workflows with production reliability.',
-    meta: '4 MODULES • 12 LESSONS',
-    href: '/ai',
-    cta: 'Explore AI Lab',
-  },
-  {
-    tag: 'CLOUD INFRASTRUCTURE',
-    price: '$149.00',
-    title: 'Cloud DevOps, Kubernetes & CI/CD Pipelines',
-    desc: 'Containerization with Docker, multi-stage builds, automated testing pipelines, reverse proxies, and production deployment.',
-    meta: '3 MODULES • 8 LESSONS',
-    href: '/courses',
-    cta: 'View Catalog',
-  },
+const STEPS = [
+  { icon: PlayCircle, title: 'Watch & learn', text: 'Short, focused video lessons. Watch time is tracked securely, so progress is real.' },
+  { icon: ClipboardCheck, title: 'Practise & test', text: 'Module quizzes and hands-on practice tasks unlock as you complete each lesson.' },
+  { icon: Users, title: 'Get reviewed', text: 'Submit assignments and a capstone project; mentors review and give feedback.' },
+  { icon: Award, title: 'Get certified', text: 'Pass the final exam to earn a certificate anyone can verify with a QR code.' },
 ];
 
-const HERO_STATS = [
-  { value: '100% STRICT', label: 'Zero bypassable gates' },
-  { value: '≥ 90.0%', label: 'Realtime telemetry tracking' },
-  { value: 'QR + UUID', label: 'Blockchain-grade PDF export' },
-  { value: 'TRI-TIER', label: 'Student / Instructor / Admin' },
+const FEATURES = [
+  { icon: Lock, title: 'Server-enforced progression', text: 'Modules, quizzes and exams unlock in order. Rules live on the server, so nothing can be skipped.' },
+  { icon: Video, title: 'Tamper-proof video tracking', text: 'Only genuinely watched segments count, with watermarking and playback-speed limits.' },
+  { icon: ClipboardCheck, title: 'Question banks & quizzes', text: 'Randomised questions, attempt limits, cooldowns, CSV import and detailed analytics.' },
+  { icon: Users, title: 'Live classes & batches', text: 'Schedule live sessions, track attendance and mix live cohorts with self-paced learning.' },
+  { icon: BarChart3, title: 'Admin analytics', text: 'Revenue, enrolments, completion rates and review queues in one dashboard.' },
+  { icon: QrCode, title: 'Verifiable certificates', text: 'PDF certificates with QR codes and a public verification page for employers.' },
 ];
 
 export default function HomePage() {
+  const [courses, setCourses] = useState<CourseCardData[] | null>(null);
+
+  useEffect(() => {
+    apiClient<{ items: CourseCardData[] }>('/courses?limit=12')
+      .then((res) => setCourses(res.items || []))
+      .catch(() => setCourses([]));
+  }, []);
+
+  const featured = (courses || []).slice(0, 6);
+  const totalLessons = (courses || []).reduce((n, c) => n + (c.lessonsCount || 0), 0);
+  const heroCourse = (courses || []).find((c) => c.slug === 'ui-ux-product-design') || (courses || [])[0];
+
   return (
     <div className="min-h-screen flex flex-col bg-cream text-ink">
       <Navbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-rust text-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[1.25fr_1fr] gap-12 items-center py-16 lg:py-24">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-cream/40 px-4 py-1.5 text-sm font-medium text-cream/90 mb-7">
-              <Sparkles className="w-4 h-4 text-peach-500" />
-              <span>Deterministic Progression Architecture</span>
-            </div>
-
-            <h1 className="font-display text-[2.6rem] sm:text-6xl lg:text-7xl font-extrabold leading-[0.98]">
-              <span className="block text-cream">Online Creative &amp;</span>
-              <span className="block text-plum">IT Academy.</span>
+      <section className="relative overflow-hidden hero-mesh text-white">
+        <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-[1.1fr_1fr] gap-14 items-center">
+          <div className="animate-fade-up">
+            <span className="inline-flex items-center gap-2 rounded-full glass-dark px-3.5 py-1.5 text-xs sm:text-sm font-medium text-night-200">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              New programs in Design, Marketing &amp; Cloud
+            </span>
+            <h1 className="mt-6 text-[2.5rem] leading-[1.08] sm:text-6xl lg:text-[4.2rem] font-extrabold tracking-tight text-white">
+              Build job-ready skills.
+              <br />
+              <span className="text-gradient">Prove them</span> with a certificate.
             </h1>
-            <p className="mt-6 text-lg sm:text-xl text-cream/90 max-w-xl leading-snug">
-              Server-Enforced Mastery &amp; Verifiable Technical Certification
+            <p className="mt-6 text-base sm:text-lg text-night-300 max-w-xl leading-relaxed">
+              Structured courses in technology, design and marketing, with video lessons, quizzes,
+              mentor-reviewed projects and certificates employers can verify instantly.
             </p>
-            <p className="mt-4 text-sm sm:text-base text-cream/75 max-w-xl leading-relaxed">
-              The next-generation technical academy where skipping is impossible. Master full-stack software and AI through deterministic checkpoints: Video Tracking → Module Quizzes → Code Assignments → Instructor Approvals → Capstone Defense → Cryptographic PDF Diplomas.
-            </p>
-
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+            <div className="mt-9 flex flex-col sm:flex-row gap-3">
               <Link href="/courses">
-                <Button variant="primary" size="lg" className="gap-2">
-                  <span>Explore Technical Catalog</span>
-                  <ArrowRight className="w-4 h-4" />
+                <Button variant="primary" size="lg" className="w-full sm:w-auto">
+                  Explore courses <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
               <Link href="/login">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="lg"
-                  className="gap-2 border-cream text-cream hover:bg-cream hover:text-plum"
+                  className="w-full sm:w-auto bg-white/10 hover:bg-white/15 text-white border border-white/15 backdrop-blur"
                 >
-                  <Zap className="w-4 h-4" />
-                  <span>Instant 1-Click Demo</span>
+                  <Zap className="w-4 h-4 text-amber-500" /> Try a live demo
                 </Button>
               </Link>
-              <Link
-                href="/verify/CERT-2026-DEMO01"
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-cream/90 hover:text-cream underline-offset-4 hover:underline"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Verify Credentials
-              </Link>
             </div>
-
-            {/* Stats row */}
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-y-6">
-              {HERO_STATS.map((s, i) => (
-                <div key={s.value} className={i > 0 ? 'sm:border-l sm:border-cream/25 sm:pl-5' : ''}>
-                  <p className="font-display text-2xl font-extrabold text-cream">{s.value}</p>
-                  <p className="text-xs text-cream/75 mt-1">{s.label}</p>
+            <dl className="mt-12 grid grid-cols-3 gap-4 max-w-md">
+              {[
+                { k: courses ? String(courses.length) : '—', v: 'Programs' },
+                { k: courses ? String(totalLessons) : '—', v: 'Video lessons' },
+                { k: '100%', v: 'Verifiable' },
+              ].map((s) => (
+                <div key={s.v}>
+                  <dt className="text-2xl sm:text-3xl font-extrabold text-white">{s.k}</dt>
+                  <dd className="text-xs sm:text-sm text-night-400 mt-1">{s.v}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
 
-          {/* Collage of stage cards over a checker panel */}
-          <div className="relative hidden lg:block h-[460px]">
-            <div className="absolute inset-6 rounded-[2rem] checker-pink rotate-3" aria-hidden />
-            <Burst className="absolute -top-2 left-4 w-14 h-14 text-cream" />
-            <div className="absolute top-10 left-2 w-64 rotate-[-6deg] rounded-3xl bg-cream-50 text-plum p-6 shadow-soft">
-              <PlayCircle className="w-9 h-9 text-rust" />
-              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Video Lessons</p>
-              <p className="text-xs text-slate-400 mt-2">Sequential playback with automatic heartbeats until 90% threshold.</p>
-            </div>
-            <div className="absolute top-44 right-0 w-60 rotate-[5deg] rounded-3xl bg-plum text-cream p-6 shadow-soft">
-              <Terminal className="w-9 h-9 text-peach-500" />
-              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Module Quizzes</p>
-              <p className="text-xs text-cream/70 mt-2">Knowledge assessments unlocked only after 100% lesson completion.</p>
-            </div>
-            <div className="absolute bottom-0 left-12 w-56 rotate-[-3deg] rounded-3xl bg-peach-500 text-plum p-6 shadow-soft">
-              <Award className="w-9 h-9" />
-              <p className="font-display text-2xl font-extrabold mt-4 leading-tight">Credential Issuance</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Progression Pipeline */}
-      <section className="py-20 lg:py-28 bg-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto mb-14 relative">
-            <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-plum leading-[1.02]">
-              Deterministic 6-Stage Mastery Pipeline.
-            </h2>
-            <Burst className="hidden md:block absolute -top-6 -right-4 w-14 h-14" />
-            <p className="text-base sm:text-lg text-slate-300 mt-5">
-              Unlike generic platforms with loose progress checkboxes, our state machine enforces sequential mastery validation on the backend database.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {STAGES.map((st) => {
-              const Icon = st.icon;
-              return (
-                <div
-                  key={st.n}
-                  className={`rounded-3xl border p-7 flex flex-col justify-between min-h-[260px] transition-transform hover:-translate-y-1 ${st.tone}`}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className={`rounded-full border px-3.5 py-1 text-xs font-semibold ${st.chip}`}>
-                      Stage {st.n}
+          {/* Product preview */}
+          <div className="relative hidden md:block animate-fade-up" style={{ animationDelay: '150ms' }}>
+            <div className="absolute -inset-6 bg-brand-gradient opacity-25 blur-3xl rounded-full" aria-hidden />
+            <div className="relative rounded-3xl glass-dark p-3 shadow-2xl">
+              <div className="rounded-2xl overflow-hidden bg-night-900">
+                <div className="relative aspect-video">
+                  {heroCourse?.thumbnail ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={heroCourse.thumbnail} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-brand-gradient" />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-xl">
+                      <PlayCircle className="w-8 h-8 text-indigo-400" />
                     </span>
-                    <Icon className="w-9 h-9" />
                   </div>
-                  <div className="mt-8">
-                    <h3 className="font-display text-3xl font-extrabold leading-tight">{st.title}</h3>
-                    <p className={`text-sm mt-2 leading-relaxed ${st.sub}`}>{st.desc}</p>
-                  </div>
-                  <p className={`mt-5 text-[11px] font-semibold tracking-wide ${st.sub}`}>{st.meta}</p>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Tracks */}
-      <section className="py-20 lg:py-28 bg-plum text-cream relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
-            <div>
-              <p className="text-peach-500 font-semibold text-sm tracking-wide">CURATED SYLLABUS</p>
-              <h2 className="font-display text-4xl sm:text-6xl font-extrabold text-cream mt-2 leading-[1.02]">
-                Flagship Technical Tracks.
-              </h2>
-              <Squiggle className="mt-3" />
-            </div>
-            <Link href="/courses">
-              <Button variant="white" size="md" className="gap-1.5">
-                <span>View All Curriculums</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TRACKS.map((t, i) => (
-              <div
-                key={t.title}
-                className="rounded-3xl bg-cream-50 text-plum p-7 flex flex-col justify-between hover:-translate-y-1 transition-transform"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-display text-5xl font-extrabold text-peach-600">0{i + 1}</span>
-                    <span className="rounded-full bg-plum text-cream px-3 py-1 text-sm font-bold">{t.price}</span>
+                <div className="p-5 space-y-3">
+                  <p className="text-sm font-semibold text-white truncate">{heroCourse?.title || 'Your next course'}</p>
+                  <div className="h-2 rounded-full bg-night-800 overflow-hidden">
+                    <div className="h-full w-2/3 bg-brand-gradient rounded-full" />
                   </div>
-                  <p className="mt-5 text-[11px] font-semibold tracking-wide text-rust">{t.tag}</p>
-                  <h3 className="font-display text-2xl font-extrabold leading-tight mt-1">{t.title}</h3>
-                  <p className="text-sm text-slate-400 mt-3 leading-relaxed">{t.desc}</p>
-                </div>
-                <div className="pt-5 mt-6 border-t border-[#e7d5bd] flex items-center justify-between gap-3">
-                  <span className="text-[11px] font-semibold text-slate-400">{t.meta}</span>
-                  <Link href={t.href}>
-                    <Button variant="primary" size="sm" className="gap-1.5">
-                      {t.cta}
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
+                  <div className="flex justify-between text-xs text-night-400">
+                    <span>4 of 6 lessons</span>
+                    <span>67% complete</span>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <div className="absolute -left-8 top-10 rounded-2xl bg-white text-ink shadow-lift p-3.5 flex items-center gap-3 animate-float">
+              <span className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold">Quiz passed</span>
+                <span className="block text-xs text-slate-500">Score 92%</span>
+              </span>
+            </div>
+            <div
+              className="absolute -right-6 -bottom-6 rounded-2xl bg-white text-ink shadow-lift p-3.5 flex items-center gap-3 animate-float"
+              style={{ animationDelay: '1.5s' }}
+            >
+              <span className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <Award className="w-5 h-5 text-amber-500" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold">Certificate issued</span>
+                <span className="block text-xs text-slate-500">Verified by QR</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Skills marquee */}
+      <div className="border-b border-[#e2e8f0] bg-white overflow-hidden">
+        <div className="flex w-max animate-marquee py-4">
+          {[...SKILLS, ...SKILLS].map((s, i) => (
+            <span key={i} className="mx-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-400 whitespace-nowrap">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              {s}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Courses */}
+      <section className="py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
+            <div>
+              <p className="text-sm font-semibold text-indigo-400">Popular programs</p>
+              <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-ink">Learn what employers hire for</h2>
+              <p className="mt-3 text-slate-400 max-w-xl">
+                Every program combines video lessons, quizzes, assignments and a capstone project.
+              </p>
+            </div>
+            <Link href="/courses" className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300">
+              View all courses <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Reveal>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {courses === null
+              ? Array.from({ length: 6 }).map((_, i) => <CourseCardSkeleton key={i} />)
+              : featured.map((c, i) => (
+                  <Reveal key={c.id} delay={(i % 3) * 90} className="h-full">
+                    <CourseCard course={c} />
+                  </Reveal>
+                ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="py-20 lg:py-24 bg-white border-y border-[#e2e8f0]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center max-w-2xl mx-auto mb-14">
+            <p className="text-sm font-semibold text-indigo-400">How it works</p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-ink">A clear path from first lesson to certificate</h2>
+          </Reveal>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={i * 100} className="relative rounded-2xl border border-[#e2e8f0] bg-cream p-6">
+                <span className="absolute top-5 right-5 text-5xl font-extrabold text-indigo-900 select-none">0{i + 1}</span>
+                <span className="w-12 h-12 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
+                  <Icon className="w-6 h-6 text-white" />
+                </span>
+                <h3 className="mt-5 text-lg font-bold text-ink">{title}</h3>
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{text}</p>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Verification Callout */}
-      <section className="py-20 bg-peach-500 text-plum relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div className="max-w-3xl relative">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <ShieldCheck className="w-4 h-4" /> CRYPTOGRAPHIC VERIFICATION · PUBLIC REGISTRY
-            </div>
-            <h2 className="font-display text-4xl sm:text-6xl font-extrabold leading-[1.02] mt-3">
-              Instant Public Diploma Verification.
+      {/* Features */}
+      <section className="py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-start">
+          <Reveal className="lg:sticky lg:top-28">
+            <p className="text-sm font-semibold text-indigo-400">Built for academies</p>
+            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-ink">
+              Everything you need to run online programs
             </h2>
-            <p className="text-base text-plum/80 mt-4 leading-relaxed">
-              Employers, recruiters, and academic institutions can verify any diploma issued by our academy in real time using the certificate serial number or QR code.
+            <p className="mt-4 text-slate-400 leading-relaxed">
+              Students get a focused learning experience. Admins and instructors get the tools to run
+              courses, review work and grow enrolments.
             </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/login">
+                <Button variant="primary" size="lg">
+                  Open the demo <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </Reveal>
+          <div className="grid sm:grid-cols-2 gap-5">
+            {FEATURES.map(({ icon: Icon, title, text }, i) => (
+              <Reveal key={title} delay={(i % 2) * 100} className="rounded-2xl bg-white border border-[#e2e8f0] p-6 card-hover">
+                <span className="w-11 h-11 rounded-xl bg-indigo-50 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-indigo-400" />
+                </span>
+                <h3 className="mt-4 font-bold text-ink">{title}</h3>
+                <p className="mt-2 text-sm text-slate-400 leading-relaxed">{text}</p>
+              </Reveal>
+            ))}
           </div>
-          <div className="shrink-0 relative">
-            <Burst className="absolute -top-10 -right-2 w-12 h-12 text-plum" />
-            <Link href="/verify/CERT-2026-DEMO01">
-              <Button variant="primary" size="lg" className="gap-2">
-                <Award className="w-4 h-4" />
-                <span>Test Live Verification Engine</span>
+        </div>
+      </section>
+
+      {/* Verification band */}
+      <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24">
+        <Reveal className="relative max-w-7xl mx-auto overflow-hidden rounded-3xl hero-mesh text-white px-6 py-12 sm:px-12 lg:py-16">
+          <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
+          <div className="relative grid lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-500">
+                <ShieldCheck className="w-4 h-4" /> Public verification registry
+              </span>
+              <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-white">
+                Certificates employers can trust
+              </h2>
+              <p className="mt-4 text-night-300 max-w-xl leading-relaxed">
+                Every certificate carries a unique ID and QR code. Recruiters can confirm it is genuine in
+                seconds, with no login needed.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
+              <Link href="/verify/CERT-2026-AI-001">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white text-ink hover:bg-cream-100">
+                  <QrCode className="w-4 h-4" /> Verify a sample certificate
+                </Button>
+              </Link>
+              <Link href="/courses">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white/10 hover:bg-white/15 text-white border-white/15">
+                  <GraduationCap className="w-4 h-4" /> Start learning
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* Final CTA */}
+      <section className="pb-20 lg:pb-24">
+        <Reveal className="max-w-3xl mx-auto px-4 text-center">
+          <div className="flex justify-center gap-1 text-amber-500 mb-4" aria-hidden>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className="w-5 h-5 fill-current" />
+            ))}
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-ink">Ready to start your next chapter?</h2>
+          <p className="mt-4 text-slate-400">
+            Browse the catalogue, or sign in with a demo account to see the full student and admin
+            experience.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+            <Link href="/courses">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto">
+                <BookOpen className="w-4 h-4" /> Browse courses
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                <Zap className="w-4 h-4 text-amber-500" /> Try a demo account
               </Button>
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       <Footer />

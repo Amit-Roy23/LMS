@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { UserSummary, Role } from '@academy/shared';
 import { apiClient } from '../lib/api';
 import { useRouter } from 'next/navigation';
+import { DemoAccountKey, getDemoAccount } from '../lib/demo-accounts';
 
 interface AuthContextType {
   user: UserSummary | null;
@@ -11,7 +12,7 @@ interface AuthContextType {
   login: (credentials: { email?: string; identifier?: string; password: string }) => Promise<void>;
   register: (data: { name: string; email: string; password: string; role?: Role; phone?: string | null }) => Promise<void>;
   logout: () => Promise<void>;
-  loginAsDemo: (role: 'admin' | 'instructor' | 'student1' | 'student2') => Promise<void>;
+  loginAsDemo: (role: DemoAccountKey) => Promise<void>;
   refreshUser: () => Promise<void>;
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
 }
@@ -97,17 +98,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const loginAsDemo = async (role: 'admin' | 'instructor' | 'student1' | 'student2') => {
-    const creds: Record<string, { email: string; password: string }> = {
-      admin: { email: 'admin@creativeit.academy', password: 'Admin@123' },
-      instructor: { email: 'instructor@creativeit.academy', password: 'Instructor@123' },
-      student1: { email: 'student1@creativeit.academy', password: 'Student@123' },
-      student2: { email: 'student2@creativeit.academy', password: 'Student@123' },
-    };
-
-    const target = creds[role];
+  const loginAsDemo = async (role: DemoAccountKey) => {
+    const target = getDemoAccount(role);
     if (target) {
-      await login(target);
+      await login({ email: target.email, password: target.password });
     }
   };
 

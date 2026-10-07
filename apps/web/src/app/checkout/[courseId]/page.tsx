@@ -174,8 +174,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: Order Summary */}
-          <Card className="md:col-span-1 border-[#e7d5bd] bg-[#fffbf4] p-6 space-y-6 shadow-xl">
-            <h3 className="font-mono font-bold text-xs text-ink border-b border-[#eadac4] pb-3 uppercase tracking-wider">
+          <Card className="md:col-span-1 border-[#e2e8f0] bg-[#ffffff] p-6 space-y-6 shadow-xl">
+            <h3 className="font-mono font-bold text-xs text-ink border-b border-[#e2e8f0] pb-3 uppercase tracking-wider">
               ORDER SPECIFICATION
             </h3>
 
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
                 <p className="text-slate-400 font-mono text-[11px] mt-0.5">{course?.category}</p>
               </div>
 
-              <div className="pt-3 border-t border-[#eadac4] flex items-center justify-between">
+              <div className="pt-3 border-t border-[#e2e8f0] flex items-center justify-between">
                 <span className="text-slate-400 font-mono">TUITION:</span>
                 <span className="font-mono font-semibold text-ink">{formatCurrency(course?.price || 0, course?.currency)}</span>
               </div>
@@ -193,7 +193,7 @@ export default function CheckoutPage() {
                 <span className="text-slate-400 font-mono">PLATFORM FEE:</span>
                 <span className="text-emerald-400 font-mono font-semibold">$0.00 (WAIVED)</span>
               </div>
-              <div className="pt-3 border-t border-[#eadac4] flex items-center justify-between text-base font-extrabold text-ink">
+              <div className="pt-3 border-t border-[#e2e8f0] flex items-center justify-between text-base font-extrabold text-ink">
                 <span className="font-mono">TOTAL DUE:</span>
                 <span className="text-blue-400 font-mono">{formatCurrency(course?.price || 0, course?.currency)}</span>
               </div>

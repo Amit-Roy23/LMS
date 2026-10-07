@@ -1,0 +1,259 @@
+{
+  "lessons": {
+    "python-ai-data-science::1.1 Python Essentials for Data Work": {
+      "videoUrl": "/media/lessons/python-ai-data-science/1-1-python-essentials-for-data-work.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/1-1-python-essentials-for-data-work.jpg",
+      "durationSeconds": 53
+    },
+    "python-ai-data-science::1.2 NumPy Arrays & Vectorised Maths": {
+      "videoUrl": "/media/lessons/python-ai-data-science/1-2-numpy-arrays-vectorised-maths.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/1-2-numpy-arrays-vectorised-maths.jpg",
+      "durationSeconds": 56
+    },
+    "python-ai-data-science::1.3 Pandas DataFrames: Clean, Group & Summarise": {
+      "videoUrl": "/media/lessons/python-ai-data-science/1-3-pandas-dataframes-clean-group-summarise.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/1-3-pandas-dataframes-clean-group-summarise.jpg",
+      "durationSeconds": 53
+    },
+    "python-ai-data-science::2.1 Supervised Learning & Train/Test Splits": {
+      "videoUrl": "/media/lessons/python-ai-data-science/2-1-supervised-learning-train-test-splits.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/2-1-supervised-learning-train-test-splits.jpg",
+      "durationSeconds": 53
+    },
+    "python-ai-data-science::2.2 Regression & Classification with scikit-learn": {
+      "videoUrl": "/media/lessons/python-ai-data-science/2-2-regression-classification-with-scikit-learn.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/2-2-regression-classification-with-scikit-learn.jpg",
+      "durationSeconds": 53
+    },
+    "python-ai-data-science::2.3 Model Evaluation: Accuracy, Precision & Recall": {
+      "videoUrl": "/media/lessons/python-ai-data-science/2-3-model-evaluation-accuracy-precision-recall.mp4",
+      "posterUrl": "/media/lessons/python-ai-data-science/2-3-model-evaluation-accuracy-precision-recall.jpg",
+      "durationSeconds": 53
+    },
+    "ui-ux-product-design::1.1 The Design Thinking Process": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/1-1-the-design-thinking-process.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/1-1-the-design-thinking-process.jpg",
+      "durationSeconds": 58
+    },
+    "ui-ux-product-design::1.2 User Research & Personas": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/1-2-user-research-personas.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/1-2-user-research-personas.jpg",
+      "durationSeconds": 53
+    },
+    "ui-ux-product-design::1.3 Wireframes & Information Architecture": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/1-3-wireframes-information-architecture.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/1-3-wireframes-information-architecture.jpg",
+      "durationSeconds": 53
+    },
+    "ui-ux-product-design::2.1 Visual Hierarchy, Type & Colour": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/2-1-visual-hierarchy-type-colour.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/2-1-visual-hierarchy-type-colour.jpg",
+      "durationSeconds": 56
+    },
+    "ui-ux-product-design::2.2 Components & Auto Layout in Figma": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/2-2-components-auto-layout-in-figma.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/2-2-components-auto-layout-in-figma.jpg",
+      "durationSeconds": 53
+    },
+    "ui-ux-product-design::2.3 Prototyping & Usability Testing": {
+      "videoUrl": "/media/lessons/ui-ux-product-design/2-3-prototyping-usability-testing.mp4",
+      "posterUrl": "/media/lessons/ui-ux-product-design/2-3-prototyping-usability-testing.jpg",
+      "durationSeconds": 53
+    },
+    "digital-marketing-growth::1.1 Funnels, Audiences & Positioning": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/1-1-funnels-audiences-positioning.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/1-1-funnels-audiences-positioning.jpg",
+      "durationSeconds": 56
+    },
+    "digital-marketing-growth::1.2 SEO Fundamentals & Keyword Research": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/1-2-seo-fundamentals-keyword-research.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/1-2-seo-fundamentals-keyword-research.jpg",
+      "durationSeconds": 53
+    },
+    "digital-marketing-growth::1.3 Content Marketing That Converts": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/1-3-content-marketing-that-converts.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/1-3-content-marketing-that-converts.jpg",
+      "durationSeconds": 58
+    },
+    "digital-marketing-growth::2.1 Paid Social & Search Campaigns": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/2-1-paid-social-search-campaigns.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/2-1-paid-social-search-campaigns.jpg",
+      "durationSeconds": 53
+    },
+    "digital-marketing-growth::2.2 Email Automation & Lead Nurturing": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/2-2-email-automation-lead-nurturing.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/2-2-email-automation-lead-nurturing.jpg",
+      "durationSeconds": 56
+    },
+    "digital-marketing-growth::2.3 Analytics, KPIs & Growth Experiments": {
+      "videoUrl": "/media/lessons/digital-marketing-growth/2-3-analytics-kpis-growth-experiments.mp4",
+      "posterUrl": "/media/lessons/digital-marketing-growth/2-3-analytics-kpis-growth-experiments.jpg",
+      "durationSeconds": 53
+    },
+    "cloud-devops-kubernetes::1.1 Docker Images & Containers": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/1-1-docker-images-containers.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/1-1-docker-images-containers.jpg",
+      "durationSeconds": 61
+    },
+    "cloud-devops-kubernetes::1.2 Docker Compose for Local Environments": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/1-2-docker-compose-for-local-environments.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/1-2-docker-compose-for-local-environments.jpg",
+      "durationSeconds": 61
+    },
+    "cloud-devops-kubernetes::1.3 CI/CD Pipelines with GitHub Actions": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/1-3-ci-cd-pipelines-with-github-actions.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/1-3-ci-cd-pipelines-with-github-actions.jpg",
+      "durationSeconds": 64
+    },
+    "cloud-devops-kubernetes::2.1 Kubernetes Pods, Deployments & Services": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/2-1-kubernetes-pods-deployments-services.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/2-1-kubernetes-pods-deployments-services.jpg",
+      "durationSeconds": 64
+    },
+    "cloud-devops-kubernetes::2.2 Scaling, Rollouts & Rollbacks": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/2-2-scaling-rollouts-rollbacks.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/2-2-scaling-rollouts-rollbacks.jpg",
+      "durationSeconds": 53
+    },
+    "cloud-devops-kubernetes::2.3 Monitoring, Logs & Alerts": {
+      "videoUrl": "/media/lessons/cloud-devops-kubernetes/2-3-monitoring-logs-alerts.mp4",
+      "posterUrl": "/media/lessons/cloud-devops-kubernetes/2-3-monitoring-logs-alerts.jpg",
+      "durationSeconds": 56
+    },
+    "react-native-mobile::1.1 Expo Setup & Core Components": {
+      "videoUrl": "/media/lessons/react-native-mobile/1-1-expo-setup-core-components.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/1-1-expo-setup-core-components.jpg",
+      "durationSeconds": 64
+    },
+    "react-native-mobile::1.2 Flexbox Layouts & Styling": {
+      "videoUrl": "/media/lessons/react-native-mobile/1-2-flexbox-layouts-styling.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/1-2-flexbox-layouts-styling.jpg",
+      "durationSeconds": 56
+    },
+    "react-native-mobile::1.3 Navigation with React Navigation": {
+      "videoUrl": "/media/lessons/react-native-mobile/1-3-navigation-with-react-navigation.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/1-3-navigation-with-react-navigation.jpg",
+      "durationSeconds": 53
+    },
+    "react-native-mobile::2.1 Fetching Data & Managing State": {
+      "videoUrl": "/media/lessons/react-native-mobile/2-1-fetching-data-managing-state.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/2-1-fetching-data-managing-state.jpg",
+      "durationSeconds": 56
+    },
+    "react-native-mobile::2.2 Camera, Notifications & Device APIs": {
+      "videoUrl": "/media/lessons/react-native-mobile/2-2-camera-notifications-device-apis.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/2-2-camera-notifications-device-apis.jpg",
+      "durationSeconds": 56
+    },
+    "react-native-mobile::2.3 Building & Publishing to the Stores": {
+      "videoUrl": "/media/lessons/react-native-mobile/2-3-building-publishing-to-the-stores.mp4",
+      "posterUrl": "/media/lessons/react-native-mobile/2-3-building-publishing-to-the-stores.jpg",
+      "durationSeconds": 53
+    },
+    "cybersecurity-essentials::1.1 The CIA Triad & Threat Modelling": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/1-1-the-cia-triad-threat-modelling.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/1-1-the-cia-triad-threat-modelling.jpg",
+      "durationSeconds": 53
+    },
+    "cybersecurity-essentials::1.2 Networking Basics for Security": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/1-2-networking-basics-for-security.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/1-2-networking-basics-for-security.jpg",
+      "durationSeconds": 53
+    },
+    "cybersecurity-essentials::1.3 Passwords, Hashing & MFA": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/1-3-passwords-hashing-mfa.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/1-3-passwords-hashing-mfa.jpg",
+      "durationSeconds": 51
+    },
+    "cybersecurity-essentials::2.1 OWASP Top 10: Injection & Broken Access Control": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/2-1-owasp-top-10-injection-broken-access-control.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/2-1-owasp-top-10-injection-broken-access-control.jpg",
+      "durationSeconds": 53
+    },
+    "cybersecurity-essentials::2.2 Vulnerability Scanning & Pen Testing": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/2-2-vulnerability-scanning-pen-testing.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/2-2-vulnerability-scanning-pen-testing.jpg",
+      "durationSeconds": 53
+    },
+    "cybersecurity-essentials::2.3 Incident Response Playbooks": {
+      "videoUrl": "/media/lessons/cybersecurity-essentials/2-3-incident-response-playbooks.mp4",
+      "posterUrl": "/media/lessons/cybersecurity-essentials/2-3-incident-response-playbooks.jpg",
+      "durationSeconds": 56
+    },
+    "graphic-design-branding::1.1 Elements & Principles of Design": {
+      "videoUrl": "/media/lessons/graphic-design-branding/1-1-elements-principles-of-design.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/1-1-elements-principles-of-design.jpg",
+      "durationSeconds": 56
+    },
+    "graphic-design-branding::1.2 Colour Theory & Palettes": {
+      "videoUrl": "/media/lessons/graphic-design-branding/1-2-colour-theory-palettes.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/1-2-colour-theory-palettes.jpg",
+      "durationSeconds": 53
+    },
+    "graphic-design-branding::1.3 Typography That Speaks": {
+      "videoUrl": "/media/lessons/graphic-design-branding/1-3-typography-that-speaks.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/1-3-typography-that-speaks.jpg",
+      "durationSeconds": 53
+    },
+    "graphic-design-branding::2.1 Logo Design Process": {
+      "videoUrl": "/media/lessons/graphic-design-branding/2-1-logo-design-process.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/2-1-logo-design-process.jpg",
+      "durationSeconds": 56
+    },
+    "graphic-design-branding::2.2 Social Media Creatives": {
+      "videoUrl": "/media/lessons/graphic-design-branding/2-2-social-media-creatives.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/2-2-social-media-creatives.jpg",
+      "durationSeconds": 56
+    },
+    "graphic-design-branding::2.3 Brand Guidelines & Style Guides": {
+      "videoUrl": "/media/lessons/graphic-design-branding/2-3-brand-guidelines-style-guides.mp4",
+      "posterUrl": "/media/lessons/graphic-design-branding/2-3-brand-guidelines-style-guides.jpg",
+      "durationSeconds": 56
+    },
+    "fullstack-ai-engineering::1.1 HTTP Protocols, RESTful API Principles & Monorepos": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/1-1-http-protocols-restful-api-principles-monorepos.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/1-1-http-protocols-restful-api-principles-monorepos.jpg",
+      "durationSeconds": 53
+    },
+    "fullstack-ai-engineering::1.2 TypeScript Mastery, Generics & Runtime Zod Schema Validation": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/1-2-typescript-mastery-generics-runtime-zod-schema-validatio.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/1-2-typescript-mastery-generics-runtime-zod-schema-validatio.jpg",
+      "durationSeconds": 58
+    },
+    "fullstack-ai-engineering::1.3 Database Modeling with Prisma ORM & PostgreSQL": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/1-3-database-modeling-with-prisma-orm-postgresql.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/1-3-database-modeling-with-prisma-orm-postgresql.jpg",
+      "durationSeconds": 58
+    },
+    "fullstack-ai-engineering::2.1 Next.js App Router, Server Components & Streaming SSR": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/2-1-next-js-app-router-server-components-streaming-ssr.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/2-1-next-js-app-router-server-components-streaming-ssr.jpg",
+      "durationSeconds": 56
+    },
+    "fullstack-ai-engineering::2.2 Server State Management with TanStack Query & Optimistic Updates": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/2-2-server-state-management-with-tanstack-query-optimistic-u.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/2-2-server-state-management-with-tanstack-query-optimistic-u.jpg",
+      "durationSeconds": 56
+    },
+    "fullstack-ai-engineering::2.3 Responsive Design Systems with Tailwind CSS & Micro-Animations": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/2-3-responsive-design-systems-with-tailwind-css-micro-animat.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/2-3-responsive-design-systems-with-tailwind-css-micro-animat.jpg",
+      "durationSeconds": 53
+    },
+    "fullstack-ai-engineering::3.1 Server-Enforced State Machines & Progression Logic": {
+      "videoUrl": "/media/lessons/fullstack-ai-engineering/3-1-server-enforced-state-machines-progression-logic.mp4",
+      "posterUrl": "/media/lessons/fullstack-ai-engineering/3-1-server-enforced-state-machines-progression-logic.jpg",
+      "durationSeconds": 53
+    }
+  },
+  "covers": {
+    "python-ai-data-science": "/media/covers/python-ai-data-science.jpg",
+    "ui-ux-product-design": "/media/covers/ui-ux-product-design.jpg",
+    "digital-marketing-growth": "/media/covers/digital-marketing-growth.jpg",
+    "cloud-devops-kubernetes": "/media/covers/cloud-devops-kubernetes.jpg",
+    "react-native-mobile": "/media/covers/react-native-mobile.jpg",
+    "cybersecurity-essentials": "/media/covers/cybersecurity-essentials.jpg",
+    "graphic-design-branding": "/media/covers/graphic-design-branding.jpg",
+    "fullstack-ai-engineering": "/media/covers/fullstack-ai-engineering.jpg"
+  }
+}

@@ -4,135 +4,237 @@
 
 @layer base {
   :root {
-    --background: 37 72% 94%;
-    --foreground: 330 52% 12%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
 
-    --card: 40 100% 98%;
-    --card-foreground: 330 52% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 40 100% 98%;
-    --popover-foreground: 330 52% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 330 52% 12%;
-    --primary-foreground: 37 72% 94%;
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 36 62% 90%;
-    --secondary-foreground: 330 52% 12%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 36 62% 90%;
-    --muted-foreground: 345 13% 40%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 35%;
 
-    --accent: 18 62% 44%;
-    --accent-foreground: 37 72% 94%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 347 77% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 46% 84%;
-    --input: 36 46% 84%;
-    --ring: 18 62% 44%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 59%;
 
-    --radius: 1rem;
+    --radius: 0.875rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    background-color: #fbf3e6;
-    color: #2f0f1f;
-    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   h1,
   h2,
   h3 {
-    font-family: 'Bricolage Grotesque', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
   }
 
   h1,
   h2 {
     font-weight: 800;
-    letter-spacing: -0.035em;
+  }
+
+  code,
+  pre,
+  kbd {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  :focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  /* Big chunky display heading */
   .font-display {
-    font-family: 'Bricolage Grotesque', 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-    letter-spacing: -0.035em;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.025em;
   }
 
-  /* Subtle dotted texture */
+  /* Brand gradient text */
+  .text-gradient {
+    background-image: linear-gradient(100deg, #6366f1 0%, #8b5cf6 45%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-brand-gradient {
+    background-image: linear-gradient(120deg, #4f46e5 0%, #7c3aed 55%, #a855f7 100%);
+  }
+
+  /* Deep navy hero with soft glowing colour mesh */
+  .hero-mesh {
+    background-color: #0b1020;
+    background-image:
+      radial-gradient(60% 70% at 85% 10%, rgba(99, 102, 241, 0.45) 0%, transparent 60%),
+      radial-gradient(50% 60% at 10% 90%, rgba(168, 85, 247, 0.32) 0%, transparent 60%),
+      radial-gradient(35% 40% at 55% 55%, rgba(14, 165, 233, 0.18) 0%, transparent 70%);
+  }
+
+  /* Subtle grid lines for dark sections */
+  .grid-lines {
+    background-image:
+      linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  }
+
+  /* Subtle dotted texture for light sections */
   .tech-dot-grid {
     background-size: 22px 22px;
-    background-image: radial-gradient(rgba(180, 83, 42, 0.16) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(79, 70, 229, 0.12) 1px, transparent 1px);
   }
 
   .tech-grid {
     background-size: 32px 32px;
     background-image:
-      linear-gradient(to right, rgba(47, 15, 31, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(47, 15, 31, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
   }
 
-  /* Playful pink diamond checker pattern */
+  /* Auth page backdrop (kept under its earlier name) */
   .checker-pink {
-    background-color: #f48fb9;
+    background-color: #0b1020;
     background-image:
-      linear-gradient(45deg, #f7b0cf 25%, transparent 25%, transparent 75%, #f7b0cf 75%),
-      linear-gradient(45deg, #f7b0cf 25%, transparent 25%, transparent 75%, #f7b0cf 75%);
-    background-size: 56px 56px;
-    background-position: 0 0, 28px 28px;
+      radial-gradient(55% 60% at 80% 0%, rgba(99, 102, 241, 0.5) 0%, transparent 60%),
+      radial-gradient(45% 55% at 0% 100%, rgba(168, 85, 247, 0.38) 0%, transparent 60%);
   }
 
-  /* Soft diagonal stripes in peach */
   .hero-stripes {
-    background-color: #fce5d6;
-    background-image: repeating-linear-gradient(
-      135deg,
-      rgba(238, 139, 83, 0.25) 0 10px,
-      transparent 10px 22px
-    );
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
   }
 
   /* Highlighted word inside a heading */
   .highlight-pill {
     display: inline-block;
-    background: #2f0f1f;
-    color: #fbf3e6;
-    padding: 0 0.3em 0.06em;
-    border-radius: 0.5em;
+    background-image: linear-gradient(120deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    padding: 0 0.3em 0.05em;
+    border-radius: 0.45em;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(160%) blur(14px);
+  }
+
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(14px);
   }
 
   .panel-flat {
-    background: #fffbf4;
-    border: 1px solid #eadac4;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
   }
 
   .panel-card {
-    background: #fffbf4;
-    border: 1px solid #e7d5bd;
-    box-shadow: 0 4px 18px -6px rgba(47, 15, 31, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12);
   }
 
   .panel-active {
-    background: #fbefe6;
-    border: 1px solid #b4532a;
+    background: #eef2ff;
+    border: 1px solid #6366f1;
+  }
+
+  /* Lift on hover for interactive cards */
+  .card-hover {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -18px rgba(15, 23, 42, 0.28);
+    border-color: #c7d2fe;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #eef2f7 0px, #f8fafc 120px, #eef2f7 240px);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+
+  /* Scroll-reveal: elements fade up once they enter the viewport (see <Reveal />) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #fbf3e6;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #e0ccb2;
+  background: #cbd5e1;
   border-radius: 999px;
+  border: 3px solid #f8fafc;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #b4532a;
+  background: #94a3b8;
 }

@@ -24,6 +24,7 @@ export class ReviewController {
       const result = await reviewService.reviewAssignmentSubmission({
         submissionId,
         reviewerId: req.user!.userId,
+        reviewerRole: req.user!.role,
         status,
         feedback,
         grade,
@@ -41,6 +42,7 @@ export class ReviewController {
       const result = await reviewService.reviewProjectSubmission({
         submissionId,
         reviewerId: req.user!.userId,
+        reviewerRole: req.user!.role,
         status,
         feedback,
         grade,

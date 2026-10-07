@@ -24,6 +24,11 @@ export class StorageService {
     const ttl = ttlSeconds || this.defaultTtl;
     const expires = Math.floor(Date.now() / 1000) + ttl;
 
+    // Public assets bundled with the web app (demo lesson videos, posters, covers) need no signing
+    if (fileKeyOrUrl.startsWith('/media/')) {
+      return fileKeyOrUrl;
+    }
+
     // If it's already an external absolute URL that doesn't need signing (e.g. external link)
     if (fileKeyOrUrl.startsWith('http://') || fileKeyOrUrl.startsWith('https://')) {
       if (!fileKeyOrUrl.includes('/api/v1/storage/') && !fileKeyOrUrl.includes('/uploads/')) {

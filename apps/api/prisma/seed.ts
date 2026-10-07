@@ -36,6 +36,7 @@ import {
   ResourceType,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { seedDemoCatalog } from './seed-catalog';
 
 const prisma = new PrismaClient();
 
@@ -1434,6 +1435,9 @@ async function main() {
   });
 
   console.log('✅ Seeded Enrollments, Registrations, Inquiries, Notification Templates & Logs');
+  // 14. Demo catalogue: more courses, instructors, rendered lesson videos and learners
+  await seedDemoCatalog(prisma, { defaultInstructorId: instructor.id, adminId: admin.id });
+
   console.log('🎉 Comprehensive database seeding completed successfully!');
 }
 

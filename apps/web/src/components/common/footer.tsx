@@ -1,129 +1,103 @@
 import React from 'react';
 import Link from 'next/link';
-import { GraduationCap, Github, Twitter, Linkedin, ShieldCheck, Award, Heart } from 'lucide-react';
+import { GraduationCap, Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone } from 'lucide-react';
+
+const COLUMNS = [
+  {
+    title: 'Programs',
+    links: [
+      { href: '/courses', label: 'All courses' },
+      { href: '/courses/fullstack-ai-engineering', label: 'Full-Stack & AI Engineering' },
+      { href: '/courses/ui-ux-product-design', label: 'UI/UX & Product Design' },
+      { href: '/courses/cloud-devops-kubernetes', label: 'Cloud DevOps & Kubernetes' },
+      { href: '/courses/digital-marketing-growth', label: 'Digital Marketing' },
+    ],
+  },
+  {
+    title: 'Students',
+    links: [
+      { href: '/login', label: 'Student portal' },
+      { href: '/verify/CERT-2026-AI-001', label: 'Verify a certificate' },
+      { href: '/career', label: 'Career support' },
+      { href: '/ai', label: 'AI & Labs' },
+    ],
+  },
+  {
+    title: 'Academy',
+    links: [
+      { href: '/about', label: 'About us' },
+      { href: '/contact', label: 'Admissions & contact' },
+      { href: '/api/docs', label: 'Developer API (Swagger)' },
+    ],
+  },
+];
+
+const SOCIALS = [
+  { icon: Github, label: 'GitHub' },
+  { icon: Linkedin, label: 'LinkedIn' },
+  { icon: Youtube, label: 'YouTube' },
+  { icon: Twitter, label: 'X' },
+];
 
 export function Footer() {
   return (
-    <footer className="bg-plum text-cream/75">
-      <div className="h-6 checker-pink" aria-hidden />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
-          {/* Col 1 */}
-          <div className="space-y-4 md:col-span-1">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-peach-500 flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-plum" />
-              </div>
-              <span className="font-display font-extrabold text-cream text-lg tracking-tight">
-                Creative & IT Academy
+    <footer className="relative bg-night-950 text-night-400 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-px bg-brand-gradient opacity-60" aria-hidden />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+          <div className="col-span-2 space-y-5">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center">
+                <GraduationCap className="w-5 h-5 text-white" />
               </span>
-            </div>
-            <p className="text-xs text-cream/70 leading-relaxed">
-              Empowering next-generation engineers with industry-vetted curriculums, server-enforced mastery progression, and cryptographically verifiable certifications.
+              <span className="font-extrabold text-lg text-white tracking-tight">Creative &amp; IT Academy</span>
+            </Link>
+            <p className="text-sm leading-relaxed max-w-sm">
+              Job-ready programs in technology, design and marketing, with mentor-reviewed projects and
+              certificates that employers can verify in seconds.
             </p>
-            <div className="flex items-center gap-2 pt-2">
-              <a href="#" className="p-2 rounded-full bg-cream/10 hover:bg-peach-500 hover:text-plum transition-colors">
-                <Github className="w-3.5 h-3.5" />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-cream/10 hover:bg-peach-500 hover:text-plum transition-colors">
-                <Twitter className="w-3.5 h-3.5" />
-              </a>
-              <a href="#" className="p-2 rounded-full bg-cream/10 hover:bg-peach-500 hover:text-plum transition-colors">
-                <Linkedin className="w-3.5 h-3.5" />
-              </a>
+            <div className="space-y-1.5 text-sm">
+              <p className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-indigo-500" /> admissions@creativeit.academy
+              </p>
+              <p className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-indigo-500" /> +91 98765 43210
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {SOCIALS.map(({ icon: Icon, label }) => (
+                <a
+                  key={label}
+                  href="#"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-indigo-600 hover:border-indigo-500 hover:text-white transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Col 2 */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-cream">
-              Learning Programs
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/courses" className="hover:text-peach-500 transition-colors">
-                  Full-Stack Web Development
-                </Link>
-              </li>
-              <li>
-                <Link href="/ai" className="hover:text-peach-500 transition-colors">
-                  Applied AI & Prompt Engineering
-                </Link>
-              </li>
-              <li>
-                <Link href="/courses" className="hover:text-peach-500 transition-colors">
-                  Cloud DevOps & Microservices
-                </Link>
-              </li>
-              <li>
-                <Link href="/courses" className="hover:text-peach-500 transition-colors">
-                  Mobile App Development
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 3 */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-cream">
-              Verification & Career
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/verify/CERT-2026-DEMO01" className="hover:text-peach-500 transition-colors flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-peach-500" /> Certificate Verification
-                </Link>
-              </li>
-              <li>
-                <Link href="/career" className="hover:text-peach-500 transition-colors">
-                  Career Placement Support
-                </Link>
-              </li>
-              <li>
-                <Link href="/portfolio/student-1" className="hover:text-peach-500 transition-colors">
-                  Student Portfolios
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-peach-500 transition-colors">
-                  Accreditation & Standards
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4 */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-cream">
-              Institute & Trust
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/about" className="hover:text-peach-500 transition-colors">
-                  About Our Academy
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-peach-500 transition-colors">
-                  Admissions Contact
-                </Link>
-              </li>
-              <li>
-                <a href="/api/docs" target="_blank" rel="noreferrer" className="hover:text-peach-500 transition-colors">
-                  Developer API Docs (Swagger)
-                </a>
-              </li>
-              <li>
-                <span className="text-cream/50">ISO 9001:2015 Compliant</span>
-              </li>
-            </ul>
-          </div>
+          {COLUMNS.map((col) => (
+            <div key={col.title} className="space-y-4">
+              <h4 className="text-sm font-semibold text-white">{col.title}</h4>
+              <ul className="space-y-2.5 text-sm">
+                {col.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="hover:text-white transition-colors">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-cream/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream/60">
-          <p>© {new Date().getFullYear()} Online Creative & IT Academy. All rights reserved.</p>
-          <p className="flex items-center gap-1">
-            Built with Next.js, Node.js, Prisma, PostgreSQL & Precision Progression Engine
+        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <p>© {new Date().getFullYear()} Online Creative &amp; IT Academy. All rights reserved.</p>
+          <p className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Certificates verifiable at /verify
           </p>
         </div>
       </div>

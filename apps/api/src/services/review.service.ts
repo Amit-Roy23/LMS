@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma.js';
-import { NotFoundError, BadRequestError } from '../lib/errors.js';
-import { SubmissionStatus, NotificationType } from '@academy/shared';
+import { NotFoundError, BadRequestError, ForbiddenError } from '../lib/errors.js';
+import { SubmissionStatus, NotificationType, Role } from '@academy/shared';
 import { progressionService } from './progression.service.js';
 import { certificateService } from './certificate.service.js';
 import { logger } from '../lib/logger.js';
@@ -63,6 +63,7 @@ export class ReviewService {
   async reviewAssignmentSubmission(params: {
     submissionId: string;
     reviewerId: string;
+    reviewerRole?: Role | string;
     status: SubmissionStatus;
     feedback: string;
     grade?: number | null;
@@ -76,6 +77,11 @@ export class ReviewService {
     });
 
     if (!submission) throw new NotFoundError('Submission not found');
+
+    // Instructors may only review work from courses they teach; admins can review everything
+    if (params.reviewerRole === Role.INSTRUCTOR && submission.assignment.module.course.instructorId !== params.reviewerId) {
+      throw new ForbiddenError('You can only review submissions for courses you teach.');
+    }
 
     const updated = await prisma.assignmentSubmission.update({
       where: { id: params.submissionId },
@@ -120,6 +126,7 @@ export class ReviewService {
   async reviewProjectSubmission(params: {
     submissionId: string;
     reviewerId: string;
+    reviewerRole?: Role | string;
     status: SubmissionStatus;
     feedback: string;
     grade?: number | null;
@@ -133,6 +140,11 @@ export class ReviewService {
     });
 
     if (!submission) throw new NotFoundError('Project submission not found');
+
+    // Instructors may only review work from courses they teach; admins can review everything
+    if (params.reviewerRole === Role.INSTRUCTOR && submission.project.course.instructorId !== params.reviewerId) {
+      throw new ForbiddenError('You can only review submissions for courses you teach.');
+    }
 
     const updated = await prisma.projectSubmission.update({
       where: { id: params.submissionId },

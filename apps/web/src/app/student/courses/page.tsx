@@ -184,7 +184,7 @@ export default function StudentCoursesPage() {
                 <div className="px-6 py-4 bg-slate-950/50 border-t border-slate-800/80 flex items-center justify-between gap-3">
                   <Link
                     href={`/student/courses/${item.id}`}
-                    className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                    className="text-xs font-semibold text-slate-400 hover:text-ink transition-colors"
                   >
                     View Curriculum
                   </Link>

@@ -16,12 +16,12 @@ export default function StudentPortfolioPage() {
 
   // TODO(client-requirement): Load dynamic public student profile from database with custom domain support
   return (
-    <div className="min-h-screen flex flex-col bg-[#fbf3e6] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-100">
       <Navbar />
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-16 w-full space-y-10 tech-dot-grid">
         {/* Profile Card */}
-        <Card className="border-[#e7d5bd] bg-[#fffbf4] p-8 shadow-xl flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+        <Card className="border-[#e2e8f0] bg-[#ffffff] p-8 shadow-xl flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <div className="w-20 h-20 rounded-xl bg-blue-600 border border-blue-400/30 flex items-center justify-center text-2xl font-mono font-bold text-cream shrink-0">
             JD
           </div>

@@ -59,7 +59,7 @@ function ResetPasswordForm() {
   };
 
   return (
-    <Card className="border-[#efdfd4] bg-[#ffffff] p-6 space-y-6 shadow-xl">
+    <Card className="border-[#e2e8f0] bg-[#ffffff] p-6 space-y-6 shadow-xl">
       {isDone ? (
         <div className="space-y-4 text-center py-4">
           <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
@@ -130,14 +130,14 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#fff8f3] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-100">
       <Navbar />
 
       <main className="flex-1 flex items-center justify-center p-4 py-16 tech-dot-grid">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
             <div className="w-10 h-10 rounded-lg bg-blue-600 border border-blue-400/30 flex items-center justify-center mx-auto shadow-sm">
-              <Lock className="w-5 h-5 text-white" />
+              <Lock className="w-5 h-5 text-ink" />
             </div>
             <h1 className="text-2xl font-bold text-ink tracking-tight">Set Your Password</h1>
             <p className="text-xs font-mono text-slate-400">SECURE ONE-TIME CREDENTIAL ACTIVATION</p>

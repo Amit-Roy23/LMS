@@ -65,10 +65,33 @@ export class CourseService {
       prisma.course.count({ where }),
     ]);
 
+    // Lesson counts and review stats for the course cards, fetched together in one round trip
+    const ids = items.map((c) => c.id);
+    const [moduleLessonCounts, ratings] = await Promise.all([
+      prisma.module.findMany({
+        where: { courseId: { in: ids }, deletedAt: null },
+        select: { courseId: true, _count: { select: { lessons: { where: { deletedAt: null } } } } },
+      }),
+      prisma.feedback.groupBy({
+        by: ['courseId'],
+        where: { courseId: { in: ids } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+    ]);
+    const lessonsByCourse = new Map<string, number>();
+    moduleLessonCounts.forEach((m) =>
+      lessonsByCourse.set(m.courseId, (lessonsByCourse.get(m.courseId) || 0) + m._count.lessons)
+    );
+    const ratingByCourse = new Map(ratings.map((r) => [r.courseId, r]));
+
     const formatted = items.map((c) => ({
       ...c,
       modulesCount: c._count.modules,
+      lessonsCount: lessonsByCourse.get(c.id) || 0,
       enrolledStudentsCount: c._count.enrollments,
+      averageRating: ratingByCourse.get(c.id)?._avg.rating ?? null,
+      reviewsCount: ratingByCourse.get(c.id)?._count._all ?? 0,
     }));
 
     return { items: formatted, total, page, limit };

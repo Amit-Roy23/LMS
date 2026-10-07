@@ -122,6 +122,23 @@ describe('Authentication Flow & Service Test Suite', () => {
       expect(cookieHeader).toBeDefined();
     });
 
+    it('POST /api/v1/auth/register cannot self-assign a staff role', async () => {
+      const res = await fetch(`${baseUrl}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Sneaky User',
+          email: `sneaky-${Date.now()}@example.com`,
+          password: 'Secret@123',
+          role: 'ADMIN',
+        }),
+      });
+
+      const body = await res.json();
+      expect(res.status).toBe(201);
+      expect(body.data.user.role).toBe('STUDENT');
+    });
+
     it('POST /api/v1/auth/login twice at the same moment succeeds both times', async () => {
       const login = () =>
         fetch(`${baseUrl}/api/v1/auth/login`, {

@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Top Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#fffbf4] border border-[#e7d5bd] shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#ffffff] border border-[#e2e8f0] shadow-xl">
         <div className="space-y-1.5">
           <Badge variant="purple">INSTITUTE CONTROL CENTER</Badge>
           <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">

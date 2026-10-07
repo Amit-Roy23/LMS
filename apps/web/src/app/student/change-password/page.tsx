@@ -75,7 +75,7 @@ export default function ChangePasswordPage() {
         </div>
       )}
 
-      <Card className="border-[#efdfd4] bg-white p-6 shadow-md">
+      <Card className="border-[#e2e8f0] bg-white p-6 shadow-md">
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isForced && (
             <Input

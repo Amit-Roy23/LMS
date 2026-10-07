@@ -268,7 +268,7 @@ export default function LessonPlayerPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={`/student/courses/${courseId}`}>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-slate-400 hover:text-ink">
               <ChevronLeft className="w-4 h-4" />
               <span>Curriculum</span>
             </Button>
@@ -291,7 +291,7 @@ export default function LessonPlayerPage() {
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-ink'
             }`}
             title="Bookmark lesson"
           >
@@ -332,7 +332,7 @@ export default function LessonPlayerPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white">All module video tutorials completed!</h4>
+              <h4 className="text-xs font-bold text-ink">All module video tutorials completed!</h4>
               <p className="text-[11px] text-purple-200/80">
                 Your Module Assessment Quiz is now unlocked and available.
               </p>
@@ -385,7 +385,7 @@ export default function LessonPlayerPage() {
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                     isActive
                       ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                      : 'text-slate-400 hover:text-ink hover:bg-slate-900/60'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -641,7 +641,7 @@ export default function LessonPlayerPage() {
                           href={isLocked ? '#' : `/student/courses/${courseId}/learn/${l.id}`}
                           className={`p-3 flex items-center justify-between gap-3 text-xs transition-colors ${
                             isActive
-                              ? 'bg-indigo-600/20 border-l-2 border-indigo-500 font-bold text-white'
+                              ? 'bg-indigo-600/20 border-l-2 border-indigo-500 font-bold text-ink'
                               : isLocked
                               ? 'cursor-not-allowed text-slate-500'
                               : 'text-slate-300 hover:bg-slate-800/60'

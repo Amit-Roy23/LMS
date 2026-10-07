@@ -70,7 +70,7 @@ export default function StudentProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* User Card */}
-        <Card className="border-[#efdfd4] bg-white p-6 text-center space-y-4 shadow-sm">
+        <Card className="border-[#e2e8f0] bg-white p-6 text-center space-y-4 shadow-sm">
           <div className="w-20 h-20 rounded-2xl bg-blue-100 border border-blue-200 flex items-center justify-center text-2xl font-bold text-blue-700 mx-auto">
             {avatar ? (
               <img src={avatar} alt={user?.name} className="w-full h-full rounded-2xl object-cover" />
@@ -106,7 +106,7 @@ export default function StudentProfilePage() {
         </Card>
 
         {/* Profile Edit Form */}
-        <Card className="md:col-span-2 border-[#efdfd4] bg-white p-6 space-y-6 shadow-sm">
+        <Card className="md:col-span-2 border-[#e2e8f0] bg-white p-6 space-y-6 shadow-sm">
           <CardTitle className="text-base text-slate-900">Personal Information</CardTitle>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">

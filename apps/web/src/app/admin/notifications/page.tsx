@@ -114,7 +114,7 @@ export default function AdminNotificationsPage() {
       </div>
 
       {/* Filters Bar */}
-      <Card className="border-[#efdfd4] bg-white p-4 shadow-sm">
+      <Card className="border-[#e2e8f0] bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div>
             <label className="block text-[10px] font-mono font-bold text-slate-500 uppercase mb-1">
@@ -126,7 +126,7 @@ export default function AdminNotificationsPage() {
                 setChannelFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 rounded-lg border border-[#f0e2d8] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-lg border border-[#e2e8f0] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Channels</option>
               <option value="EMAIL">Email</option>
@@ -145,7 +145,7 @@ export default function AdminNotificationsPage() {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 rounded-lg border border-[#f0e2d8] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-lg border border-[#e2e8f0] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Statuses</option>
               <option value="SENT">Sent</option>
@@ -174,10 +174,10 @@ export default function AdminNotificationsPage() {
       </Card>
 
       {/* Logs Table */}
-      <Card className="border-[#efdfd4] bg-white overflow-hidden shadow-sm">
+      <Card className="border-[#e2e8f0] bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#fff8f3] text-slate-600 font-mono uppercase text-[10px] border-b border-[#f0e2d8]">
+            <thead className="bg-[#f8fafc] text-slate-600 font-mono uppercase text-[10px] border-b border-[#e2e8f0]">
               <tr>
                 <th className="p-3.5 pl-4">Channel</th>
                 <th className="p-3.5">Recipient (Masked)</th>

@@ -76,7 +76,7 @@ export default function StudentDashboardPage() {
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Welcome Hero */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-[#efdfd4] shadow-soft">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl bg-white border border-[#e2e8f0] shadow-soft">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider">
@@ -138,7 +138,7 @@ export default function StudentDashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 border-[#efdfd4] bg-white shadow-sm">
+        <Card className="p-5 border-[#e2e8f0] bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Enrolled Courses</span>
             <BookOpen className="w-4 h-4 text-blue-600" />
@@ -147,7 +147,7 @@ export default function StudentDashboardPage() {
           <span className="text-[11px] text-slate-400 font-mono">Registered curricula</span>
         </Card>
 
-        <Card className="p-5 border-[#efdfd4] bg-white shadow-sm">
+        <Card className="p-5 border-[#e2e8f0] bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Certificates Earned</span>
             <Award className="w-4 h-4 text-emerald-600" />
@@ -156,7 +156,7 @@ export default function StudentDashboardPage() {
           <span className="text-[11px] text-slate-400 font-mono">Verified diplomas</span>
         </Card>
 
-        <Card className="p-5 border-[#efdfd4] bg-white shadow-sm">
+        <Card className="p-5 border-[#e2e8f0] bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Admission Status</span>
             <CheckCircle2 className="w-4 h-4 text-purple-600" />
@@ -165,7 +165,7 @@ export default function StudentDashboardPage() {
           <span className="text-[11px] text-slate-400 font-mono">ID & Access Active</span>
         </Card>
 
-        <Card className="p-5 border-[#efdfd4] bg-white shadow-sm">
+        <Card className="p-5 border-[#e2e8f0] bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">Receipts Available</span>
             <Receipt className="w-4 h-4 text-amber-600" />
@@ -190,7 +190,7 @@ export default function StudentDashboardPage() {
         </div>
 
         {enrollments.length === 0 ? (
-          <Card className="p-12 text-center border-dashed border-[#efdfd4] bg-white shadow-sm">
+          <Card className="p-12 text-center border-dashed border-[#e2e8f0] bg-white shadow-sm">
             <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto text-blue-600 mb-3">
               <BookOpen className="w-6 h-6" />
             </div>
@@ -210,7 +210,7 @@ export default function StudentDashboardPage() {
             {enrollments.map((enr) => (
               <Card
                 key={enr.id}
-                className="border-[#efdfd4] bg-white p-6 flex flex-col justify-between hover:border-blue-300 transition-all shadow-sm"
+                className="border-[#e2e8f0] bg-white p-6 flex flex-col justify-between hover:border-blue-300 transition-all shadow-sm"
               >
                 <div className="space-y-4">
                   {/* Top Badges */}
@@ -249,7 +249,7 @@ export default function StudentDashboardPage() {
 
                   {/* Batch & Instructor info if present */}
                   {enr.batch && (
-                    <div className="p-3 rounded-lg bg-[#fff8f3] border border-[#f0e2d8] text-xs space-y-1">
+                    <div className="p-3 rounded-lg bg-[#f8fafc] border border-[#e2e8f0] text-xs space-y-1">
                       <p className="font-semibold text-slate-800">
                         Batch: <span className="text-blue-700">{enr.batch.name}</span> (Section {enr.batch.section})
                       </p>
@@ -291,7 +291,7 @@ export default function StudentDashboardPage() {
       </div>
 
       {/* Payment Receipts Section */}
-      <div className="space-y-4 pt-4 border-t border-[#f0e2d8]">
+      <div className="space-y-4 pt-4 border-t border-[#e2e8f0]">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Receipt className="w-5 h-5 text-blue-600" />
@@ -301,14 +301,14 @@ export default function StudentDashboardPage() {
         </div>
 
         {receiptsData.registrations.length === 0 && receiptsData.payments.length === 0 ? (
-          <Card className="p-6 text-center border-[#efdfd4] bg-white shadow-sm">
+          <Card className="p-6 text-center border-[#e2e8f0] bg-white shadow-sm">
             <p className="text-xs text-slate-500">No payment receipts on record.</p>
           </Card>
         ) : (
-          <Card className="border-[#efdfd4] bg-white overflow-hidden shadow-sm">
+          <Card className="border-[#e2e8f0] bg-white overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#fff8f3] text-slate-600 font-mono uppercase text-[10px] border-b border-[#f0e2d8]">
+                <thead className="bg-[#f8fafc] text-slate-600 font-mono uppercase text-[10px] border-b border-[#e2e8f0]">
                   <tr>
                     <th className="p-3.5 pl-4">Receipt Ref</th>
                     <th className="p-3.5">Course & Mode</th>
@@ -392,7 +392,7 @@ export default function StudentDashboardPage() {
       {/* Modal: View / Print Receipt */}
       {selectedReceipt && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#efdfd4] space-y-6 text-slate-900">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#e2e8f0] space-y-6 text-slate-900">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
                 <h3 className="font-bold text-lg text-slate-900">Official Admission Receipt</h3>
@@ -401,7 +401,7 @@ export default function StudentDashboardPage() {
               <Badge variant="success">PAID & VERIFIED</Badge>
             </div>
 
-            <div className="space-y-4 text-xs font-mono bg-[#fff8f3] p-4 rounded-xl border border-[#f0e2d8]">
+            <div className="space-y-4 text-xs font-mono bg-[#f8fafc] p-4 rounded-xl border border-[#e2e8f0]">
               <div className="flex justify-between">
                 <span className="text-slate-500">RECEIPT NO:</span>
                 <span className="font-bold">RCP-{selectedReceipt.id.substring(0, 10).toUpperCase()}</span>
@@ -422,7 +422,7 @@ export default function StudentDashboardPage() {
                 <span className="text-slate-500">DELIVERY MODE:</span>
                 <span className="font-bold">{selectedReceipt.mode || 'RECORDED'}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-[#f0e2d8]">
+              <div className="flex justify-between pt-2 border-t border-[#e2e8f0]">
                 <span className="text-slate-500">TOTAL PAID:</span>
                 <span className="font-extrabold text-base text-blue-700">
                   {formatCurrency(selectedReceipt.amount, selectedReceipt.currency || 'INR')}

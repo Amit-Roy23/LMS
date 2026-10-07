@@ -213,6 +213,39 @@ Use the **⚡ 1-Click Demo Login** button on the navbar/login page, or log in ma
 | **Student 3** | `student3@creativeit.academy` | `Student@123` | Live student with passed retake quiz & pending assignment review |
 | **Student 4** | `student4@creativeit.academy` | `Student@123` | Active student with 40% watch progress (Quiz is locked until 90% threshold) |
 | **Student Pending** | `student_pending@creativeit.academy` | `Student@123` | Applicant with pending payment (`PAYMENT_PENDING` 403 guard) |
+| **Design Instructor** | `priya.design@creativeit.academy` | `Instructor@123` | Teaches the UI/UX and Graphic Design courses |
+| **Demo learners (16)** | `<first>.<last>@demo.creativeit.academy` (e.g. `aarav.patel@demo.creativeit.academy`) | `Student@123` | Enrolled across the catalogue at different stages, some certified |
+
+The seed also builds **7 published courses** (Full-Stack & AI, Python Data Science, UI/UX, Digital Marketing,
+Cloud DevOps, React Native, Cybersecurity, Graphic Design) with lessons, quizzes, assignments, mock tests,
+capstones, final exams, reviews and certificates.
+
+### Demo lesson videos
+
+Lesson videos, poster frames and course covers are rendered from `apps/api/prisma/demo-content/catalog.json`
+and shipped as static files in `apps/web/public/media`, so they always load and their durations match the
+database exactly (needed for the 90% watch threshold). To change lesson content and re-render:
+
+```bash
+pip install pillow numpy          # plus ffmpeg with libx264 on PATH
+python3 scripts/demo-media/render_media.py --only ui-ux-product-design   # or --force for everything
+npm run db:seed
+```
+
+## 🚀 Deploying on Vercel (fast & reliable)
+
+1. **Seed the production database once** from your machine:
+   `DATABASE_URL=... DIRECT_URL=... npm run db:push && DATABASE_URL=... DIRECT_URL=... npm run db:seed`
+2. **Use a pooled connection string** for `DATABASE_URL` on the `api` service (Neon "pooled", Supabase
+   pooler on port 6543 with `?pgbouncer=true&connection_limit=5`) and the direct one for `DIRECT_URL`.
+   Serverless functions open many short-lived connections; pooling avoids slow connection set-up.
+3. **Put the functions in the same region as the database** (Vercel → Project → Settings → Functions →
+   Region). A cross-region round trip adds 100–250 ms to *every* query and is the most common cause of a
+   slow deployment.
+4. Set `JWT_SECRET` (or `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`) on the `api` service.
+
+The API is written to need few round trips: course progression loads in a single query, independent
+lookups run in parallel, and the public catalogue is cached at the edge.
 
 ---
 

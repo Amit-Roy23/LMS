@@ -24,7 +24,7 @@ export function CertificateCard({ certificate }: { certificate: any }) {
   };
 
   return (
-    <Card className="border-[#e7d5bd] bg-[#fffbf4] overflow-hidden shadow-xl hover:border-blue-500/50 transition-all">
+    <Card className="border-[#e2e8f0] bg-[#ffffff] overflow-hidden shadow-xl hover:border-blue-500/50 transition-all">
       {/* Decorative Top Solid Line */}
       <div className="h-1 w-full bg-blue-600" />
 
@@ -49,7 +49,7 @@ export function CertificateCard({ certificate }: { certificate: any }) {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="p-3.5 rounded-lg bg-[#fbf3e6] border border-[#eadac4] space-y-2">
+        <div className="p-3.5 rounded-lg bg-[#f8fafc] border border-[#e2e8f0] space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-mono text-[11px]">SERIAL NO:</span>
             <span className="font-mono font-bold text-ink text-[11px]">{certificate.certificateId}</span>
