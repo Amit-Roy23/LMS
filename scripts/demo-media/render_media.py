@@ -365,7 +365,8 @@ def main() -> None:
     args = ap.parse_args()
 
     catalog = json.loads(CATALOG.read_text())
-    manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() and not args.force else {'lessons': {}, 'covers': {}}
+    # --force re-renders but keeps entries for courses that are not being rendered (e.g. with --only)
+    manifest = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {'lessons': {}, 'covers': {}}
 
     courses = list(catalog['courses'])
     # The flagship full-stack course keeps its seed structure but gets rendered videos too
@@ -387,7 +388,7 @@ def main() -> None:
         title = course.get('title') or course['slug']
         cover = OUT / 'covers' / f"{course['slug']}.jpg"
         if args.force or not cover.exists():
-            render_cover({**course, 'title': title, 'category': course.get('category', 'Data Science & AI')}, cover)
+            render_cover({**course, 'title': title, 'category': course.get('category', '')}, cover)
         manifest['covers'][course['slug']] = f"/media/covers/{course['slug']}.jpg"
 
         flat = [(mi, l) for mi, m in enumerate(course['modules']) for l in m['lessons']]

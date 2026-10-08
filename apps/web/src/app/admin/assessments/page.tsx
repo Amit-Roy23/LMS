@@ -435,7 +435,7 @@ export default function AdminAssessmentsPage() {
                       <div className="font-semibold text-plum">{att.student?.name}</div>
                       <div className="text-xs text-slate-500">{att.student?.email}</div>
                     </td>
-                    <td className="py-3.5 font-medium text-slate-700">Attempt {att.attemptNumber}</td>
+                    <td className="py-3.5 font-medium text-slate-300">Attempt {att.attemptNumber}</td>
                     <td className="py-3.5 font-semibold text-plum">
                       {att.score} / {att.maxScore}
                     </td>

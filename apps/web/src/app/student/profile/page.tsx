@@ -62,7 +62,7 @@ export default function StudentProfilePage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900">Student Profile & Settings</h1>
+        <h1 className="text-2xl font-extrabold text-ink">Student Profile & Settings</h1>
         <p className="text-xs text-slate-500 mt-1">
           Manage your student account identity, contact channels, and security settings.
         </p>
@@ -79,7 +79,7 @@ export default function StudentProfilePage() {
             )}
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900">{user?.name}</h3>
+            <h3 className="text-base font-bold text-ink">{user?.name}</h3>
             <p className="text-xs text-slate-500">{user?.email}</p>
           </div>
 
@@ -95,7 +95,7 @@ export default function StudentProfilePage() {
             <Badge variant="success">Active</Badge>
           </div>
 
-          <div className="pt-3 border-t border-slate-100">
+          <div className="pt-3 border-t border-[#e2e8f0]">
             <Link href="/student/change-password">
               <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
                 <KeyRound className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ export default function StudentProfilePage() {
 
         {/* Profile Edit Form */}
         <Card className="md:col-span-2 border-[#e2e8f0] bg-white p-6 space-y-6 shadow-sm">
-          <CardTitle className="text-base text-slate-900">Personal Information</CardTitle>
+          <CardTitle className="text-base text-ink">Personal Information</CardTitle>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <Input
@@ -121,7 +121,7 @@ export default function StudentProfilePage() {
               label="Registered Email (Immutable User ID)"
               value={user?.email || ''}
               readOnly
-              className="opacity-75 bg-slate-50"
+              className="opacity-75 bg-cream"
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

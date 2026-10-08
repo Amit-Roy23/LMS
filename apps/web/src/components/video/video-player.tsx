@@ -20,7 +20,6 @@ import {
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { apiClient } from '../../lib/api';
-import { formatDuration } from '../../lib/utils';
 import { useToast } from '../../providers/toast-provider';
 import { VideoProvider } from '@academy/shared';
 
@@ -37,6 +36,15 @@ export interface VideoPlayerProps {
   isCompleted?: boolean;
   onProgressUpdate?: (percent: number, isCompleted: boolean) => void;
   onComplete?: () => void;
+}
+
+/** Formats seconds as m:ss (or h:mm:ss) like a media player clock. */
+function clock(total: number) {
+  const t = Math.max(0, Math.floor(total || 0));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const sec = String(t % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 }
 
 export function VideoPlayer({
@@ -134,7 +142,8 @@ export function VideoPlayer({
 
       const payload = {
         positionSeconds: Math.round(position),
-        playedIntervals: [...playedIntervalsRef.current],
+        // The API validates intervals as [start, end] pairs
+        playedIntervals: playedIntervalsRef.current.map((i) => [i.start, i.end]),
         playbackRate: playbackSpeed,
       };
 
@@ -368,7 +377,14 @@ export function VideoPlayer({
             if (videoRef.current) sendHeartbeat(videoRef.current.duration || videoRef.current.currentTime, true);
           }}
           onLoadedMetadata={() => {
-            if (videoRef.current) setDuration(videoRef.current.duration);
+            const el = videoRef.current;
+            if (!el) return;
+            setDuration(el.duration);
+            // Resume where the learner left off (unless they had reached the end)
+            if (initialWatchedSeconds > 1 && initialWatchedSeconds < el.duration - 2) {
+              el.currentTime = initialWatchedSeconds;
+              setCurrentTime(initialWatchedSeconds);
+            }
           }}
           onClick={togglePlay}
           className="w-full h-full object-contain cursor-pointer bg-black"
@@ -410,12 +426,12 @@ export function VideoPlayer({
             left: `${watermarkPos.left}%`,
             transition: 'top 4s ease-in-out, left 4s ease-in-out',
           }}
-          className="absolute pointer-events-none z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-mono font-medium text-white/50 tracking-wider shadow-lg select-none"
+          className="absolute pointer-events-none z-20 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-[9px] sm:text-[10px] font-medium text-white/45 tracking-wide select-none max-w-[45%] truncate"
         >
           <ShieldCheck className="w-3 h-3 text-indigo-400/60" />
           <span>{studentId}</span>
-          <span className="text-white/20">•</span>
-          <span>{studentName}</span>
+          <span className="hidden sm:inline text-white/20">•</span>
+          <span className="hidden sm:inline">{studentName}</span>
         </div>
       )}
 
@@ -426,21 +442,17 @@ export function VideoPlayer({
             showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {/* Top Bar: Title & Status */}
-          <div className="flex items-center justify-between pointer-events-auto">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white drop-shadow truncate max-w-md">{title}</h3>
-              {completed && (
-                <Badge variant="success" className="gap-1 py-0.5 text-[10px]">
-                  <CheckCircle2 className="w-3 h-3" /> Completed
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-night-200 font-mono bg-night-900/60 backdrop-blur px-2.5 py-1 rounded-lg border border-night-700/50">
-              <Clock className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{Math.round(watchPercent)}% watched</span>
-            </div>
+          {/* Top corner: watch status (the lesson title is shown above the player) */}
+          <div className="flex items-center justify-end pointer-events-auto">
+            {completed ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-semibold text-white">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-night-900/70 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-night-200 border border-white/10">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" /> {Math.round(watchPercent)}% watched
+              </span>
+            )}
           </div>
 
           {/* Center Play/Pause Trigger */}
@@ -460,7 +472,7 @@ export function VideoPlayer({
             {/* Scrubber Progress Bar */}
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono text-night-200 min-w-[42px]">
-                {formatDuration(currentTime)}
+                {clock(currentTime)}
               </span>
               <input
                 type="range"
@@ -472,7 +484,7 @@ export function VideoPlayer({
                 className="w-full h-1.5 bg-night-700/80 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all"
               />
               <span className="text-xs font-mono text-night-400 min-w-[42px]">
-                {formatDuration(duration)}
+                {clock(duration)}
               </span>
             </div>
 

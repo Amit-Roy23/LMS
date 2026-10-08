@@ -132,6 +132,13 @@ export class StudentPlayerController {
           batch: enrollment.batch,
         },
         progression,
+        // Flat fields used directly by the curriculum and lesson pages
+        id: enrollment.course.id,
+        title: enrollment.course.title,
+        mode: enrollment.mode,
+        batch: enrollment.batch,
+        modules: progression.modules,
+        progressPercent: progression.coursePercent,
       });
     } catch (err) {
       next(err);

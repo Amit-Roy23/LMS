@@ -155,6 +155,19 @@ export async function seedDemoCatalog(
           where: { id: lesson.id },
           data: { videoProvider: VideoProvider.MP4, videoUrl: m.videoUrl, durationSeconds: m.durationSeconds },
         });
+        // Rescale the personas' existing watch progress to the real video length (same percentage)
+        const progresses = await prisma.lessonProgress.findMany({ where: { lessonId: lesson.id } });
+        for (const lp of progresses) {
+          const watched = Math.round((Math.min(100, lp.percent) / 100) * m.durationSeconds);
+          await prisma.lessonProgress.update({
+            where: { id: lp.id },
+            data: {
+              watchedSeconds: watched,
+              lastPositionSeconds: watched,
+              watchedSegments: watched > 0 ? [[0, watched]] : [],
+            },
+          });
+        }
       }
     }
   }

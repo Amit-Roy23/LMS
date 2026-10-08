@@ -23,7 +23,8 @@ export function Reveal({ delay = 0, as: Tag = 'div', className, style, children,
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          // Also reveal anything already scrolled past (fast scrolls, jumps, restored scroll position)
+          if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
             entry.target.classList.add('is-visible');
             observer.unobserve(entry.target);
           }
@@ -32,7 +33,20 @@ export function Reveal({ delay = 0, as: Tag = 'div', className, style, children,
       { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
     );
     observer.observe(node);
-    return () => observer.disconnect();
+
+    // Fallback for very fast scrolls that skip past the element between frames
+    const onScroll = () => {
+      if (node.getBoundingClientRect().top < window.innerHeight) {
+        node.classList.add('is-visible');
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return React.createElement(

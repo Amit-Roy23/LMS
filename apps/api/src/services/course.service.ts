@@ -115,6 +115,9 @@ export class CourseService {
                 description: true,
                 durationSeconds: true,
                 order: true,
+                isPreview: true,
+                videoUrl: true,
+                videoProvider: true,
               },
             },
             quiz: { select: { id: true, title: true, passingScorePercent: true } },
@@ -125,6 +128,11 @@ export class CourseService {
         finalProject: { select: { id: true, title: true } },
         finalAssessment: { select: { id: true, title: true, durationMinutes: true } },
         _count: { select: { enrollments: true } },
+        feedbacks: {
+          orderBy: { createdAt: 'desc' },
+          take: 6,
+          select: { id: true, rating: true, comment: true, createdAt: true, student: { select: { name: true } } },
+        },
       },
     });
 
@@ -132,17 +140,26 @@ export class CourseService {
       throw new NotFoundError('Course not found');
     }
 
-    let isEnrolled = false;
-    if (studentId) {
-      const enrollment = await prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId, courseId: course.id } },
-      });
-      isEnrolled = !!enrollment && enrollment.status === 'ACTIVE';
-    }
+    const [enrollment, rating] = await Promise.all([
+      studentId
+        ? prisma.enrollment.findUnique({ where: { studentId_courseId: { studentId, courseId: course.id } } })
+        : null,
+      prisma.feedback.aggregate({ where: { courseId: course.id }, _avg: { rating: true }, _count: { _all: true } }),
+    ]);
+    const isEnrolled = !!enrollment && enrollment.status === 'ACTIVE';
 
     return {
       ...course,
+      // Only free preview lessons expose their video publicly
+      modules: course.modules.map((m) => ({
+        ...m,
+        lessons: m.lessons.map(({ videoUrl, videoProvider, ...lesson }) =>
+          lesson.isPreview ? { ...lesson, videoUrl, videoProvider } : lesson
+        ),
+      })),
       enrolledStudentsCount: course._count.enrollments,
+      averageRating: rating._avg.rating,
+      reviewsCount: rating._count._all,
       isEnrolled,
     };
   }

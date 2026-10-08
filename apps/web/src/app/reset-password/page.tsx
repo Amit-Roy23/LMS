@@ -65,13 +65,13 @@ function ResetPasswordForm() {
           <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900">
+          <h3 className="text-lg font-bold text-ink">
             {isSetup ? 'Account Password Configured!' : 'Password Reset Successfully!'}
           </h3>
           <p className="text-xs text-slate-500 leading-relaxed">
             Your credentials have been updated and are active. You can now log into your Student LMS dashboard.
           </p>
-          <div className="pt-4 border-t border-slate-100">
+          <div className="pt-4 border-t border-[#e2e8f0]">
             <Link href="/login">
               <Button variant="primary" size="lg" className="w-full gap-2">
                 <span>Sign In to Student Portal</span>
@@ -117,7 +117,7 @@ function ResetPasswordForm() {
             <span>{isSetup ? 'Set Password & Activate LMS' : 'Reset Password'}</span>
           </Button>
 
-          <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <div className="text-center text-xs text-slate-500 pt-2 border-t border-[#e2e8f0]">
             <Link href="/login" className="text-blue-600 font-semibold hover:underline">
               Back to Sign In
             </Link>

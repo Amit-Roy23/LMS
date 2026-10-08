@@ -59,11 +59,11 @@ export default function ForgotPasswordPage() {
                 <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">Check Your Notifications</h3>
+                <h3 className="text-lg font-bold text-ink">Check Your Notifications</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   If an account matches <strong>{identifier}</strong>, we have dispatched a single-use password reset link via Email and WhatsApp.
                 </p>
-                <div className="pt-4 border-t border-slate-100">
+                <div className="pt-4 border-t border-[#e2e8f0]">
                   <Link href="/login">
                     <Button variant="outline" size="sm" className="w-full gap-2">
                       <ArrowLeft className="w-4 h-4" />
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
 
-                <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+                <div className="text-center text-xs text-slate-500 pt-2 border-t border-[#e2e8f0]">
                   Remembered your password?{' '}
                   <Link href="/login" className="text-blue-600 font-semibold hover:underline">
                     Sign in
