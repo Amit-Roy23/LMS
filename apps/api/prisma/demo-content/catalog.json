@@ -1,0 +1,2316 @@
+{
+  "instructors": [
+    {
+      "key": "design",
+      "name": "Priya Nair",
+      "email": "priya.design@creativeit.academy",
+      "title": "Lead Product Designer"
+    },
+    {
+      "key": "marketing",
+      "name": "Daniel Brooks",
+      "email": "daniel.marketing@creativeit.academy",
+      "title": "Growth Marketing Lead"
+    },
+    {
+      "key": "cloud",
+      "name": "Arjun Mehta",
+      "email": "arjun.cloud@creativeit.academy",
+      "title": "Principal DevOps Engineer"
+    }
+  ],
+  "courses": [
+    {
+      "slug": "python-ai-data-science",
+      "existing": true,
+      "title": "Python Data Science, Machine Learning & Agentic AI",
+      "category": "Data Science & AI",
+      "palette": [
+        "#0ea5e9",
+        "#4f46e5"
+      ],
+      "mark": "Py",
+      "modules": [
+        {
+          "title": "Module 1: Python for Data Analysis",
+          "description": "Clean, explore and summarise real datasets with NumPy and Pandas.",
+          "lessons": [
+            {
+              "title": "1.1 Python Essentials for Data Work",
+              "summary": "The Python building blocks you use every day as a data practitioner.",
+              "points": [
+                "Lists, dicts and comprehensions for fast data shaping",
+                "Functions and modules keep notebooks reusable",
+                "Virtual environments pin your exact library versions"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "comprehension.py",
+                "lines": [
+                  "scores = [72, 88, 95, 61]",
+                  "passed = [s for s in scores if s >= 70]",
+                  "print(len(passed), 'students passed')"
+                ]
+              },
+              "recap": "Small, readable Python is the foundation of every analysis."
+            },
+            {
+              "title": "1.2 NumPy Arrays & Vectorised Maths",
+              "summary": "Why NumPy is fast and how to think in whole arrays instead of loops.",
+              "points": [
+                "ndarrays store one data type in contiguous memory",
+                "Vectorised operations replace slow Python loops",
+                "Broadcasting combines arrays of different shapes"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "vectorise.py",
+                "lines": [
+                  "import numpy as np",
+                  "prices = np.array([120, 80, 45])",
+                  "with_tax = prices * 1.18",
+                  "print(with_tax.round(2))"
+                ]
+              },
+              "recap": "Think in arrays and let NumPy do the looping in C."
+            },
+            {
+              "title": "1.3 Pandas DataFrames: Clean, Group & Summarise",
+              "summary": "Load a CSV, fix messy values and answer business questions in a few lines.",
+              "points": [
+                "read_csv turns files into labelled DataFrames",
+                "fillna and astype repair missing or mistyped data",
+                "groupby plus agg produces instant summaries"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "sales.py",
+                "lines": [
+                  "df = pd.read_csv('sales.csv')",
+                  "df['region'] = df['region'].fillna('Unknown')",
+                  "df.groupby('region')['revenue'].sum()"
+                ]
+              },
+              "recap": "Clean first, then group: most insights are one groupby away."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which structure gives NumPy its speed?",
+              "a": "Contiguous arrays of a single data type",
+              "wrong": [
+                "Python lists of mixed objects",
+                "JSON documents",
+                "Linked lists"
+              ]
+            },
+            {
+              "q": "What does df.groupby('region')['revenue'].sum() return?",
+              "a": "Total revenue for each region",
+              "wrong": [
+                "The number of rows per region",
+                "The first revenue value",
+                "A sorted copy of the DataFrame"
+              ]
+            },
+            {
+              "q": "Which Pandas method replaces missing values?",
+              "a": "fillna",
+              "wrong": [
+                "dropcols",
+                "replace_null",
+                "astype"
+              ]
+            },
+            {
+              "q": "Broadcasting in NumPy lets you…",
+              "a": "Combine arrays of different but compatible shapes",
+              "wrong": [
+                "Send arrays over the network",
+                "Print arrays to the console",
+                "Convert arrays to lists"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Exploratory Analysis of a Sales Dataset",
+            "description": "Load the provided sales CSV, clean missing values, and submit a notebook link answering: top 3 regions by revenue, monthly trend, and one surprising insight."
+          }
+        },
+        {
+          "title": "Module 2: Machine Learning Foundations",
+          "description": "Train, evaluate and improve your first predictive models with scikit-learn.",
+          "lessons": [
+            {
+              "title": "2.1 Supervised Learning & Train/Test Splits",
+              "summary": "How models learn from labelled examples, and how to measure them honestly.",
+              "points": [
+                "Features (X) predict a target (y)",
+                "Hold out a test set the model never sees",
+                "Overfitting means great training scores but poor test scores"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "split.py",
+                "lines": [
+                  "from sklearn.model_selection import train_test_split",
+                  "X_tr, X_te, y_tr, y_te = train_test_split(",
+                  "    X, y, test_size=0.2, random_state=42)"
+                ]
+              },
+              "recap": "Never grade a model on the data it trained on."
+            },
+            {
+              "title": "2.2 Regression & Classification with scikit-learn",
+              "summary": "Two model families that solve most everyday prediction problems.",
+              "points": [
+                "Regression predicts numbers such as price",
+                "Classification predicts labels such as churn",
+                "Every estimator shares fit, predict and score"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "model.py",
+                "lines": [
+                  "from sklearn.linear_model import LogisticRegression",
+                  "model = LogisticRegression().fit(X_tr, y_tr)",
+                  "print('accuracy:', model.score(X_te, y_te))"
+                ]
+              },
+              "recap": "Pick the family from the question: a number or a category?"
+            },
+            {
+              "title": "2.3 Model Evaluation: Accuracy, Precision & Recall",
+              "summary": "Choosing the metric that matches the business cost of mistakes.",
+              "points": [
+                "Accuracy misleads on imbalanced data",
+                "Precision asks: of my positives, how many were right?",
+                "Recall asks: of the real positives, how many did I find?"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Pick the metric",
+                "lines": [
+                  "Spam filter → precision (don't hide real mail)",
+                  "Disease screening → recall (don't miss a case)",
+                  "Balanced classes → accuracy is fine"
+                ]
+              },
+              "recap": "The right metric is the one that reflects the real cost of an error."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Why do we keep a separate test set?",
+              "a": "To measure performance on data the model never saw",
+              "wrong": [
+                "To make training faster",
+                "To store backups of the data",
+                "To increase accuracy automatically"
+              ]
+            },
+            {
+              "q": "Predicting a house price is an example of…",
+              "a": "Regression",
+              "wrong": [
+                "Classification",
+                "Clustering",
+                "Tokenisation"
+              ]
+            },
+            {
+              "q": "Which metric matters most when missing a positive case is dangerous?",
+              "a": "Recall",
+              "wrong": [
+                "Precision",
+                "Training time",
+                "Model size"
+              ]
+            },
+            {
+              "q": "Which three methods do scikit-learn estimators share?",
+              "a": "fit, predict and score",
+              "wrong": [
+                "load, run and save",
+                "open, read and close",
+                "train, deploy and log"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "A model scores 99% on training data but 60% on test data. What is happening?",
+          "a": "Overfitting",
+          "wrong": [
+            "Underfitting",
+            "Data leakage prevention",
+            "Perfect generalisation"
+          ]
+        },
+        {
+          "q": "Which library provides the DataFrame type?",
+          "a": "Pandas",
+          "wrong": [
+            "NumPy",
+            "Matplotlib",
+            "Requests"
+          ]
+        },
+        {
+          "q": "Classifying emails as spam or not spam is…",
+          "a": "Binary classification",
+          "wrong": [
+            "Linear regression",
+            "Dimensionality reduction",
+            "Web scraping"
+          ]
+        },
+        {
+          "q": "What does random_state make reproducible?",
+          "a": "The random split or initialisation",
+          "wrong": [
+            "The CPU speed",
+            "The dataset size",
+            "The Python version"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Customer Churn Prediction",
+        "description": "Build an end-to-end churn model: clean the telecom dataset, engineer features, compare two models with precision/recall, and present a one-page recommendation for the retention team."
+      },
+      "final": [
+        {
+          "q": "Which split is the standard starting point for model evaluation?",
+          "a": "80% train / 20% test",
+          "wrong": [
+            "100% train / 0% test",
+            "10% train / 90% test",
+            "No split is needed"
+          ]
+        },
+        {
+          "q": "Which operation summarises data per category in Pandas?",
+          "a": "groupby",
+          "wrong": [
+            "concat",
+            "head",
+            "to_csv"
+          ]
+        },
+        {
+          "q": "Precision is the share of…",
+          "a": "Predicted positives that are correct",
+          "wrong": [
+            "All rows that are positive",
+            "Features used by the model",
+            "Missing values filled"
+          ]
+        },
+        {
+          "q": "Vectorised NumPy code is fast because…",
+          "a": "Loops run in optimised compiled code",
+          "wrong": [
+            "It skips calculations",
+            "It uses the GPU automatically",
+            "It caches results on disk"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "ui-ux-product-design",
+      "title": "UI/UX & Product Design with Figma",
+      "description": "Go from blank canvas to a tested, developer-ready product design. Learn research, wireframing, visual design systems, prototyping and usability testing in Figma.",
+      "category": "Design",
+      "level": "BEGINNER",
+      "price": 3999,
+      "livePrice": 7999,
+      "instructor": "design",
+      "palette": [
+        "#ec4899",
+        "#8b5cf6"
+      ],
+      "mark": "UX",
+      "modules": [
+        {
+          "title": "Module 1: Research & Wireframing",
+          "description": "Understand users and turn insights into structured layouts.",
+          "lessons": [
+            {
+              "title": "1.1 The Design Thinking Process",
+              "summary": "A repeatable five-step loop for solving the right problem.",
+              "points": [
+                "Empathise and define before you sketch",
+                "Ideate widely, then converge on one direction",
+                "Prototype and test to learn cheaply"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "The five stages",
+                "lines": [
+                  "1. Empathise with real users",
+                  "2. Define the core problem",
+                  "3. Ideate many solutions",
+                  "4. Prototype quickly",
+                  "5. Test and iterate"
+                ]
+              },
+              "recap": "Fall in love with the problem, not your first solution."
+            },
+            {
+              "title": "1.2 User Research & Personas",
+              "summary": "Interviews and personas that keep the whole team focused on real needs.",
+              "points": [
+                "Ask open questions about past behaviour",
+                "Cluster findings into themes with affinity maps",
+                "Personas summarise goals, frustrations and context"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Persona: Riya, 24",
+                "lines": [
+                  "Goal: learn design skills after work",
+                  "Frustration: long videos with no feedback",
+                  "Context: studies on her phone during commutes"
+                ]
+              },
+              "recap": "Good research turns opinions into evidence."
+            },
+            {
+              "title": "1.3 Wireframes & Information Architecture",
+              "summary": "Low-fidelity layouts that settle structure before style.",
+              "points": [
+                "Sitemaps define what lives where",
+                "Grey-box wireframes focus on hierarchy, not colour",
+                "Test navigation early with simple click-throughs"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Checkout wireframe",
+                "lines": [
+                  "Header: logo · cart · account",
+                  "Body: order summary + payment form",
+                  "Footer: trust badges · help link"
+                ]
+              },
+              "recap": "Get the structure right while changes are still cheap."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which stage of design thinking comes first?",
+              "a": "Empathise",
+              "wrong": [
+                "Prototype",
+                "Test",
+                "Launch"
+              ]
+            },
+            {
+              "q": "What is an affinity map used for?",
+              "a": "Grouping research findings into themes",
+              "wrong": [
+                "Choosing brand colours",
+                "Exporting assets",
+                "Writing code"
+              ]
+            },
+            {
+              "q": "Wireframes are deliberately low-fidelity so that…",
+              "a": "Teams focus on structure and hierarchy",
+              "wrong": [
+                "They look finished to clients",
+                "They can be shipped to production",
+                "They replace user research"
+              ]
+            },
+            {
+              "q": "A persona describes…",
+              "a": "A representative user's goals and frustrations",
+              "wrong": [
+                "The company's revenue targets",
+                "The final colour palette",
+                "The database schema"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Persona & Wireframe Pack",
+            "description": "Interview three people about how they learn online, build one persona, and submit a Figma link with low-fidelity wireframes for a course discovery screen."
+          }
+        },
+        {
+          "title": "Module 2: Visual Design & Prototyping",
+          "description": "Design systems, interactive prototypes and usability testing.",
+          "lessons": [
+            {
+              "title": "2.1 Visual Hierarchy, Type & Colour",
+              "summary": "Guide the eye with size, weight, contrast and space.",
+              "points": [
+                "Use a type scale instead of random font sizes",
+                "Limit the palette: one primary, neutrals, feedback colours",
+                "Check text contrast against WCAG AA (4.5:1)"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Type scale (1.25)",
+                "lines": [
+                  "H1 · 40px Bold",
+                  "H2 · 32px SemiBold",
+                  "Body · 16px Regular",
+                  "Caption · 13px Medium"
+                ]
+              },
+              "recap": "Hierarchy tells users what matters before they read a word."
+            },
+            {
+              "title": "2.2 Components & Auto Layout in Figma",
+              "summary": "Build reusable components that scale across a whole product.",
+              "points": [
+                "Components and variants remove duplicated work",
+                "Auto layout makes frames resize like real code",
+                "Design tokens keep colour and spacing consistent"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Button component",
+                "lines": [
+                  "Variants: primary · secondary · ghost",
+                  "Sizes: sm · md · lg",
+                  "States: default · hover · disabled"
+                ]
+              },
+              "recap": "Design once, reuse everywhere."
+            },
+            {
+              "title": "2.3 Prototyping & Usability Testing",
+              "summary": "Turn screens into clickable flows and watch real people use them.",
+              "points": [
+                "Prototype only the flow you want to test",
+                "Give tasks, not instructions, during sessions",
+                "Five users uncover most usability problems"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Test script",
+                "lines": [
+                  "Task: enrol in the UI/UX course",
+                  "Observe: hesitation, wrong taps, comments",
+                  "Measure: success rate and time on task"
+                ]
+              },
+              "recap": "Watching one real user beats a week of debate."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "What contrast ratio does WCAG AA require for body text?",
+              "a": "4.5:1",
+              "wrong": [
+                "1.5:1",
+                "2:1",
+                "10:1"
+              ]
+            },
+            {
+              "q": "Auto layout in Figma helps frames…",
+              "a": "Resize and space content like real UI code",
+              "wrong": [
+                "Export to PDF automatically",
+                "Generate user personas",
+                "Pick colours for you"
+              ]
+            },
+            {
+              "q": "During usability testing you should give participants…",
+              "a": "Realistic tasks to complete",
+              "wrong": [
+                "Step-by-step click instructions",
+                "The answers in advance",
+                "No context at all"
+              ]
+            },
+            {
+              "q": "Component variants are useful for…",
+              "a": "Different states and sizes of the same element",
+              "wrong": [
+                "Storing research notes",
+                "Version control of code",
+                "Hosting the website"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "Which deliverable best settles page structure before styling?",
+          "a": "Wireframes",
+          "wrong": [
+            "Final mockups",
+            "Brand guidelines",
+            "Marketing copy"
+          ]
+        },
+        {
+          "q": "How many users typically reveal most usability issues?",
+          "a": "About five",
+          "wrong": [
+            "One",
+            "Fifty",
+            "Five hundred"
+          ]
+        },
+        {
+          "q": "Design tokens store…",
+          "a": "Reusable values like colours and spacing",
+          "wrong": [
+            "User passwords",
+            "Analytics events",
+            "Video files"
+          ]
+        },
+        {
+          "q": "What does a type scale provide?",
+          "a": "Consistent, proportional font sizes",
+          "wrong": [
+            "Random font choices",
+            "Image compression",
+            "Icon sets"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Mobile Learning App Case Study",
+        "description": "Research, design and test a mobile learning app. Submit a Figma prototype plus a case study covering research insights, design decisions and usability test results."
+      },
+      "final": [
+        {
+          "q": "Which stage of design thinking validates ideas with users?",
+          "a": "Test",
+          "wrong": [
+            "Define",
+            "Empathise",
+            "Ideate"
+          ]
+        },
+        {
+          "q": "Visual hierarchy is mainly created with…",
+          "a": "Size, weight, contrast and spacing",
+          "wrong": [
+            "File names",
+            "Server speed",
+            "Database indexes"
+          ]
+        },
+        {
+          "q": "A sitemap describes…",
+          "a": "How content and pages are organised",
+          "wrong": [
+            "Office locations",
+            "Colour palettes",
+            "Animation timing"
+          ]
+        },
+        {
+          "q": "Why prototype only the flow being tested?",
+          "a": "It is faster and keeps the test focused",
+          "wrong": [
+            "Figma limits prototypes to one screen",
+            "Users dislike long prototypes",
+            "It is required by WCAG"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "digital-marketing-growth",
+      "title": "Digital Marketing & Growth Analytics",
+      "description": "Plan, launch and measure campaigns that grow a real business: SEO, content, paid ads, email automation and data-driven optimisation with analytics dashboards.",
+      "category": "Marketing",
+      "level": "BEGINNER",
+      "price": 3499,
+      "livePrice": 6999,
+      "instructor": "marketing",
+      "palette": [
+        "#f59e0b",
+        "#ef4444"
+      ],
+      "mark": "GM",
+      "modules": [
+        {
+          "title": "Module 1: Marketing Strategy & SEO",
+          "description": "Know your audience and get found organically.",
+          "lessons": [
+            {
+              "title": "1.1 Funnels, Audiences & Positioning",
+              "summary": "Map the customer journey from first touch to loyal advocate.",
+              "points": [
+                "Awareness → consideration → conversion → retention",
+                "Segment audiences by need, not just demographics",
+                "Positioning states why you, for whom, and why now"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Positioning statement",
+                "lines": [
+                  "For working professionals",
+                  "who want job-ready creative skills,",
+                  "our academy offers mentor-reviewed projects",
+                  "unlike video-only course libraries."
+                ]
+              },
+              "recap": "Clear positioning makes every later channel cheaper."
+            },
+            {
+              "title": "1.2 SEO Fundamentals & Keyword Research",
+              "summary": "Match search intent and earn traffic that keeps compounding.",
+              "points": [
+                "Target keywords by intent, volume and difficulty",
+                "Titles, headings and internal links signal relevance",
+                "Fast, mobile-friendly pages rank and convert better"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Keyword plan",
+                "lines": [
+                  "'learn ui ux online' · commercial",
+                  "'what is a wireframe' · informational",
+                  "'figma course with certificate' · transactional"
+                ]
+              },
+              "recap": "Write for the searcher's intent and rankings follow."
+            },
+            {
+              "title": "1.3 Content Marketing That Converts",
+              "summary": "Turn helpful content into a steady stream of qualified leads.",
+              "points": [
+                "Pillar pages anchor clusters of related posts",
+                "Every piece needs one clear call to action",
+                "Repurpose one idea across blog, video and social"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "One idea, five formats",
+                "lines": [
+                  "Blog: 10 portfolio mistakes",
+                  "Carousel: 5 quick fixes",
+                  "Short video: before vs after",
+                  "Email: free checklist",
+                  "Webinar: live portfolio review"
+                ]
+              },
+              "recap": "Consistency beats virality for long-term growth."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which funnel stage comes right after awareness?",
+              "a": "Consideration",
+              "wrong": [
+                "Retention",
+                "Advocacy",
+                "Churn"
+              ]
+            },
+            {
+              "q": "'figma course with certificate' has which search intent?",
+              "a": "Transactional",
+              "wrong": [
+                "Navigational",
+                "Informational",
+                "Random"
+              ]
+            },
+            {
+              "q": "What is a pillar page?",
+              "a": "A comprehensive page that links a cluster of related content",
+              "wrong": [
+                "A paid banner ad",
+                "The site's privacy policy",
+                "An email template"
+              ]
+            },
+            {
+              "q": "Every content piece should have…",
+              "a": "One clear call to action",
+              "wrong": [
+                "At least ten links",
+                "No headings",
+                "Only images"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Mini Marketing Plan",
+            "description": "Pick a real local business. Submit a one-page plan with its positioning statement, three target keywords with intent, and a four-week content calendar."
+          }
+        },
+        {
+          "title": "Module 2: Paid Ads, Email & Analytics",
+          "description": "Scale what works and prove ROI with data.",
+          "lessons": [
+            {
+              "title": "2.1 Paid Social & Search Campaigns",
+              "summary": "Structure campaigns so budgets go to what actually converts.",
+              "points": [
+                "Campaign → ad set → ad keeps tests organised",
+                "Test one variable at a time: audience, creative or copy",
+                "Optimise for conversions, not cheap clicks"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "A/B test",
+                "lines": [
+                  "Ad A: 'Get job-ready in 12 weeks'",
+                  "Ad B: 'Build 5 portfolio projects'",
+                  "Winner: Ad B · CTR 2.4% vs 1.6%"
+                ]
+              },
+              "recap": "Spend follows evidence, not opinions."
+            },
+            {
+              "title": "2.2 Email Automation & Lead Nurturing",
+              "summary": "Automated journeys that turn sign-ups into enrolled students.",
+              "points": [
+                "Welcome series sets expectations in the first week",
+                "Segment by behaviour: viewed course, abandoned checkout",
+                "Measure opens, clicks and, above all, conversions"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Welcome journey",
+                "lines": [
+                  "Day 0 · Welcome + free lesson",
+                  "Day 2 · Student success story",
+                  "Day 5 · Course comparison guide",
+                  "Day 7 · Limited-time enrolment offer"
+                ]
+              },
+              "recap": "The right message at the right moment sells for you."
+            },
+            {
+              "title": "2.3 Analytics, KPIs & Growth Experiments",
+              "summary": "Read the dashboard, find the bottleneck, run the next experiment.",
+              "points": [
+                "CAC, conversion rate and LTV drive decisions",
+                "Funnel reports reveal where users drop off",
+                "Run experiments with a hypothesis and a success metric"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Experiment card",
+                "lines": [
+                  "Hypothesis: a demo video lifts sign-ups",
+                  "Metric: landing page conversion rate",
+                  "Result: 3.1% → 4.0% (+29%)"
+                ]
+              },
+              "recap": "Measure, learn, and compound small wins."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "When A/B testing ads you should change…",
+              "a": "One variable at a time",
+              "wrong": [
+                "Everything at once",
+                "Only the budget",
+                "Nothing, just wait"
+              ]
+            },
+            {
+              "q": "What does CAC stand for?",
+              "a": "Customer Acquisition Cost",
+              "wrong": [
+                "Click And Convert",
+                "Content Approval Cycle",
+                "Campaign Audience Count"
+              ]
+            },
+            {
+              "q": "A welcome email series is mainly used to…",
+              "a": "Onboard and nurture new subscribers",
+              "wrong": [
+                "Delete inactive users",
+                "Replace the website",
+                "Run paid search"
+              ]
+            },
+            {
+              "q": "A funnel report helps you find…",
+              "a": "Where users drop off",
+              "wrong": [
+                "Your server's IP address",
+                "The best font",
+                "Competitor salaries"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "Which metric compares a customer's lifetime revenue with acquisition cost?",
+          "a": "LTV to CAC ratio",
+          "wrong": [
+            "Bounce rate",
+            "Page speed",
+            "Follower count"
+          ]
+        },
+        {
+          "q": "Which page element strongly signals topic relevance to search engines?",
+          "a": "The title tag and headings",
+          "wrong": [
+            "The footer colour",
+            "The favicon",
+            "The cookie banner"
+          ]
+        },
+        {
+          "q": "A good growth experiment always starts with…",
+          "a": "A clear hypothesis",
+          "wrong": [
+            "A bigger budget",
+            "A logo redesign",
+            "A new domain name"
+          ]
+        },
+        {
+          "q": "Segmenting emails by behaviour means…",
+          "a": "Sending messages based on what users did",
+          "wrong": [
+            "Sending to everyone at once",
+            "Removing all images",
+            "Only emailing on weekends"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: 30-Day Growth Campaign",
+        "description": "Design a 30-day multi-channel campaign for a course launch. Include audience, positioning, channel mix, budget split, email journey, KPI dashboard mock-up and two experiments."
+      },
+      "final": [
+        {
+          "q": "Positioning should explain…",
+          "a": "Who it is for and why it is different",
+          "wrong": [
+            "The company founding date",
+            "The office address",
+            "Server hosting costs"
+          ]
+        },
+        {
+          "q": "Optimising campaigns for cheap clicks instead of conversions usually…",
+          "a": "Wastes budget on low-intent traffic",
+          "wrong": [
+            "Guarantees more sales",
+            "Improves SEO directly",
+            "Reduces CAC to zero"
+          ]
+        },
+        {
+          "q": "Pillar pages and topic clusters improve…",
+          "a": "Topical authority and internal linking",
+          "wrong": [
+            "Email deliverability",
+            "Ad click-through rate only",
+            "Video resolution"
+          ]
+        },
+        {
+          "q": "Which KPI best measures a landing page's effectiveness?",
+          "a": "Conversion rate",
+          "wrong": [
+            "Number of images",
+            "Word count",
+            "Domain age"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "cloud-devops-kubernetes",
+      "title": "Cloud DevOps, Docker & Kubernetes",
+      "description": "Ship software like modern engineering teams: containers, CI/CD pipelines, infrastructure as code, Kubernetes deployments and production monitoring on the cloud.",
+      "category": "DevOps & Cloud",
+      "level": "INTERMEDIATE",
+      "price": 4499,
+      "livePrice": 8999,
+      "instructor": "cloud",
+      "palette": [
+        "#06b6d4",
+        "#2563eb"
+      ],
+      "mark": "Ops",
+      "modules": [
+        {
+          "title": "Module 1: Containers & CI/CD",
+          "description": "Package apps reliably and automate every release.",
+          "lessons": [
+            {
+              "title": "1.1 Docker Images & Containers",
+              "summary": "Build once, run anywhere: how images and containers fit together.",
+              "points": [
+                "Images are immutable, layered blueprints",
+                "Containers are running instances of images",
+                "Small base images mean faster, safer deploys"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "Dockerfile",
+                "lines": [
+                  "FROM node:22-alpine",
+                  "WORKDIR /app",
+                  "COPY package*.json ./",
+                  "RUN npm ci --omit=dev",
+                  "COPY . .",
+                  "CMD [\"node\", \"server.js\"]"
+                ]
+              },
+              "recap": "If it runs in the container, it runs in production."
+            },
+            {
+              "title": "1.2 Docker Compose for Local Environments",
+              "summary": "Spin up your app, database and cache with one command.",
+              "points": [
+                "One YAML file describes every service",
+                "Named volumes persist database data",
+                "Health checks control start-up order"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "docker-compose.yml",
+                "lines": [
+                  "services:",
+                  "  api:",
+                  "    build: .",
+                  "    ports: [\"5000:5000\"]",
+                  "  db:",
+                  "    image: postgres:16"
+                ]
+              },
+              "recap": "New teammates should be productive in one command."
+            },
+            {
+              "title": "1.3 CI/CD Pipelines with GitHub Actions",
+              "summary": "Automatically test, build and deploy on every push.",
+              "points": [
+                "CI runs lint and tests on every pull request",
+                "CD promotes passing builds to staging then production",
+                "Secrets live in the CI vault, never in the repo"
+              ],
+              "example": {
+                "kind": "code",
+                "label": ".github/workflows/ci.yml",
+                "lines": [
+                  "on: [push, pull_request]",
+                  "jobs:",
+                  "  test:",
+                  "    runs-on: ubuntu-latest",
+                  "    steps:",
+                  "      - uses: actions/checkout@v4",
+                  "      - run: npm ci && npm test"
+                ]
+              },
+              "recap": "Automate the boring parts so releases become routine."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "What is the relationship between an image and a container?",
+              "a": "A container is a running instance of an image",
+              "wrong": [
+                "They are the same file",
+                "An image runs inside a container",
+                "Containers build images automatically"
+              ]
+            },
+            {
+              "q": "Where should deployment secrets be stored?",
+              "a": "In the CI/CD secret store",
+              "wrong": [
+                "In the Git repository",
+                "In the Dockerfile",
+                "In the README"
+              ]
+            },
+            {
+              "q": "Docker Compose is mainly used to…",
+              "a": "Run multi-service environments from one file",
+              "wrong": [
+                "Write unit tests",
+                "Design user interfaces",
+                "Send marketing email"
+              ]
+            },
+            {
+              "q": "Why prefer small base images like Alpine?",
+              "a": "Faster pulls and a smaller attack surface",
+              "wrong": [
+                "They include more tools",
+                "They run only on Windows",
+                "They avoid needing a Dockerfile"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Containerise a Web App",
+            "description": "Write a Dockerfile and docker-compose.yml for a small web app with a PostgreSQL database, plus a GitHub Actions workflow that runs the tests. Submit the repository link."
+          }
+        },
+        {
+          "title": "Module 2: Kubernetes & Observability",
+          "description": "Run, scale and monitor workloads in production.",
+          "lessons": [
+            {
+              "title": "2.1 Kubernetes Pods, Deployments & Services",
+              "summary": "The three objects you need to run a stateless app on Kubernetes.",
+              "points": [
+                "Pods wrap one or more containers",
+                "Deployments keep the desired number of replicas running",
+                "Services give pods a stable network address"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "deployment.yaml",
+                "lines": [
+                  "kind: Deployment",
+                  "spec:",
+                  "  replicas: 3",
+                  "  template:",
+                  "    spec:",
+                  "      containers:",
+                  "        - image: academy/api:1.4.0"
+                ]
+              },
+              "recap": "Declare the state you want and Kubernetes keeps it that way."
+            },
+            {
+              "title": "2.2 Scaling, Rollouts & Rollbacks",
+              "summary": "Release safely and handle traffic spikes automatically.",
+              "points": [
+                "Rolling updates replace pods gradually",
+                "Readiness probes stop traffic to unready pods",
+                "The Horizontal Pod Autoscaler adds replicas under load"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "terminal",
+                "lines": [
+                  "kubectl set image deploy/api api=academy/api:1.5.0",
+                  "kubectl rollout status deploy/api",
+                  "kubectl rollout undo deploy/api"
+                ]
+              },
+              "recap": "Every release should be reversible in one command."
+            },
+            {
+              "title": "2.3 Monitoring, Logs & Alerts",
+              "summary": "Know something is wrong before your users tell you.",
+              "points": [
+                "Metrics, logs and traces are the three signals",
+                "Alert on symptoms users feel, such as error rate and latency",
+                "Dashboards should answer 'is it healthy?' at a glance"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Golden signals",
+                "lines": [
+                  "Latency · p95 under 300 ms",
+                  "Traffic · requests per second",
+                  "Errors · 5xx rate under 1%",
+                  "Saturation · CPU and memory headroom"
+                ]
+              },
+              "recap": "You cannot improve what you cannot see."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which Kubernetes object keeps a set number of replicas running?",
+              "a": "Deployment",
+              "wrong": [
+                "ConfigMap",
+                "Namespace",
+                "Secret"
+              ]
+            },
+            {
+              "q": "What gives pods a stable network address?",
+              "a": "A Service",
+              "wrong": [
+                "A Volume",
+                "A Job",
+                "A Label"
+              ]
+            },
+            {
+              "q": "Which command reverts a bad release?",
+              "a": "kubectl rollout undo",
+              "wrong": [
+                "kubectl delete cluster",
+                "docker rm -f",
+                "git reset --hard"
+              ]
+            },
+            {
+              "q": "Which is one of the four golden signals?",
+              "a": "Latency",
+              "wrong": [
+                "Logo colour",
+                "Commit count",
+                "Office temperature"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "Readiness probes are used to…",
+          "a": "Stop sending traffic to pods that are not ready",
+          "wrong": [
+            "Delete old images",
+            "Encrypt secrets",
+            "Write logs to disk"
+          ]
+        },
+        {
+          "q": "CI typically runs on…",
+          "a": "Every push and pull request",
+          "wrong": [
+            "Once a year",
+            "Only after production outages",
+            "Never automatically"
+          ]
+        },
+        {
+          "q": "A rolling update…",
+          "a": "Replaces pods gradually without downtime",
+          "wrong": [
+            "Stops everything, then restarts",
+            "Only works on databases",
+            "Deletes the cluster"
+          ]
+        },
+        {
+          "q": "Which file describes multi-container local environments?",
+          "a": "docker-compose.yml",
+          "wrong": [
+            "package.json",
+            "tsconfig.json",
+            ".gitignore"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Production-Ready Deployment",
+        "description": "Deploy a three-tier app to Kubernetes with CI/CD, autoscaling, health probes and a monitoring dashboard. Submit the repo, manifests and a short runbook for rollbacks."
+      },
+      "final": [
+        {
+          "q": "Which object provides automatic horizontal scaling under load?",
+          "a": "Horizontal Pod Autoscaler",
+          "wrong": [
+            "PersistentVolume",
+            "Ingress",
+            "ServiceAccount"
+          ]
+        },
+        {
+          "q": "Images are described as immutable because…",
+          "a": "Once built they never change; you build a new version",
+          "wrong": [
+            "They cannot be deleted",
+            "They are encrypted",
+            "They contain no files"
+          ]
+        },
+        {
+          "q": "Good alerts focus on…",
+          "a": "Symptoms users experience",
+          "wrong": [
+            "Every log line",
+            "Developer commit counts",
+            "Disk brand names"
+          ]
+        },
+        {
+          "q": "CD in CI/CD stands for…",
+          "a": "Continuous Delivery or Deployment",
+          "wrong": [
+            "Code Documentation",
+            "Container Download",
+            "Central Database"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "react-native-mobile",
+      "title": "Mobile App Development with React Native",
+      "description": "Build and publish cross-platform iOS and Android apps with React Native and Expo: navigation, state, native device features, APIs and store submission.",
+      "category": "Mobile Development",
+      "level": "INTERMEDIATE",
+      "price": 4299,
+      "livePrice": 8499,
+      "instructor": "instructor",
+      "palette": [
+        "#22c55e",
+        "#0d9488"
+      ],
+      "mark": "RN",
+      "modules": [
+        {
+          "title": "Module 1: React Native Fundamentals",
+          "description": "Components, styling and navigation for mobile.",
+          "lessons": [
+            {
+              "title": "1.1 Expo Setup & Core Components",
+              "summary": "Create your first app and preview it on a real phone in minutes.",
+              "points": [
+                "Expo handles builds and device previews",
+                "View, Text and Pressable replace HTML elements",
+                "Hot reload shows changes instantly"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "App.tsx",
+                "lines": [
+                  "export default function App() {",
+                  "  return (",
+                  "    <View style={styles.screen}>",
+                  "      <Text>Hello, Academy!</Text>",
+                  "    </View>",
+                  "  );",
+                  "}"
+                ]
+              },
+              "recap": "Mobile UI is just components, rendered natively."
+            },
+            {
+              "title": "1.2 Flexbox Layouts & Styling",
+              "summary": "Layouts that adapt to every screen size and orientation.",
+              "points": [
+                "Flexbox is column-first on mobile",
+                "StyleSheet.create keeps styles typed and fast",
+                "Use safe areas to avoid notches and home bars"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "styles.ts",
+                "lines": [
+                  "const styles = StyleSheet.create({",
+                  "  screen: { flex: 1, padding: 16 },",
+                  "  row: { flexDirection: 'row', gap: 12 },",
+                  "});"
+                ]
+              },
+              "recap": "Master flexbox and every layout becomes predictable."
+            },
+            {
+              "title": "1.3 Navigation with React Navigation",
+              "summary": "Stacks, tabs and passing data between screens.",
+              "points": [
+                "Stack navigators push and pop screens",
+                "Tab navigators switch between top-level areas",
+                "Route params pass data to the next screen"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "navigate.tsx",
+                "lines": [
+                  "navigation.navigate('Course', {",
+                  "  courseId: course.id,",
+                  "});"
+                ]
+              },
+              "recap": "Good navigation makes an app feel native."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which component replaces <div> in React Native?",
+              "a": "View",
+              "wrong": [
+                "Span",
+                "Section",
+                "Box"
+              ]
+            },
+            {
+              "q": "What is the default flexDirection in React Native?",
+              "a": "column",
+              "wrong": [
+                "row",
+                "grid",
+                "inline"
+              ]
+            },
+            {
+              "q": "Which navigator pushes screens on top of each other?",
+              "a": "Stack navigator",
+              "wrong": [
+                "Tab navigator",
+                "Drawer only",
+                "Grid navigator"
+              ]
+            },
+            {
+              "q": "Why use safe areas?",
+              "a": "To keep content clear of notches and system bars",
+              "wrong": [
+                "To encrypt storage",
+                "To speed up builds",
+                "To add animations"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Course Catalogue App Screens",
+            "description": "Build a two-screen Expo app: a scrollable course list and a course detail screen reached via navigation. Submit a repository or Expo Snack link."
+          }
+        },
+        {
+          "title": "Module 2: Data, Device Features & Publishing",
+          "description": "Connect to APIs, use native features and ship to the stores.",
+          "lessons": [
+            {
+              "title": "2.1 Fetching Data & Managing State",
+              "summary": "Load remote data with loading, error and empty states handled.",
+              "points": [
+                "Fetch in effects or with TanStack Query",
+                "Always design loading, error and empty states",
+                "Cache responses to keep the app fast offline"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "useCourses.ts",
+                "lines": [
+                  "const { data, isLoading } = useQuery({",
+                  "  queryKey: ['courses'],",
+                  "  queryFn: () => api.get('/courses'),",
+                  "});"
+                ]
+              },
+              "recap": "Every network call has three states: plan for all of them."
+            },
+            {
+              "title": "2.2 Camera, Notifications & Device APIs",
+              "summary": "Use native capabilities with permissions handled gracefully.",
+              "points": [
+                "Request permissions at the moment they are needed",
+                "Expo modules wrap camera, location and notifications",
+                "Always handle the 'permission denied' path"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "camera.ts",
+                "lines": [
+                  "const { status } = await Camera.requestCameraPermissionsAsync();",
+                  "if (status !== 'granted') {",
+                  "  showMessage('Camera access is needed to scan certificates');",
+                  "}"
+                ]
+              },
+              "recap": "Respect permissions and users will trust your app."
+            },
+            {
+              "title": "2.3 Building & Publishing to the Stores",
+              "summary": "From development build to App Store and Play Store listing.",
+              "points": [
+                "EAS Build produces signed iOS and Android binaries",
+                "Store listings need screenshots, privacy details and descriptions",
+                "Over-the-air updates ship JavaScript fixes instantly"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "terminal",
+                "lines": [
+                  "eas build --platform all",
+                  "eas submit --platform ios",
+                  "eas update --branch production"
+                ]
+              },
+              "recap": "Shipping is a feature: automate it early."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which three states should every data screen handle?",
+              "a": "Loading, error and empty",
+              "wrong": [
+                "Red, green and blue",
+                "Login, logout and signup",
+                "Portrait, landscape and tablet"
+              ]
+            },
+            {
+              "q": "When should an app request camera permission?",
+              "a": "At the moment the feature is needed",
+              "wrong": [
+                "Before the splash screen",
+                "Never",
+                "Only after an app update"
+              ]
+            },
+            {
+              "q": "Which tool builds signed binaries for the stores with Expo?",
+              "a": "EAS Build",
+              "wrong": [
+                "Webpack",
+                "Babel",
+                "ESLint"
+              ]
+            },
+            {
+              "q": "Over-the-air updates can ship…",
+              "a": "JavaScript and asset fixes without a store release",
+              "wrong": [
+                "New native modules",
+                "A new app icon on iOS",
+                "Database migrations"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "Hot reload helps developers by…",
+          "a": "Showing code changes instantly",
+          "wrong": [
+            "Publishing to the store",
+            "Encrypting data",
+            "Generating icons"
+          ]
+        },
+        {
+          "q": "Route params are used to…",
+          "a": "Pass data to the next screen",
+          "wrong": [
+            "Style components",
+            "Store passwords",
+            "Compile native code"
+          ]
+        },
+        {
+          "q": "StyleSheet.create is preferred because…",
+          "a": "Styles are validated and optimised",
+          "wrong": [
+            "It adds CSS animations",
+            "It works only on iOS",
+            "It replaces flexbox"
+          ]
+        },
+        {
+          "q": "A good permission flow always handles…",
+          "a": "The denied case",
+          "wrong": [
+            "Only the granted case",
+            "Dark mode",
+            "Tablet layouts"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Study Companion App",
+        "description": "Build a cross-platform study companion with course browsing, progress tracking, push reminders and offline caching. Submit the repo, a demo video and store-ready screenshots."
+      },
+      "final": [
+        {
+          "q": "Which library handles screen-to-screen navigation in most RN apps?",
+          "a": "React Navigation",
+          "wrong": [
+            "React Router DOM",
+            "Express",
+            "Redux Toolkit"
+          ]
+        },
+        {
+          "q": "Caching API responses mainly improves…",
+          "a": "Speed and offline experience",
+          "wrong": [
+            "App icon quality",
+            "Store ranking directly",
+            "Battery capacity"
+          ]
+        },
+        {
+          "q": "React Native renders UI using…",
+          "a": "Real native platform views",
+          "wrong": [
+            "A hidden web browser",
+            "Canvas screenshots",
+            "PDF pages"
+          ]
+        },
+        {
+          "q": "Before submitting to the App Store you need…",
+          "a": "A signed build and a complete store listing",
+          "wrong": [
+            "Only a GitHub link",
+            "A Docker image",
+            "A domain name"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "cybersecurity-essentials",
+      "title": "Cybersecurity & Ethical Hacking Essentials",
+      "description": "Learn to think like an attacker to defend like a pro: networking basics, the OWASP Top 10, secure authentication, vulnerability scanning and incident response.",
+      "category": "Cybersecurity",
+      "level": "BEGINNER",
+      "price": 4999,
+      "livePrice": 9499,
+      "instructor": "cloud",
+      "palette": [
+        "#64748b",
+        "#0f172a"
+      ],
+      "mark": "Sec",
+      "modules": [
+        {
+          "title": "Module 1: Security Foundations",
+          "description": "Core concepts every security professional relies on.",
+          "lessons": [
+            {
+              "title": "1.1 The CIA Triad & Threat Modelling",
+              "summary": "What we protect, from whom, and how to prioritise.",
+              "points": [
+                "Confidentiality, Integrity and Availability",
+                "List assets, threats and attack paths",
+                "Prioritise by likelihood and impact"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Threat model: student portal",
+                "lines": [
+                  "Asset: certificates and grades",
+                  "Threat: tampering with grades",
+                  "Control: server-side checks + audit logs"
+                ]
+              },
+              "recap": "Security starts with knowing what matters most."
+            },
+            {
+              "title": "1.2 Networking Basics for Security",
+              "summary": "Ports, protocols and how traffic really flows.",
+              "points": [
+                "TCP/IP layers and common ports such as 22, 80 and 443",
+                "TLS encrypts data in transit",
+                "Firewalls allow only what is needed"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "terminal",
+                "lines": [
+                  "nmap -sV scanme.nmap.org",
+                  "# 22/tcp open  ssh",
+                  "# 80/tcp open  http"
+                ]
+              },
+              "recap": "Every open port is a door: close the ones you don't use."
+            },
+            {
+              "title": "1.3 Passwords, Hashing & MFA",
+              "summary": "Store credentials safely and stop account takeovers.",
+              "points": [
+                "Hash passwords with bcrypt or Argon2, never plain text",
+                "Salts defeat precomputed rainbow tables",
+                "Multi-factor authentication blocks most credential attacks"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "auth.ts",
+                "lines": [
+                  "const hash = await bcrypt.hash(password, 12);",
+                  "const ok = await bcrypt.compare(input, hash);"
+                ]
+              },
+              "recap": "Assume passwords will leak, and design for it."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "What does the 'I' in the CIA triad stand for?",
+              "a": "Integrity",
+              "wrong": [
+                "Identity",
+                "Internet",
+                "Inspection"
+              ]
+            },
+            {
+              "q": "Which port is standard for HTTPS?",
+              "a": "443",
+              "wrong": [
+                "21",
+                "25",
+                "3306"
+              ]
+            },
+            {
+              "q": "How should passwords be stored?",
+              "a": "As salted hashes using bcrypt or Argon2",
+              "wrong": [
+                "In plain text",
+                "Base64 encoded",
+                "In a spreadsheet"
+              ]
+            },
+            {
+              "q": "MFA mainly protects against…",
+              "a": "Stolen or guessed passwords",
+              "wrong": [
+                "Slow websites",
+                "Broken images",
+                "Typos in content"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Threat Model a Web App",
+            "description": "Choose a web app you use. Submit a one-page threat model listing assets, three realistic threats, their likelihood and impact, and the controls you would add."
+          }
+        },
+        {
+          "title": "Module 2: Web Security & Incident Response",
+          "description": "Find, fix and respond to real-world vulnerabilities.",
+          "lessons": [
+            {
+              "title": "2.1 OWASP Top 10: Injection & Broken Access Control",
+              "summary": "The two vulnerability classes behind countless breaches.",
+              "points": [
+                "Parameterised queries stop SQL injection",
+                "Check authorisation on the server for every request",
+                "Never trust IDs or roles sent by the client"
+              ],
+              "example": {
+                "kind": "code",
+                "label": "safe-query.ts",
+                "lines": [
+                  "// ❌ db.query(`SELECT * FROM users WHERE id = ${id}`)",
+                  "// ✅ parameterised",
+                  "db.query('SELECT * FROM users WHERE id = $1', [id]);"
+                ]
+              },
+              "recap": "Validate input, authorise every action, trust nothing."
+            },
+            {
+              "title": "2.2 Vulnerability Scanning & Pen Testing",
+              "summary": "Find weaknesses legally, safely and systematically.",
+              "points": [
+                "Always get written permission and a defined scope",
+                "Scanners find known issues; humans find logic flaws",
+                "Report findings with severity and clear fixes"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Finding report",
+                "lines": [
+                  "Title: IDOR on /api/certificates/:id",
+                  "Severity: High",
+                  "Fix: verify the certificate belongs to the caller"
+                ]
+              },
+              "recap": "A good report makes fixing easy."
+            },
+            {
+              "title": "2.3 Incident Response Playbooks",
+              "summary": "What to do in the first hour of a security incident.",
+              "points": [
+                "Prepare → detect → contain → eradicate → recover → learn",
+                "Preserve logs and evidence before changing systems",
+                "Blameless post-mortems prevent repeat incidents"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "First-hour checklist",
+                "lines": [
+                  "Confirm and classify the incident",
+                  "Contain: rotate keys, isolate hosts",
+                  "Notify the incident commander",
+                  "Start the timeline document"
+                ]
+              },
+              "recap": "Calm, rehearsed responses turn crises into lessons."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "Which technique prevents SQL injection?",
+              "a": "Parameterised queries",
+              "wrong": [
+                "Longer passwords",
+                "Bigger servers",
+                "Minifying JavaScript"
+              ]
+            },
+            {
+              "q": "Before any penetration test you must have…",
+              "a": "Written permission and a defined scope",
+              "wrong": [
+                "A faster laptop",
+                "Admin passwords from a friend",
+                "Nothing at all"
+              ]
+            },
+            {
+              "q": "Broken access control happens when…",
+              "a": "Users can act on data they should not access",
+              "wrong": [
+                "The site loads slowly",
+                "Images are too large",
+                "Fonts fail to load"
+              ]
+            },
+            {
+              "q": "What should you do before changing compromised systems?",
+              "a": "Preserve logs and evidence",
+              "wrong": [
+                "Delete all logs",
+                "Announce it on social media",
+                "Reinstall everything immediately"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "TLS is used to…",
+          "a": "Encrypt data in transit",
+          "wrong": [
+            "Compress images",
+            "Store backups",
+            "Speed up databases"
+          ]
+        },
+        {
+          "q": "A salt added to a password hash…",
+          "a": "Makes precomputed rainbow tables useless",
+          "wrong": [
+            "Makes passwords shorter",
+            "Encrypts the network",
+            "Removes the need for MFA"
+          ]
+        },
+        {
+          "q": "Authorisation checks must happen…",
+          "a": "On the server for every request",
+          "wrong": [
+            "Only in the browser",
+            "Once per year",
+            "Only for admins"
+          ]
+        },
+        {
+          "q": "Blameless post-mortems aim to…",
+          "a": "Improve systems and prevent repeats",
+          "wrong": [
+            "Find someone to fire",
+            "Hide the incident",
+            "Skip documentation"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Secure an Insecure App",
+        "description": "Audit a deliberately vulnerable web app in a lab environment. Document five findings with severity, proof of concept and fixes, then submit a patched version and an incident response plan."
+      },
+      "final": [
+        {
+          "q": "Which item is NOT part of the CIA triad?",
+          "a": "Velocity",
+          "wrong": [
+            "Confidentiality",
+            "Integrity",
+            "Availability"
+          ]
+        },
+        {
+          "q": "An IDOR vulnerability is a type of…",
+          "a": "Broken access control",
+          "wrong": [
+            "Network latency",
+            "Weak typography",
+            "Disk failure"
+          ]
+        },
+        {
+          "q": "Firewalls should be configured to…",
+          "a": "Allow only the traffic that is required",
+          "wrong": [
+            "Allow everything for convenience",
+            "Block only HTTPS",
+            "Log nothing"
+          ]
+        },
+        {
+          "q": "The first step of the incident response lifecycle is…",
+          "a": "Preparation",
+          "wrong": [
+            "Celebration",
+            "Deletion",
+            "Marketing"
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "graphic-design-branding",
+      "title": "Graphic Design & Brand Identity",
+      "description": "Design memorable brands: typography, colour theory, logo design, layout, social media creatives and complete brand guidelines using industry tools.",
+      "category": "Creative Design",
+      "level": "BEGINNER",
+      "price": 2999,
+      "livePrice": 5999,
+      "instructor": "design",
+      "palette": [
+        "#f43f5e",
+        "#f97316"
+      ],
+      "mark": "Br",
+      "modules": [
+        {
+          "title": "Module 1: Design Principles",
+          "description": "The visual language behind every great design.",
+          "lessons": [
+            {
+              "title": "1.1 Elements & Principles of Design",
+              "summary": "Line, shape, colour and space, and the principles that organise them.",
+              "points": [
+                "Contrast creates focus",
+                "Alignment and proximity create order",
+                "White space gives designs room to breathe"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Quick critique",
+                "lines": [
+                  "Is the focal point obvious?",
+                  "Are related items grouped?",
+                  "Is everything aligned to a grid?",
+                  "Is there enough white space?"
+                ]
+              },
+              "recap": "Principles turn decoration into communication."
+            },
+            {
+              "title": "1.2 Colour Theory & Palettes",
+              "summary": "Build palettes that feel intentional and accessible.",
+              "points": [
+                "Complementary colours create energy and contrast",
+                "Use the 60-30-10 rule for balance",
+                "Check contrast so text stays readable"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "60-30-10 palette",
+                "lines": [
+                  "60% · Warm ivory background",
+                  "30% · Deep navy text and blocks",
+                  "10% · Coral accent for calls to action"
+                ]
+              },
+              "recap": "A small, purposeful palette always looks more professional."
+            },
+            {
+              "title": "1.3 Typography That Speaks",
+              "summary": "Choose and pair typefaces that match a brand's voice.",
+              "points": [
+                "Serif feels classic; sans-serif feels modern",
+                "Pair at most two typefaces",
+                "Line height and tracking affect readability as much as the font"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Font pairing",
+                "lines": [
+                  "Headings · Playfair Display (serif)",
+                  "Body · Inter (sans-serif)",
+                  "Line height · 1.5 for body text"
+                ]
+              },
+              "recap": "Typography is the voice of your design."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "In the 60-30-10 rule, the 10% is usually used for…",
+              "a": "Accent colours and calls to action",
+              "wrong": [
+                "Backgrounds",
+                "Body text",
+                "Borders only"
+              ]
+            },
+            {
+              "q": "Which principle groups related items together?",
+              "a": "Proximity",
+              "wrong": [
+                "Repetition",
+                "Rotation",
+                "Opacity"
+              ]
+            },
+            {
+              "q": "How many typefaces should a typical design pair?",
+              "a": "At most two",
+              "wrong": [
+                "At least five",
+                "Exactly seven",
+                "One per paragraph"
+              ]
+            },
+            {
+              "q": "Complementary colours sit…",
+              "a": "Opposite each other on the colour wheel",
+              "wrong": [
+                "Next to each other",
+                "Only in grayscale",
+                "In the same hue family"
+              ]
+            }
+          ],
+          "assignment": {
+            "title": "Event Poster Design",
+            "description": "Design an A3 poster for a tech meetup applying contrast, alignment, a 60-30-10 palette and a two-font pairing. Submit a PDF or image link with a short rationale."
+          }
+        },
+        {
+          "title": "Module 2: Logos & Brand Systems",
+          "description": "Create identities that work everywhere.",
+          "lessons": [
+            {
+              "title": "2.1 Logo Design Process",
+              "summary": "From brief and moodboard to a versatile final mark.",
+              "points": [
+                "Start with a brief and keyword moodboard",
+                "Sketch many ideas before going digital",
+                "Test the logo small, in one colour, and reversed"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Logo checklist",
+                "lines": [
+                  "Readable at 16px favicon size",
+                  "Works in black and white",
+                  "Has horizontal and stacked versions",
+                  "Memorable at a glance"
+                ]
+              },
+              "recap": "Simple logos survive every size and medium."
+            },
+            {
+              "title": "2.2 Social Media Creatives",
+              "summary": "Design scroll-stopping posts that stay on brand.",
+              "points": [
+                "Design for each platform's aspect ratio",
+                "One message per post, with a strong visual hook",
+                "Templates keep a series consistent"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Platform sizes",
+                "lines": [
+                  "Instagram post · 1080 × 1350",
+                  "Story / Reel · 1080 × 1920",
+                  "LinkedIn · 1200 × 627",
+                  "YouTube thumbnail · 1280 × 720"
+                ]
+              },
+              "recap": "Consistency builds recognition faster than novelty."
+            },
+            {
+              "title": "2.3 Brand Guidelines & Style Guides",
+              "summary": "Document the system so anyone can use the brand correctly.",
+              "points": [
+                "Cover logo usage, colour, typography and imagery",
+                "Show do's and don'ts with real examples",
+                "Share as a living document the team can update"
+              ],
+              "example": {
+                "kind": "list",
+                "label": "Guideline contents",
+                "lines": [
+                  "Brand story and voice",
+                  "Logo clear space and misuse",
+                  "Colour codes: HEX · RGB · CMYK",
+                  "Typography scale and imagery style"
+                ]
+              },
+              "recap": "Guidelines protect the brand when you are not in the room."
+            }
+          ],
+          "quiz": [
+            {
+              "q": "A strong logo should still work…",
+              "a": "At very small sizes and in one colour",
+              "wrong": [
+                "Only at billboard size",
+                "Only in full colour",
+                "Only on dark backgrounds"
+              ]
+            },
+            {
+              "q": "What is the standard Instagram story size?",
+              "a": "1080 × 1920",
+              "wrong": [
+                "800 × 600",
+                "1920 × 1080",
+                "500 × 500"
+              ]
+            },
+            {
+              "q": "Brand guidelines exist to…",
+              "a": "Help everyone apply the brand consistently",
+              "wrong": [
+                "Replace the logo",
+                "Store invoices",
+                "Track website visitors"
+              ]
+            },
+            {
+              "q": "Why sketch on paper before going digital?",
+              "a": "To explore many ideas quickly",
+              "wrong": [
+                "Software cannot draw logos",
+                "Clients require paper",
+                "It improves printing quality"
+              ]
+            }
+          ],
+          "assignment": null
+        }
+      ],
+      "mock": [
+        {
+          "q": "White space in a layout…",
+          "a": "Improves focus and readability",
+          "wrong": [
+            "Wastes the client's money",
+            "Should always be filled",
+            "Only matters in print"
+          ]
+        },
+        {
+          "q": "A moodboard helps define…",
+          "a": "The visual direction before designing",
+          "wrong": [
+            "The final invoice",
+            "Server settings",
+            "The legal entity"
+          ]
+        },
+        {
+          "q": "Serif typefaces are often perceived as…",
+          "a": "Classic and trustworthy",
+          "wrong": [
+            "Futuristic and technical",
+            "Childish",
+            "Illegible"
+          ]
+        },
+        {
+          "q": "Templates for social posts mainly provide…",
+          "a": "Consistency across a series",
+          "wrong": [
+            "Higher image resolution",
+            "Automatic captions",
+            "Paid reach"
+          ]
+        }
+      ],
+      "project": {
+        "title": "Capstone: Complete Brand Identity",
+        "description": "Create a full identity for a fictional startup: logo suite, palette, type system, social templates and a 10-page brand guideline PDF. Submit the files with a presentation of your process."
+      },
+      "final": [
+        {
+          "q": "Contrast in design is mainly used to…",
+          "a": "Create focus and hierarchy",
+          "wrong": [
+            "Reduce file size",
+            "Hide information",
+            "Replace typography"
+          ]
+        },
+        {
+          "q": "Which format suits a LinkedIn link image?",
+          "a": "1200 × 627",
+          "wrong": [
+            "1080 × 1920",
+            "300 × 300",
+            "4000 × 4000"
+          ]
+        },
+        {
+          "q": "Logo 'clear space' is…",
+          "a": "The minimum empty area around the logo",
+          "wrong": [
+            "A transparent background",
+            "A colour code",
+            "A font weight"
+          ]
+        },
+        {
+          "q": "A palette following the 60-30-10 rule has…",
+          "a": "A dominant, a secondary and an accent colour",
+          "wrong": [
+            "Ten equal colours",
+            "Only black and white",
+            "Random colours per page"
+          ]
+        }
+      ]
+    }
+  ],
+  "fullstackLessons": {
+    "1.1 HTTP Protocols, RESTful API Principles & Monorepos": {
+      "summary": "How the web talks: requests, responses and clean REST contracts.",
+      "points": [
+        "Verbs carry meaning: GET reads, POST creates, PUT replaces",
+        "Status codes tell clients exactly what happened",
+        "Monorepos share types between frontend and backend"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "routes.ts",
+        "lines": [
+          "router.get('/courses', listCourses);",
+          "router.post('/enrollments', enroll);",
+          "// 201 Created · 404 Not Found · 409 Conflict"
+        ]
+      },
+      "recap": "A clear API contract is the backbone of every full-stack app."
+    },
+    "1.2 TypeScript Mastery, Generics & Runtime Zod Schema Validation": {
+      "summary": "Type safety at compile time and validation at runtime.",
+      "points": [
+        "Generics make reusable, fully typed helpers",
+        "Zod validates untrusted input at the edge",
+        "Infer TypeScript types directly from schemas"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "schema.ts",
+        "lines": [
+          "const Login = z.object({",
+          "  email: z.string().email(),",
+          "  password: z.string().min(8),",
+          "});",
+          "type Login = z.infer<typeof Login>;"
+        ]
+      },
+      "recap": "Types guard your code; schemas guard your inputs."
+    },
+    "1.3 Database Modeling with Prisma ORM & PostgreSQL": {
+      "summary": "Model relations, constraints and indexes that keep data correct.",
+      "points": [
+        "Relations mirror real-world ownership",
+        "Unique constraints prevent duplicate enrollments",
+        "Indexes keep frequent queries fast"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "schema.prisma",
+        "lines": [
+          "model Enrollment {",
+          "  studentId String",
+          "  courseId  String",
+          "  @@unique([studentId, courseId])",
+          "}"
+        ]
+      },
+      "recap": "Let the database enforce the rules it can enforce."
+    },
+    "2.1 Next.js App Router, Server Components & Streaming SSR": {
+      "summary": "Render fast pages by choosing what runs on the server and the client.",
+      "points": [
+        "Server Components fetch data without shipping JavaScript",
+        "Client Components handle interactivity",
+        "Streaming shows content as soon as it is ready"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "page.tsx",
+        "lines": [
+          "export default async function Page() {",
+          "  const courses = await getCourses();",
+          "  return <CourseGrid courses={courses} />;",
+          "}"
+        ]
+      },
+      "recap": "Server by default, client when you need interaction."
+    },
+    "2.2 Server State Management with TanStack Query & Optimistic Updates": {
+      "summary": "Cache, refetch and update server data without boilerplate.",
+      "points": [
+        "Query keys identify cached data",
+        "Mutations invalidate stale queries",
+        "Optimistic updates make the UI feel instant"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "useEnroll.ts",
+        "lines": [
+          "useMutation({",
+          "  mutationFn: enroll,",
+          "  onSuccess: () => qc.invalidateQueries(['my-courses']),",
+          "});"
+        ]
+      },
+      "recap": "Treat server data as a cache, not as component state."
+    },
+    "2.3 Responsive Design Systems with Tailwind CSS & Micro-Animations": {
+      "summary": "Consistent, responsive interfaces with tokens and subtle motion.",
+      "points": [
+        "Design tokens live in the Tailwind config",
+        "Mobile-first breakpoints scale layouts up",
+        "Micro-animations give feedback without distraction"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "card.tsx",
+        "lines": [
+          "<div className=\"grid gap-4 sm:grid-cols-2 lg:grid-cols-3\">",
+          "  <Card className=\"transition hover:-translate-y-1\" />",
+          "</div>"
+        ]
+      },
+      "recap": "A design system makes every new screen faster to build."
+    },
+    "3.1 Server-Enforced State Machines & Progression Logic": {
+      "summary": "Why progression rules must live on the server, not in the browser.",
+      "points": [
+        "Model each stage as an explicit state",
+        "Guards check prerequisites on every request",
+        "The client only renders what the server allows"
+      ],
+      "example": {
+        "kind": "code",
+        "label": "progression.ts",
+        "lines": [
+          "if (!quizPassed) {",
+          "  throw new ProgressionLockedError('Pass the quiz first');",
+          "}"
+        ]
+      },
+      "recap": "If the rule matters, enforce it on the server."
+    }
+  }
+}

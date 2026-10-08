@@ -1,68 +1,87 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Warm "maker" theme: cream surfaces, deep plum ink, rust/terracotta, peach and pink accents.
+ * "Academy" theme: clean white surfaces on a cool slate canvas, an indigo → violet brand
+ * gradient, amber highlights and a deep navy ("night") for hero sections, sidebars,
+ * the footer and the video player.
  *
- * The UI was originally written against a dark palette, so the colour scales
- * below keep the same "dark-theme" semantics but in light values:
- *   - 950/900/800 shades (used as surfaces, tints and borders) are light.
- *   - 400/300/200 shades (used as foreground text) are dark and readable.
+ * The UI was originally written against a dark palette, so the light-mode colour scales
+ * below keep that "dark-theme" naming but carry light values:
+ *   - 950/900/850/800 shades (used as surfaces, tints and borders) are light.
+ *   - 400/300/200/100 shades (used as foreground text) are dark and readable.
  *   - 500/600/700 shades stay solid brand colours for buttons and fills.
+ * Use the `night` scale (a true dark scale) for genuinely dark surfaces.
  */
-const rust = {
-  50: '#fbede4',
-  100: '#f5d7c5',
-  200: '#7a3317',
-  300: '#8f3d1d',
-  400: '#a84a24',
-  500: '#c25e33',
-  600: '#b4532a',
-  700: '#9a4322',
-  800: '#efcdb8',
-  900: '#f7e2d3',
-  950: '#fbefe6',
+const indigo = {
+  50: '#eef2ff',
+  100: '#e0e7ff',
+  200: '#3730a3',
+  300: '#4338ca',
+  400: '#4f46e5',
+  500: '#6366f1',
+  600: '#4f46e5',
+  700: '#4338ca',
+  800: '#c7d2fe',
+  900: '#e0e7ff',
+  950: '#eef2ff',
 };
 
-const peach = {
-  50: '#fef1e8',
-  100: '#fce5d6',
-  200: '#9a4a1e',
-  300: '#b85a26',
-  400: '#cf672c',
-  500: '#f6a06c',
-  600: '#ee8b53',
-  700: '#d9763e',
-  800: '#fad4bc',
-  900: '#fce5d6',
-  950: '#fef1e8',
+const violet = {
+  50: '#f5f3ff',
+  100: '#ede9fe',
+  200: '#5b21b6',
+  300: '#6d28d9',
+  400: '#7c3aed',
+  500: '#8b5cf6',
+  600: '#7c3aed',
+  700: '#6d28d9',
+  800: '#ddd6fe',
+  900: '#ede9fe',
+  950: '#f5f3ff',
 };
 
-const pink = {
-  50: '#fdeff5',
-  100: '#fce0ec',
-  200: '#8e1f52',
-  300: '#a62862',
-  400: '#c03474',
-  500: '#ec6fa6',
-  600: '#db4f8e',
-  700: '#b83a74',
-  800: '#f8c6dc',
-  900: '#fce0ec',
-  950: '#fdeff5',
+const sky = {
+  50: '#f0f9ff',
+  100: '#e0f2fe',
+  200: '#075985',
+  300: '#0369a1',
+  400: '#0284c7',
+  500: '#0ea5e9',
+  600: '#0284c7',
+  700: '#0369a1',
+  800: '#bae6fd',
+  900: '#e0f2fe',
+  950: '#f0f9ff',
 };
 
-const plum = {
-  50: '#f6edf0',
-  100: '#ead7de',
-  200: '#2f0f1f',
-  300: '#3d1a2b',
-  400: '#4a1a32',
-  500: '#5c2340',
-  600: '#2f0f1f',
-  700: '#240a17',
-  800: '#e2ccd4',
-  900: '#efe2e6',
-  950: '#f6edf0',
+/** A true dark scale for dark surfaces (hero, sidebar, footer, video player). */
+const night = {
+  DEFAULT: '#0f172a',
+  50: '#f8fafc',
+  100: '#f1f5f9',
+  200: '#e2e8f0',
+  300: '#cbd5e1',
+  400: '#94a3b8',
+  500: '#64748b',
+  600: '#475569',
+  700: '#334155',
+  800: '#1e293b',
+  900: '#0f172a',
+  950: '#0b1020',
+};
+
+const amber = {
+  50: '#fffbeb',
+  100: '#fef3c7',
+  200: '#92400e',
+  300: '#b45309',
+  400: '#d97706',
+  500: '#f59e0b',
+  600: '#d97706',
+  700: '#b45309',
+  800: '#fde68a',
+  900: '#fef3c7',
+  950: '#fffbeb',
 };
 
 const config: Config = {
@@ -83,49 +102,49 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         // Main heading/body ink colour
-        ink: '#2f0f1f',
-        cream: {
-          DEFAULT: '#fbf3e6',
-          50: '#fffbf4',
-          100: '#f6ead8',
-          200: '#f1e1ca',
-        },
-        plum: { DEFAULT: '#2f0f1f', ...plum },
-        rust: { DEFAULT: '#b4532a', ...rust },
-        peach: { DEFAULT: '#f6a06c', ...peach },
-        pink: { DEFAULT: '#ec6fa6', ...pink },
-        primary: { DEFAULT: '#2f0f1f', foreground: '#fbf3e6', ...plum },
-        brand: { DEFAULT: '#2f0f1f', dark: '#4a1a32', ...plum },
-        coral: { DEFAULT: '#f6a06c', ...peach },
+        ink: '#0f172a',
+        night,
+        brand: { DEFAULT: '#4f46e5', dark: '#4338ca', ...indigo },
+        primary: { DEFAULT: '#4f46e5', foreground: '#ffffff', ...indigo },
+        // Earlier theme token names, mapped onto the academy palette
+        cream: { DEFAULT: '#f8fafc', 50: '#ffffff', 100: '#f1f5f9', 200: '#e2e8f0' },
+        plum: { ...night, DEFAULT: '#0f172a', 500: '#1e293b' },
+        rust: { DEFAULT: '#4f46e5', ...indigo },
+        peach: { DEFAULT: '#f59e0b', ...amber },
+        coral: { DEFAULT: '#f59e0b', ...amber },
+        pink: { DEFAULT: '#8b5cf6', ...violet },
         surface: {
-          dark: '#fbf3e6',
-          card: '#fffbf4',
-          cardHover: '#f6ead8',
-          border: '#eadac4',
-          borderLight: '#dcc6a9',
+          dark: '#f8fafc',
+          card: '#ffffff',
+          cardHover: '#f1f5f9',
+          border: '#e2e8f0',
+          borderLight: '#cbd5e1',
         },
         // Neutral scale (inverted: high numbers are light surfaces, low numbers are dark ink)
         slate: {
-          50: '#2f0f1f',
-          100: '#2f0f1f',
-          200: '#3d1a2b',
-          300: '#5a3a47',
-          400: '#74585f',
-          500: '#977c80',
-          600: '#b9a6a3',
-          700: '#e0ccb2',
-          800: '#eadac4',
-          850: '#f6ead8',
-          900: '#fffbf4',
-          950: '#fbf3e6',
+          50: '#0f172a',
+          100: '#0f172a',
+          200: '#1e293b',
+          300: '#334155',
+          400: '#475569',
+          500: '#64748b',
+          600: '#94a3b8',
+          700: '#cbd5e1',
+          800: '#e2e8f0',
+          850: '#f1f5f9',
+          900: '#ffffff',
+          950: '#f8fafc',
         },
-        blue: rust,
-        indigo: rust,
-        sky: rust,
-        violet: peach,
-        purple: peach,
-        cyan: pink,
+        blue: indigo,
+        indigo,
+        violet,
+        purple: violet,
+        sky,
+        cyan: sky,
+        amber,
         emerald: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
           200: '#065f46',
           300: '#047857',
           400: '#059669',
@@ -136,18 +155,9 @@ const config: Config = {
           900: '#d1fae5',
           950: '#ecfdf5',
         },
-        amber: {
-          200: '#92400e',
-          300: '#b45309',
-          400: '#d97706',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#fde68a',
-          900: '#fef3c7',
-          950: '#fffbeb',
-        },
         rose: {
+          50: '#fff1f2',
+          100: '#ffe4e6',
           200: '#9f1239',
           300: '#be123c',
           400: '#e11d48',
@@ -159,32 +169,79 @@ const config: Config = {
           950: '#fff1f2',
         },
         accent: {
-          blue: '#b4532a',
+          blue: '#4f46e5',
           emerald: '#059669',
           amber: '#d97706',
-          purple: '#ee8b53',
+          purple: '#7c3aed',
           rose: '#e11d48',
-          cyan: '#db4f8e',
+          cyan: '#0284c7',
         },
       },
       borderRadius: {
-        lg: '0.75rem',
-        md: '0.625rem',
+        lg: '0.625rem',
+        md: '0.5rem',
         sm: '0.375rem',
-        xl: '1rem',
-        '2xl': '1.5rem',
-        '3xl': '2rem',
+        xl: '0.875rem',
+        '2xl': '1.125rem',
+        '3xl': '1.5rem',
       },
       fontFamily: {
-        sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['"Bricolage Grotesque"', '"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        // Labels previously used a monospace "terminal" look; the new theme keeps them friendly
-        mono: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        code: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Labels previously used a monospace "terminal" look; the theme keeps them friendly
+        mono: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        code: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       boxShadow: {
-        soft: '0 10px 30px -12px rgba(47, 15, 31, 0.22)',
-        card: '0 4px 18px -6px rgba(47, 15, 31, 0.10)',
+        soft: '0 12px 32px -12px rgba(79, 70, 229, 0.35)',
+        card: '0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12)',
+        lift: '0 20px 40px -18px rgba(15, 23, 42, 0.28)',
+      },
+      keyframes: {
+        'fade-up': {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        'scale-in': {
+          '0%': { opacity: '0', transform: 'scale(0.96)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        'slide-in-right': {
+          '0%': { opacity: '0', transform: 'translateX(24px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'slide-in-left': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-400px 0' },
+          '100%': { backgroundPosition: '400px 0' },
+        },
+        'gradient-pan': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+      },
+      animation: {
+        'fade-up': 'fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-in': 'fade-in 0.5s ease-out both',
+        'scale-in': 'scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'slide-in-right': 'slide-in-right 0.4s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'slide-in-left': 'slide-in-left 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
+        float: 'float 6s ease-in-out infinite',
+        shimmer: 'shimmer 1.4s linear infinite',
+        'gradient-pan': 'gradient-pan 8s ease infinite',
+        marquee: 'marquee 40s linear infinite',
       },
     },
   },

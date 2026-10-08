@@ -3,187 +3,217 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { apiClient } from '../../../lib/api';
-import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
+import { useAuth } from '../../../providers/auth-provider';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
-import {
-  Users,
-  CreditCard,
-  BookOpen,
-  Award,
-  ClipboardCheck,
-  TrendingUp,
-  ArrowRight,
-  ShieldCheck,
-  Zap,
-} from 'lucide-react';
+import { Reveal } from '../../../components/motion/reveal';
+import { ColumnChart, BarList } from '../../../components/charts/bar-charts';
 import { formatCurrency, formatDate } from '../../../lib/utils';
+import {
+  Award,
+  BarChart3,
+  BookOpen,
+  ClipboardCheck,
+  CreditCard,
+  Plus,
+  TrendingUp,
+  Users,
+  ArrowRight,
+} from 'lucide-react';
 
 export default function AdminDashboardPage() {
+  const { user } = useAuth();
   const [analytics, setAnalytics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadAnalytics() {
-      try {
-        setIsLoading(true);
-        const data = await apiClient('/admin/reports/analytics');
-        setAnalytics(data);
-      } catch (err) {
-        console.error('Failed to load admin analytics', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadAnalytics();
+    apiClient('/admin/reports/analytics')
+      .then(setAnalytics)
+      .catch((err) => console.error('Failed to load admin analytics', err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const summary = analytics?.summary || {};
+  const weekly: any[] = analytics?.weekly || [];
+  const byCourse: any[] = analytics?.byCourse || [];
+  const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+  const compactInr = (v: number) =>
+    v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : v >= 1000 ? `₹${Math.round(v / 1000)}k` : `₹${v}`;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 max-w-7xl">
+        <div className="h-32 rounded-3xl skeleton" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-32 rounded-2xl skeleton" />)}
+        </div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="h-72 rounded-2xl skeleton" />
+          <div className="h-72 rounded-2xl skeleton" />
+        </div>
+      </div>
+    );
+  }
+
+  const kpis = [
+    { icon: CreditCard, label: 'Total revenue', value: formatCurrency(summary.totalRevenue || 0), sub: 'Completed payments', tone: 'bg-emerald-50 text-emerald-400' },
+    { icon: Users, label: 'Students', value: summary.totalStudents || 0, sub: `${summary.totalEnrollments || 0} enrolments`, tone: 'bg-indigo-50 text-indigo-400' },
+    { icon: ClipboardCheck, label: 'Pending reviews', value: summary.pendingReviewsCount || 0, sub: 'Awaiting an instructor', tone: 'bg-amber-50 text-amber-400' },
+    { icon: Award, label: 'Certificates', value: summary.totalCertificates || 0, sub: `${summary.certificationRate || 0}% of enrolments`, tone: 'bg-violet-50 text-violet-400' },
+  ];
 
   return (
-    <div className="space-y-8 max-w-6xl">
-      {/* Top Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-lg bg-[#fffbf4] border border-[#e7d5bd] shadow-xl">
-        <div className="space-y-1.5">
-          <Badge variant="purple">INSTITUTE CONTROL CENTER</Badge>
-          <h1 className="text-xl sm:text-2xl font-bold text-ink tracking-tight">
-            Administrative Overview
-          </h1>
-          <p className="text-xs text-slate-400 max-w-xl">
-            Monitor real-time student admissions, review queues, revenue streams, and automated certification issuance.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/admin/reviews">
-            <Button variant="primary" size="md" className="gap-2">
-              <ClipboardCheck className="w-4 h-4" />
-              <span>Review Queue ({summary.pendingReviewsCount || 0})</span>
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 border-slate-800 bg-slate-900/80">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Total Revenue</span>
-            <CreditCard className="w-4 h-4 text-emerald-400" />
+    <div className="space-y-8 max-w-7xl">
+      {/* Welcome */}
+      <section className="relative overflow-hidden rounded-3xl hero-mesh text-white p-6 sm:p-8 animate-fade-up">
+        <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div>
+            <p className="text-sm font-semibold text-indigo-500">Academy overview</p>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold text-white">
+              Welcome back, {user?.name || 'Admin'}
+            </h1>
+            <p className="mt-2 text-night-300 max-w-xl">
+              Enrolments, revenue and review work across all {summary.totalCourses || 0} programs, updated live.
+            </p>
           </div>
-          <p className="text-2xl font-bold text-emerald-400 mt-2">
-            {formatCurrency(summary.totalRevenue || 0)}
-          </p>
-          <span className="text-[11px] text-slate-500">Completed payments</span>
-        </Card>
-
-        <Card className="p-5 border-slate-800 bg-slate-900/80">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Total Students</span>
-            <Users className="w-4 h-4 text-indigo-400" />
-          </div>
-          <p className="text-2xl font-bold text-ink mt-2">{summary.totalStudents || 0}</p>
-          <span className="text-[11px] text-slate-500">{summary.totalEnrollments || 0} Enrollments</span>
-        </Card>
-
-        <Card className="p-5 border-slate-800 bg-slate-900/80">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Pending Reviews</span>
-            <ClipboardCheck className="w-4 h-4 text-amber-400" />
-          </div>
-          <p className="text-2xl font-bold text-amber-400 mt-2">{summary.pendingReviewsCount || 0}</p>
-          <span className="text-[11px] text-slate-500">Requires instructor action</span>
-        </Card>
-
-        <Card className="p-5 border-slate-800 bg-slate-900/80">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400">Issued Certificates</span>
-            <Award className="w-4 h-4 text-purple-400" />
-          </div>
-          <p className="text-2xl font-bold text-purple-400 mt-2">{summary.totalCertificates || 0}</p>
-          <span className="text-[11px] text-slate-500">Verified graduates</span>
-        </Card>
-      </div>
-
-      {/* Recent Admissions & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Enrollments */}
-        <Card className="lg:col-span-2 border-slate-800 bg-slate-900/80 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h3 className="font-bold text-sm text-ink flex items-center gap-2">
-              <Users className="w-4 h-4 text-indigo-400" />
-              Recent Student Admissions
-            </h3>
-            <Link href="/admin/enrollments" className="text-xs text-indigo-400 hover:underline">
-              View All
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/reviews">
+              <Button variant="primary">
+                <ClipboardCheck className="w-4 h-4" /> Review queue ({summary.pendingReviewsCount || 0})
+              </Button>
+            </Link>
+            <Link href="/admin/courses/new">
+              <Button variant="secondary" className="bg-white/10 hover:bg-white/15 text-white border-white/15">
+                <Plus className="w-4 h-4" /> New course
+              </Button>
             </Link>
           </div>
+        </div>
+      </section>
 
-          <div className="space-y-3">
-            {(analytics?.recentEnrollments || []).length === 0 ? (
-              <p className="text-xs text-slate-400 py-6 text-center">No recent admissions recorded.</p>
-            ) : (
-              analytics.recentEnrollments.map((enr: any) => (
-                <div
-                  key={enr.id}
-                  className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between text-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-600/30 text-indigo-300 flex items-center justify-center font-bold">
-                      {enr.student?.name?.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-ink">{enr.student?.name}</p>
-                      <p className="text-[11px] text-slate-400">{enr.course?.title}</p>
-                    </div>
-                  </div>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map(({ icon: Icon, label, value, sub, tone }, i) => (
+          <Reveal key={label} delay={i * 70} className="rounded-2xl bg-white border border-[#e2e8f0] p-5 shadow-card">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-400">{label}</span>
+              <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${tone}`}>
+                <Icon className="w-[18px] h-[18px]" />
+              </span>
+            </div>
+            <p className="mt-3 text-2xl sm:text-3xl font-extrabold text-ink tabular-nums">{value}</p>
+            <p className="mt-1 text-xs text-slate-500">{sub}</p>
+          </Reveal>
+        ))}
+      </div>
 
-                  <div className="text-right">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
+        <Reveal className="min-w-0 rounded-2xl bg-white border border-[#e2e8f0] p-5 sm:p-6 shadow-card">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-bold text-ink flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-indigo-400" /> New enrolments per week
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Last 8 weeks</p>
+            </div>
+            <span className="text-sm font-semibold text-ink tabular-nums">
+              {weekly.reduce((n, w) => n + w.enrollments, 0)} total
+            </span>
+          </div>
+          <div className="mt-6">
+            <ColumnChart
+              caption="New enrolments per week, last 8 weeks"
+              data={weekly.map((w) => ({
+                label: shortDate(w.weekStart),
+                value: w.enrollments,
+                detail: `Week of ${shortDate(w.weekStart)} · ${formatCurrency(w.revenue)} revenue`,
+              }))}
+              format={(v) => `${v} enrolment${v === 1 ? '' : 's'}`}
+            />
+          </div>
+        </Reveal>
+
+        <Reveal delay={80} className="min-w-0 rounded-2xl bg-white border border-[#e2e8f0] p-5 sm:p-6 shadow-card">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-bold text-ink flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-indigo-400" /> Revenue by program
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">All time · completed payments</p>
+            </div>
+            <Link href="/admin/reports" className="text-sm font-semibold text-indigo-400 hover:text-indigo-300">
+              Reports
+            </Link>
+          </div>
+          <div className="mt-5">
+            <BarList
+              caption="Revenue by program"
+              data={byCourse.slice(0, 6).map((c) => ({
+                label: c.title,
+                value: c.revenue,
+                sub: `${c.enrollments} learner${c.enrollments === 1 ? '' : 's'}`,
+              }))}
+              format={compactInr}
+            />
+          </div>
+        </Reveal>
+      </div>
+
+      {/* Recent admissions & quick actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6">
+        <Reveal className="min-w-0 rounded-2xl bg-white border border-[#e2e8f0] shadow-card overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-[#e2e8f0]">
+            <h2 className="font-bold text-ink flex items-center gap-2">
+              <Users className="w-4 h-4 text-indigo-400" /> Recent admissions
+            </h2>
+            <Link href="/admin/enrollments" className="text-sm font-semibold text-indigo-400 hover:text-indigo-300">View all</Link>
+          </div>
+          {(analytics?.recentEnrollments || []).length === 0 ? (
+            <p className="text-sm text-slate-500 p-8 text-center">No admissions yet.</p>
+          ) : (
+            <ul className="divide-y divide-[#e2e8f0]">
+              {analytics.recentEnrollments.map((enr: any) => (
+                <li key={enr.id} className="flex items-center gap-3 px-5 py-3.5">
+                  <span className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-300 font-bold flex items-center justify-center shrink-0">
+                    {enr.student?.name?.charAt(0)}
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-semibold text-ink truncate">{enr.student?.name}</span>
+                    <span className="block text-xs text-slate-500 truncate">{enr.course?.title}</span>
+                  </span>
+                  <span className="text-right shrink-0">
                     <Badge variant="success">Active</Badge>
-                    <p className="text-[10px] text-slate-500 mt-1">{formatDate(enr.enrolledAt)}</p>
-                  </div>
-                </div>
-              ))
-            )}
+                    <span className="block text-[11px] text-slate-500 mt-1">{formatDate(enr.enrolledAt)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Reveal>
+
+        <Reveal delay={80} className="rounded-2xl bg-white border border-[#e2e8f0] shadow-card p-5">
+          <h2 className="font-bold text-ink">Quick actions</h2>
+          <div className="mt-4 grid gap-2">
+            {[
+              { href: '/admin/courses/new', icon: BookOpen, label: 'Create a new course', tone: 'text-indigo-400' },
+              { href: '/admin/reviews', icon: ClipboardCheck, label: 'Grade submissions', tone: 'text-amber-400' },
+              { href: '/admin/students', icon: Users, label: 'Track student progress', tone: 'text-sky-400' },
+              { href: '/admin/assessments', icon: BarChart3, label: 'Quiz analytics', tone: 'text-violet-400' },
+            ].map(({ href, icon: Icon, label, tone }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group flex items-center gap-3 rounded-xl border border-[#e2e8f0] px-4 py-3 text-sm font-semibold text-ink hover:border-indigo-500 hover:bg-indigo-50/40 transition-colors"
+              >
+                <Icon className={`w-4 h-4 ${tone}`} />
+                <span className="flex-1">{label}</span>
+                <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            ))}
           </div>
-        </Card>
-
-        {/* Quick Management Shortcuts */}
-        <Card className="border-slate-800 bg-slate-900/80 p-6 space-y-4">
-          <h3 className="font-bold text-sm text-ink border-b border-slate-800 pb-3">
-            Quick Administrative Actions
-          </h3>
-
-          <div className="space-y-2.5">
-            <Link href="/admin/courses/new" className="block">
-              <Button variant="secondary" size="sm" className="w-full justify-start text-xs gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-400" />
-                <span>Create New Course Track</span>
-              </Button>
-            </Link>
-
-            <Link href="/admin/reviews" className="block">
-              <Button variant="secondary" size="sm" className="w-full justify-start text-xs gap-2">
-                <ClipboardCheck className="w-4 h-4 text-amber-400" />
-                <span>Evaluate Practical Assignments</span>
-              </Button>
-            </Link>
-
-            <Link href="/admin/students" className="block">
-              <Button variant="secondary" size="sm" className="w-full justify-start text-xs gap-2">
-                <Users className="w-4 h-4 text-cyan-400" />
-                <span>Inspect Student Progression</span>
-              </Button>
-            </Link>
-
-            <Link href="/admin/reports" className="block">
-              <Button variant="secondary" size="sm" className="w-full justify-start text-xs gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span>Revenue & Analytics Reports</span>
-              </Button>
-            </Link>
-          </div>
-        </Card>
+        </Reveal>
       </div>
     </div>
   );

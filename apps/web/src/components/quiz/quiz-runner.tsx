@@ -228,7 +228,7 @@ export function QuizRunner({
           <div className="flex items-center justify-between gap-4">
             <div>
               <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 mb-2">Module Assessment</Badge>
-              <CardTitle className="text-xl md:text-2xl font-bold text-white">
+              <CardTitle className="text-xl md:text-2xl font-bold text-ink">
                 {quizInfo?.title || initialQuiz?.title || 'Knowledge Assessment'}
               </CardTitle>
             </div>
@@ -246,7 +246,7 @@ export function QuizRunner({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <div>
               <div className="text-xs text-slate-400">Questions</div>
-              <div className="text-lg font-bold text-white">{quizInfo?.questionCount || 20} MCQs</div>
+              <div className="text-lg font-bold text-ink">{quizInfo?.questionCount || 20} MCQs</div>
             </div>
             <div>
               <div className="text-xs text-slate-400">Pass Mark</div>
@@ -254,13 +254,13 @@ export function QuizRunner({
             </div>
             <div>
               <div className="text-xs text-slate-400">Time Limit</div>
-              <div className="text-lg font-bold text-white">
+              <div className="text-lg font-bold text-ink">
                 {quizInfo?.timeLimitMinutes ? `${quizInfo.timeLimitMinutes} Mins` : 'Untimed'}
               </div>
             </div>
             <div>
               <div className="text-xs text-slate-400">Attempts Left</div>
-              <div className="text-lg font-bold text-white">
+              <div className="text-lg font-bold text-ink">
                 {quizInfo?.attemptsRemaining !== null && quizInfo?.attemptsRemaining !== undefined
                   ? quizInfo.attemptsRemaining
                   : 'Unlimited'}
@@ -272,7 +272,7 @@ export function QuizRunner({
             <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-400" />
               <div className="text-sm">
-                <div className="font-semibold text-white">Assessment Locked</div>
+                <div className="font-semibold text-ink">Assessment Locked</div>
                 <div>{quizInfo.lockReason || 'Complete all video lessons in this module to unlock this assessment.'}</div>
               </div>
             </div>
@@ -368,7 +368,7 @@ export function QuizRunner({
                   onClick={() => currentQ && handleOptionToggle(currentQ.id, opt.id, isMultiple)}
                   className={`p-3.5 rounded-xl border flex items-start gap-3 cursor-pointer transition-all ${
                     isChecked
-                      ? 'bg-amber-500/10 border-amber-500/40 text-white shadow-sm'
+                      ? 'bg-amber-500/10 border-amber-500/40 text-ink shadow-sm'
                       : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
                   }`}
                 >
@@ -465,9 +465,9 @@ export function QuizRunner({
           </div>
 
           <div>
-            <h3 className="text-2xl font-bold text-white">{result.passed ? 'Assessment Passed! 🎉' : 'Assessment Failed'}</h3>
+            <h3 className="text-2xl font-bold text-ink">{result.passed ? 'Assessment Passed! 🎉' : 'Assessment Failed'}</h3>
             <p className="text-slate-400 text-sm mt-1">
-              Score: <span className="font-bold text-white">{result.score} / {result.maxScore}</span> ({result.percentage}%)
+              Score: <span className="font-bold text-ink">{result.score} / {result.maxScore}</span> ({result.percentage}%)
               | Pass mark: {result.passPercentage}%
             </p>
           </div>

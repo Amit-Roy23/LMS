@@ -59,18 +59,27 @@ export class MockTestService {
     answers: { questionId: string; selectedOptionIds: string[] }[];
     timeSpentSeconds?: number;
   }) {
-    const mockTest = await prisma.mockTest.findUnique({
-      where: { id: params.mockTestId },
-      include: {
-        questions: { include: { options: true } },
-      },
-    });
+    const [mockTest, previousAttempts] = await Promise.all([
+      prisma.mockTest.findUnique({
+        where: { id: params.mockTestId },
+        include: {
+          questions: { include: { options: true } },
+        },
+      }),
+      prisma.mockTestAttempt.count({
+        where: { mockTestId: params.mockTestId, studentId: params.studentId },
+      }),
+    ]);
 
     if (!mockTest) throw new NotFoundError('Mock test not found');
 
-    const previousAttempts = await prisma.mockTestAttempt.count({
-      where: { mockTestId: params.mockTestId, studentId: params.studentId },
-    });
+    // Submissions are gated exactly like the runner: every module must be completed first
+    if (params.role === Role.STUDENT) {
+      const gate = await progressionService.getCourseProgression(mockTest.courseId, params.studentId);
+      if (!gate.isAllModulesCompleted) {
+        throw new BadRequestError('Mock test is locked. You must complete all course modules first.');
+      }
+    }
 
     if (previousAttempts >= mockTest.maxAttempts) {
       throw new BadRequestError(`Maximum attempts (${mockTest.maxAttempts}) reached for this mock test.`);

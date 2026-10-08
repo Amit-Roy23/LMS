@@ -20,7 +20,6 @@ import {
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { apiClient } from '../../lib/api';
-import { formatDuration } from '../../lib/utils';
 import { useToast } from '../../providers/toast-provider';
 import { VideoProvider } from '@academy/shared';
 
@@ -37,6 +36,15 @@ export interface VideoPlayerProps {
   isCompleted?: boolean;
   onProgressUpdate?: (percent: number, isCompleted: boolean) => void;
   onComplete?: () => void;
+}
+
+/** Formats seconds as m:ss (or h:mm:ss) like a media player clock. */
+function clock(total: number) {
+  const t = Math.max(0, Math.floor(total || 0));
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const sec = String(t % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 }
 
 export function VideoPlayer({
@@ -69,6 +77,12 @@ export function VideoPlayer({
   const [isSaving, setIsSaving] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [watermarkPos, setWatermarkPos] = useState({ top: 15, left: 15 });
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  // Rendered demo videos ship with a poster frame next to the MP4
+  const posterUrl = videoUrl && /^\/media\/.+\.mp4$/.test(videoUrl) ? videoUrl.replace(/\.mp4$/, '.jpg') : undefined;
 
   // Played interval tracking for tamper-proof heartbeat
   const currentIntervalStartRef = useRef<number | null>(null);
@@ -96,6 +110,8 @@ export function VideoPlayer({
     setIsPlaying(false);
     playedIntervalsRef.current = [];
     currentIntervalStartRef.current = null;
+    setLoadError(false);
+    setIsBuffering(false);
 
     if (videoRef.current) {
       try {
@@ -126,7 +142,8 @@ export function VideoPlayer({
 
       const payload = {
         positionSeconds: Math.round(position),
-        playedIntervals: [...playedIntervalsRef.current],
+        // The API validates intervals as [start, end] pairs
+        playedIntervals: playedIntervalsRef.current.map((i) => [i.start, i.end]),
         playbackRate: playbackSpeed,
       };
 
@@ -135,15 +152,15 @@ export function VideoPlayer({
 
       try {
         setIsSaving(true);
-        const res = await apiClient<{
-          percent: number;
-          watchedSeconds: number;
-          isCompleted: boolean;
-          newlyCompleted?: boolean;
+        const data = await apiClient<{
+          progress: { percent: number; watchedSeconds: number; isCompleted: boolean };
+          coursePercent: number;
+          thresholdMet: boolean;
         }>(`/student/lessons/${lessonId}/progress`, {
           method: 'POST',
           body: JSON.stringify(payload),
         });
+        const res = data.progress;
 
         if (res.percent !== undefined) {
           setWatchPercent(res.percent);
@@ -316,7 +333,7 @@ export function VideoPlayer({
           if (isPlaying) setShowControls(false);
         }, 3000);
       }}
-      className="relative w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-slate-800 select-none group"
+      className="relative w-full aspect-video bg-night-950 rounded-2xl overflow-hidden shadow-2xl border border-night-800 select-none group"
     >
       {/* 1. Video Player Element / Embed */}
       {isYouTube ? (
@@ -337,19 +354,68 @@ export function VideoPlayer({
         />
       ) : (
         <video
+          key={`${videoUrl}-${reloadKey}`}
           ref={videoRef}
           src={videoUrl}
+          poster={posterUrl}
+          preload="metadata"
           playsInline
           muted={isMuted}
           onPlay={onPlay}
           onPause={onPause}
           onTimeUpdate={onTimeUpdate}
+          onWaiting={() => setIsBuffering(true)}
+          onPlaying={() => setIsBuffering(false)}
+          onCanPlay={() => setIsBuffering(false)}
+          onError={() => {
+            setIsBuffering(false);
+            setIsPlaying(false);
+            setLoadError(true);
+          }}
+          onEnded={() => {
+            setIsPlaying(false);
+            if (videoRef.current) sendHeartbeat(videoRef.current.duration || videoRef.current.currentTime, true);
+          }}
           onLoadedMetadata={() => {
-            if (videoRef.current) setDuration(videoRef.current.duration);
+            const el = videoRef.current;
+            if (!el) return;
+            setDuration(el.duration);
+            // Resume where the learner left off (unless they had reached the end)
+            if (initialWatchedSeconds > 1 && initialWatchedSeconds < el.duration - 2) {
+              el.currentTime = initialWatchedSeconds;
+              setCurrentTime(initialWatchedSeconds);
+            }
           }}
           onClick={togglePlay}
-          className="w-full h-full object-contain cursor-pointer"
+          className="w-full h-full object-contain cursor-pointer bg-black"
         />
+      )}
+
+      {/* Buffering spinner */}
+      {isBuffering && !loadError && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+          <span className="w-12 h-12 rounded-full border-4 border-white/20 border-t-white animate-spin" />
+        </div>
+      )}
+
+      {/* Friendly error state with retry */}
+      {loadError && !isYouTube && !isVimeo && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 bg-night-950/95 text-center px-6">
+          <AlertCircle className="w-10 h-10 text-amber-500" />
+          <p className="text-white font-semibold">This video couldn&apos;t be loaded</p>
+          <p className="text-sm text-night-400 max-w-sm">
+            Check your connection and try again. Your watch progress is saved.
+          </p>
+          <button
+            onClick={() => {
+              setLoadError(false);
+              setReloadKey((k) => k + 1);
+            }}
+            className="mt-1 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-night-900 hover:bg-night-100"
+          >
+            <RotateCcw className="w-4 h-4" /> Retry
+          </button>
+        </div>
       )}
 
       {/* 2. Anti-Piracy Dynamic Floating Watermark (Student ID & Timestamp) */}
@@ -360,37 +426,33 @@ export function VideoPlayer({
             left: `${watermarkPos.left}%`,
             transition: 'top 4s ease-in-out, left 4s ease-in-out',
           }}
-          className="absolute pointer-events-none z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-mono font-medium text-white/50 tracking-wider shadow-lg select-none"
+          className="absolute pointer-events-none z-20 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-[9px] sm:text-[10px] font-medium text-white/45 tracking-wide select-none max-w-[45%] truncate"
         >
           <ShieldCheck className="w-3 h-3 text-indigo-400/60" />
           <span>{studentId}</span>
-          <span className="text-white/20">•</span>
-          <span>{studentName}</span>
+          <span className="hidden sm:inline text-white/20">•</span>
+          <span className="hidden sm:inline">{studentName}</span>
         </div>
       )}
 
       {/* 3. HTML5 Custom Controls Overlay (for native/HLS MP4 streams) */}
       {!isYouTube && !isVimeo && (
         <div
-          className={`absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/30 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-4 ${
+          className={`absolute inset-0 bg-gradient-to-t from-night-950/90 via-transparent to-black/30 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-4 ${
             showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          {/* Top Bar: Title & Status */}
-          <div className="flex items-center justify-between pointer-events-auto">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white drop-shadow truncate max-w-md">{title}</h3>
-              {completed && (
-                <Badge variant="success" className="gap-1 py-0.5 text-[10px]">
-                  <CheckCircle2 className="w-3 h-3" /> Completed
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-slate-300 font-mono bg-slate-900/60 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-700/50">
-              <Clock className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{Math.round(watchPercent)}% watched</span>
-            </div>
+          {/* Top corner: watch status (the lesson title is shown above the player) */}
+          <div className="flex items-center justify-end pointer-events-auto">
+            {completed ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-semibold text-white">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-night-900/70 backdrop-blur px-2.5 py-1 text-[11px] font-semibold text-night-200 border border-white/10">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" /> {Math.round(watchPercent)}% watched
+              </span>
+            )}
           </div>
 
           {/* Center Play/Pause Trigger */}
@@ -409,8 +471,8 @@ export function VideoPlayer({
           <div className="space-y-2 pointer-events-auto">
             {/* Scrubber Progress Bar */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono text-slate-300 min-w-[42px]">
-                {formatDuration(currentTime)}
+              <span className="text-xs font-mono text-night-200 min-w-[42px]">
+                {clock(currentTime)}
               </span>
               <input
                 type="range"
@@ -419,10 +481,10 @@ export function VideoPlayer({
                 step={0.1}
                 value={currentTime}
                 onChange={handleSeek}
-                className="w-full h-1.5 bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all"
+                className="w-full h-1.5 bg-night-700/80 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-2 transition-all"
               />
-              <span className="text-xs font-mono text-slate-400 min-w-[42px]">
-                {formatDuration(duration)}
+              <span className="text-xs font-mono text-night-400 min-w-[42px]">
+                {clock(duration)}
               </span>
             </div>
 
@@ -443,8 +505,19 @@ export function VideoPlayer({
                   {isMuted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5" />}
                 </button>
 
+                {/* Speed: one cycling button on phones */}
+                <button
+                  onClick={() => {
+                    const speeds = [0.75, 1, 1.25, 1.5, 2];
+                    handleSpeedChange(speeds[(speeds.indexOf(playbackSpeed) + 1) % speeds.length]);
+                  }}
+                  className="sm:hidden px-2 py-0.5 text-[11px] font-bold rounded bg-night-900/70 border border-night-700/40 text-white"
+                >
+                  {playbackSpeed}x
+                </button>
+
                 {/* Speed Selector */}
-                <div className="flex items-center gap-1 bg-slate-900/70 rounded-lg p-0.5 border border-slate-700/40">
+                <div className="hidden sm:flex items-center gap-1 bg-night-900/70 rounded-lg p-0.5 border border-night-700/40">
                   {[0.75, 1, 1.25, 1.5, 2].map((s) => (
                     <button
                       key={s}
@@ -452,7 +525,7 @@ export function VideoPlayer({
                       className={`px-2 py-0.5 text-[11px] font-bold rounded ${
                         playbackSpeed === s
                           ? 'bg-indigo-600 text-white shadow'
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-night-400 hover:text-white'
                       }`}
                     >
                       {s}x

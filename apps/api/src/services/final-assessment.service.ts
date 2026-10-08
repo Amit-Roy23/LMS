@@ -60,18 +60,27 @@ export class FinalAssessmentService {
     answers: { questionId: string; selectedOptionIds: string[] }[];
     timeSpentSeconds?: number;
   }) {
-    const assessment = await prisma.finalAssessment.findUnique({
-      where: { id: params.finalAssessmentId },
-      include: {
-        questions: { include: { options: true } },
-      },
-    });
+    const [assessment, previousAttempts] = await Promise.all([
+      prisma.finalAssessment.findUnique({
+        where: { id: params.finalAssessmentId },
+        include: {
+          questions: { include: { options: true } },
+        },
+      }),
+      prisma.examAttempt.count({
+        where: { finalAssessmentId: params.finalAssessmentId, studentId: params.studentId },
+      }),
+    ]);
 
     if (!assessment) throw new NotFoundError('Final assessment not found');
 
-    const previousAttempts = await prisma.examAttempt.count({
-      where: { finalAssessmentId: params.finalAssessmentId, studentId: params.studentId },
-    });
+    // Submissions are gated exactly like the runner
+    if (params.role === Role.STUDENT) {
+      const gate = await progressionService.getCourseProgression(assessment.courseId, params.studentId);
+      if (!gate.isAllModulesCompleted || !gate.mockTestPassed || !gate.finalProjectApproved) {
+        throw new BadRequestError('Final assessment is locked. Complete all modules, mock test, and have your final project approved first.');
+      }
+    }
 
     if (previousAttempts >= assessment.maxAttempts) {
       throw new BadRequestError(`Maximum attempts (${assessment.maxAttempts}) reached for this final assessment.`);

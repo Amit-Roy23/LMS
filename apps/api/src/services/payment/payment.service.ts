@@ -3,7 +3,7 @@ import { IPaymentProvider } from './payment-provider.interface.js';
 import { MockPaymentProvider } from './mock-payment.provider.js';
 import { RazorpayProvider } from './razorpay.provider.js';
 import { PaymentProvider, PaymentStatus, EnrollmentStatus, RegistrationStatus, DeliveryMode } from '@academy/shared';
-import { BadRequestError, NotFoundError } from '../../lib/errors.js';
+import { BadRequestError, ForbiddenError, NotFoundError } from '../../lib/errors.js';
 import { logger } from '../../lib/logger.js';
 import { eventBus } from '../../events/event-bus.js';
 
@@ -228,7 +228,7 @@ class PaymentService {
     };
   }
 
-  async verifyAndCompleteEnrollment(paymentId: string, providerRef?: string, signature?: string) {
+  async verifyAndCompleteEnrollment(paymentId: string, providerRef?: string, signature?: string, requesterId?: string) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
       include: { course: true, student: true },
@@ -236,6 +236,18 @@ class PaymentService {
 
     if (!payment) {
       throw new NotFoundError('Payment record not found');
+    }
+
+    if (requesterId && payment.studentId !== requesterId) {
+      throw new ForbiddenError('This payment does not belong to your account');
+    }
+
+    // Idempotent: a payment that was already completed just returns its enrollment
+    if (payment.status === PaymentStatus.COMPLETED) {
+      const existing = await prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId: payment.studentId, courseId: payment.courseId } },
+      });
+      if (existing) return { payment, enrollment: existing };
     }
 
     const providerInstance = this.getProvider(payment.provider as PaymentProvider);
@@ -273,6 +285,7 @@ class PaymentService {
       update: {
         status: EnrollmentStatus.ACTIVE,
         paymentStatus: PaymentStatus.PAID,
+        accessStatus: 'ACTIVE',
         paymentId: payment.id,
         enrolledAt: new Date(),
       },
@@ -281,6 +294,7 @@ class PaymentService {
         courseId: payment.courseId,
         status: EnrollmentStatus.ACTIVE,
         paymentStatus: PaymentStatus.PAID,
+        accessStatus: 'ACTIVE',
         paymentId: payment.id,
         enrolledAt: new Date(),
       },

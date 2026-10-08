@@ -36,13 +36,13 @@ export function Modal({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+        className="fixed inset-0 bg-night-950/60 backdrop-blur-sm animate-fade-in"
       />
 
       {/* Modal Dialog */}
       <div
         className={cn(
-          'relative w-full rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl z-10 animate-in zoom-in-95 duration-200',
+          'relative w-full rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl z-10 animate-scale-in',
           maxWidth === 'sm' && 'max-w-sm',
           maxWidth === 'md' && 'max-w-md',
           maxWidth === 'lg' && 'max-w-lg',

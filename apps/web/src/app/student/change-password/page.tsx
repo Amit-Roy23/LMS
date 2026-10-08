@@ -53,7 +53,7 @@ export default function ChangePasswordPage() {
           <KeyRound className="w-4 h-4" />
           <span>SECURITY & CREDENTIALS</span>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+        <h1 className="text-2xl font-bold text-ink tracking-tight">
           {isForced ? 'Set Your Permanent Password' : 'Change Your Account Password'}
         </h1>
         <p className="text-xs text-slate-500">
@@ -75,7 +75,7 @@ export default function ChangePasswordPage() {
         </div>
       )}
 
-      <Card className="border-[#efdfd4] bg-white p-6 shadow-md">
+      <Card className="border-[#e2e8f0] bg-white p-6 shadow-md">
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isForced && (
             <Input

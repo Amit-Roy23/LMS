@@ -65,10 +65,33 @@ export class CourseService {
       prisma.course.count({ where }),
     ]);
 
+    // Lesson counts and review stats for the course cards, fetched together in one round trip
+    const ids = items.map((c) => c.id);
+    const [moduleLessonCounts, ratings] = await Promise.all([
+      prisma.module.findMany({
+        where: { courseId: { in: ids }, deletedAt: null },
+        select: { courseId: true, _count: { select: { lessons: { where: { deletedAt: null } } } } },
+      }),
+      prisma.feedback.groupBy({
+        by: ['courseId'],
+        where: { courseId: { in: ids } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+    ]);
+    const lessonsByCourse = new Map<string, number>();
+    moduleLessonCounts.forEach((m) =>
+      lessonsByCourse.set(m.courseId, (lessonsByCourse.get(m.courseId) || 0) + m._count.lessons)
+    );
+    const ratingByCourse = new Map(ratings.map((r) => [r.courseId, r]));
+
     const formatted = items.map((c) => ({
       ...c,
       modulesCount: c._count.modules,
+      lessonsCount: lessonsByCourse.get(c.id) || 0,
       enrolledStudentsCount: c._count.enrollments,
+      averageRating: ratingByCourse.get(c.id)?._avg.rating ?? null,
+      reviewsCount: ratingByCourse.get(c.id)?._count._all ?? 0,
     }));
 
     return { items: formatted, total, page, limit };
@@ -92,6 +115,9 @@ export class CourseService {
                 description: true,
                 durationSeconds: true,
                 order: true,
+                isPreview: true,
+                videoUrl: true,
+                videoProvider: true,
               },
             },
             quiz: { select: { id: true, title: true, passingScorePercent: true } },
@@ -102,6 +128,11 @@ export class CourseService {
         finalProject: { select: { id: true, title: true } },
         finalAssessment: { select: { id: true, title: true, durationMinutes: true } },
         _count: { select: { enrollments: true } },
+        feedbacks: {
+          orderBy: { createdAt: 'desc' },
+          take: 6,
+          select: { id: true, rating: true, comment: true, createdAt: true, student: { select: { name: true } } },
+        },
       },
     });
 
@@ -109,17 +140,26 @@ export class CourseService {
       throw new NotFoundError('Course not found');
     }
 
-    let isEnrolled = false;
-    if (studentId) {
-      const enrollment = await prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId, courseId: course.id } },
-      });
-      isEnrolled = !!enrollment && enrollment.status === 'ACTIVE';
-    }
+    const [enrollment, rating] = await Promise.all([
+      studentId
+        ? prisma.enrollment.findUnique({ where: { studentId_courseId: { studentId, courseId: course.id } } })
+        : null,
+      prisma.feedback.aggregate({ where: { courseId: course.id }, _avg: { rating: true }, _count: { _all: true } }),
+    ]);
+    const isEnrolled = !!enrollment && enrollment.status === 'ACTIVE';
 
     return {
       ...course,
+      // Only free preview lessons expose their video publicly
+      modules: course.modules.map((m) => ({
+        ...m,
+        lessons: m.lessons.map(({ videoUrl, videoProvider, ...lesson }) =>
+          lesson.isPreview ? { ...lesson, videoUrl, videoProvider } : lesson
+        ),
+      })),
       enrolledStudentsCount: course._count.enrollments,
+      averageRating: rating._avg.rating,
+      reviewsCount: rating._count._all,
       isEnrolled,
     };
   }
@@ -229,7 +269,14 @@ export class CourseService {
   }
 
   // Record Lesson Progress
-  async recordLessonProgress(studentId: string, lessonId: string, watchedSeconds: number, percent: number, markComplete = false) {
+  async recordLessonProgress(
+    studentId: string,
+    lessonId: string,
+    watchedSeconds: number,
+    percent: number,
+    markComplete = false,
+    role: Role = Role.STUDENT
+  ) {
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
       include: { module: { include: { course: true } } },
@@ -237,14 +284,19 @@ export class CourseService {
 
     if (!lesson) throw new NotFoundError('Lesson not found');
 
+    // Progress can only be recorded on lessons the student is enrolled in and has unlocked.
+    // The access check and the existing-progress lookup are independent, so run them together.
+    const [progressionBefore, existing] = await Promise.all([
+      progressionService.assertCanAccessLesson(lessonId, studentId, role),
+      prisma.lessonProgress.findUnique({
+        where: { studentId_lessonId: { studentId, lessonId } },
+      }),
+    ]);
+
     const courseSettings = (lesson.module.course.settings || {}) as any;
     const threshold = courseSettings.lessonCompletionThresholdPercent || 90;
 
     const isComplete = markComplete || percent >= threshold;
-
-    const existing = await prisma.lessonProgress.findUnique({
-      where: { studentId_lessonId: { studentId, lessonId } },
-    });
 
     const highestPercent = existing ? Math.max(existing.percent, percent) : percent;
     const completedAt = (existing?.completedAt || (isComplete ? new Date() : null));
@@ -265,8 +317,13 @@ export class CourseService {
       },
     });
 
-    // Re-evaluate module progression
-    const progression = await progressionService.getCourseProgression(lesson.module.courseId, studentId);
+    // Only a newly completed lesson can change module/course progression; regular
+    // watch heartbeats reuse the progression computed by the access check.
+    const newlyCompleted = !existing?.completedAt && !!completedAt;
+    const progression =
+      newlyCompleted || !progressionBefore
+        ? await progressionService.getCourseProgression(lesson.module.courseId, studentId)
+        : progressionBefore;
 
     return {
       progress,

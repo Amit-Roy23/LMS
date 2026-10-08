@@ -1,9 +1,27 @@
+import { Role } from '@academy/shared';
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { courseService } from '../services/course.service.js';
 import { progressionService } from '../services/progression.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 
+/** Removes `isCorrect` from every question option in a course payload. */
+function stripAnswerKeys<T>(course: T): T {
+  const clean = (questions?: any[]) =>
+    questions?.map((q) => ({ ...q, options: q.options?.map(({ isCorrect, ...o }: any) => o) }));
+  const c: any = course;
+  return {
+    ...c,
+    modules: c.modules?.map((m: any) => (m.quiz ? { ...m, quiz: { ...m.quiz, questions: clean(m.quiz.questions) } } : m)),
+    mockTest: c.mockTest ? { ...c.mockTest, questions: clean(c.mockTest.questions) } : c.mockTest,
+    finalAssessment: c.finalAssessment
+      ? { ...c.finalAssessment, questions: clean(c.finalAssessment.questions) }
+      : c.finalAssessment,
+  };
+}
+
+// Edge cache for public, non-personalised responses (served stale while refreshing)
+const PUBLIC_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
 
 export class CourseController {
   async listPublicCourses(req: Request, res: Response, next: NextFunction) {
@@ -23,6 +41,8 @@ export class CourseController {
         search,
       });
 
+      // The public catalogue is identical for every visitor, so let the CDN serve it
+      res.set('Cache-Control', PUBLIC_CACHE);
       return sendPaginated(res, result.items, result.total, result.page, result.limit);
     } catch (err) {
       next(err);
@@ -51,6 +71,8 @@ export class CourseController {
     try {
       const slug = req.params.slug as string;
       const course = await courseService.getCourseBySlug(slug, req.user?.userId);
+      // Anonymous responses are shared; signed-in ones include the viewer's enrollment
+      res.set('Cache-Control', req.user ? 'private, no-store' : PUBLIC_CACHE);
       return sendSuccess(res, course);
     } catch (err) {
       next(err);
@@ -61,7 +83,9 @@ export class CourseController {
     try {
       const id = req.params.id as string;
       const course = await courseService.getCourseById(id);
-      return sendSuccess(res, course);
+      const isStaff = req.user?.role === Role.ADMIN || req.user?.role === Role.INSTRUCTOR;
+      // Students may see questions and options, but never which option is correct
+      return sendSuccess(res, isStaff ? course : stripAnswerKeys(course));
     } catch (err) {
       next(err);
     }
@@ -337,7 +361,8 @@ export class CourseController {
         targetLessonId,
         watchedSeconds,
         percent,
-        markComplete
+        markComplete,
+        req.user!.role as Role
       );
       return sendSuccess(res, result);
     } catch (err) {

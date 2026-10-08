@@ -15,23 +15,22 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || isLoading}
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-1 focus:ring-offset-cream disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-full active:scale-[0.98]',
-          // Solid Variants - NO gradients
+          'inline-flex items-center justify-center whitespace-nowrap font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none select-none rounded-xl active:scale-[0.98]',
           variant === 'primary' &&
-            'bg-plum hover:bg-plum-500 text-cream font-semibold border border-transparent shadow-soft',
+            'bg-brand-gradient text-white shadow-soft hover:shadow-lg hover:shadow-indigo-500/30 hover:brightness-110 border border-transparent',
           (variant === 'white' || variant === 'gradient') &&
-            'bg-peach-500 hover:bg-peach-600 text-plum font-semibold border border-transparent shadow-soft',
+            'bg-amber-500 hover:bg-amber-400 text-night-950 border border-transparent shadow-sm',
           variant === 'secondary' &&
-            'bg-cream-100 hover:bg-cream-200 text-ink border border-[#e7d5bd]',
+            'bg-white hover:bg-cream-100 text-ink border border-[#e2e8f0] shadow-sm',
           variant === 'outline' &&
-            'bg-transparent hover:bg-plum hover:text-cream text-plum border-2 border-plum',
-          variant === 'ghost' && 'bg-transparent hover:bg-[#f6ead8] text-slate-400 hover:text-slate-100',
+            'bg-white/0 hover:bg-indigo-950 text-indigo-300 border border-indigo-800 hover:border-indigo-500',
+          variant === 'ghost' && 'bg-transparent hover:bg-cream-100 text-slate-400 hover:text-slate-100',
           variant === 'danger' &&
-            'bg-rose-600 hover:bg-rose-500 text-cream font-semibold border border-rose-500/40',
+            'bg-rose-600 hover:bg-rose-500 text-white border border-transparent shadow-sm',
           // Sizes
-          size === 'sm' && 'h-8 px-3.5 text-xs gap-1.5',
+          size === 'sm' && 'h-9 px-3.5 text-xs gap-1.5',
           size === 'md' && 'h-10 px-5 text-sm font-semibold gap-2',
-          size === 'lg' && 'h-12 px-7 text-sm font-semibold gap-2',
+          size === 'lg' && 'h-12 px-6 text-[15px] gap-2',
           size === 'icon' && 'h-10 w-10 p-0',
           className
         )}

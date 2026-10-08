@@ -5,9 +5,10 @@ import { Role } from '@academy/shared';
 
 export class QuizService {
   async getQuizForRunner(quizId: string, studentId: string, role: Role) {
-    await progressionService.assertCanAccessQuiz(quizId, studentId, role);
-
-    const quiz = await prisma.quiz.findUnique({
+    // Access check and data loads are independent; Promise.all still rejects if access is denied
+    const [, quiz, attempts] = await Promise.all([
+      progressionService.assertCanAccessQuiz(quizId, studentId, role),
+      prisma.quiz.findUnique({
       where: { id: quizId },
       include: {
         questions: {
@@ -25,17 +26,17 @@ export class QuizService {
         },
         module: { select: { id: true, title: true, courseId: true } },
       },
-    });
+      }),
+      prisma.quizAttempt.findMany({
+        where: { quizId, studentId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          answers: true,
+        },
+      }),
+    ]);
 
     if (!quiz) throw new NotFoundError('Quiz not found');
-
-    const attempts = await prisma.quizAttempt.findMany({
-      where: { quizId, studentId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        answers: true,
-      },
-    });
 
     const isPassed = attempts.some((a) => a.isPassed || a.scorePercent >= quiz.passingScorePercent);
     const bestScore = attempts.length ? Math.max(...attempts.map((a) => a.scorePercent)) : null;
@@ -56,23 +57,23 @@ export class QuizService {
     role: Role;
     answers: { questionId: string; selectedOptionIds: string[] }[];
   }) {
-    await progressionService.assertCanAccessQuiz(params.quizId, params.studentId, params.role);
-
-    const quiz = await prisma.quiz.findUnique({
-      where: { id: params.quizId },
-      include: {
-        questions: {
-          include: { options: true },
+    const [, quiz, previousAttempts] = await Promise.all([
+      progressionService.assertCanAccessQuiz(params.quizId, params.studentId, params.role),
+      prisma.quiz.findUnique({
+        where: { id: params.quizId },
+        include: {
+          questions: {
+            include: { options: true },
+          },
+          module: { select: { courseId: true } },
         },
-        module: true,
-      },
-    });
+      }),
+      prisma.quizAttempt.count({
+        where: { quizId: params.quizId, studentId: params.studentId },
+      }),
+    ]);
 
     if (!quiz) throw new NotFoundError('Quiz not found');
-
-    const previousAttempts = await prisma.quizAttempt.count({
-      where: { quizId: params.quizId, studentId: params.studentId },
-    });
 
     const maxAllowedAttempts = quiz.maxAttempts ?? 3;
     if (previousAttempts >= maxAllowedAttempts) {

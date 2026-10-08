@@ -148,7 +148,7 @@ export default function StudentLiveSchedulePage() {
           <select
             value={userTimezone}
             onChange={(e) => setUserTimezone(e.target.value)}
-            className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+            className="bg-transparent text-ink font-bold focus:outline-none cursor-pointer"
           >
             <option value="Asia/Kolkata" className="bg-slate-900">Asia/Kolkata (IST)</option>
             <option value="UTC" className="bg-slate-900">UTC</option>

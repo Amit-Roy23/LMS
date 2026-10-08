@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { UserSummary, Role } from '@academy/shared';
 import { apiClient } from '../lib/api';
 import { useRouter } from 'next/navigation';
+import { DemoAccountKey, getDemoAccount } from '../lib/demo-accounts';
 
 interface AuthContextType {
   user: UserSummary | null;
@@ -11,9 +12,16 @@ interface AuthContextType {
   login: (credentials: { email?: string; identifier?: string; password: string }) => Promise<void>;
   register: (data: { name: string; email: string; password: string; role?: Role; phone?: string | null }) => Promise<void>;
   logout: () => Promise<void>;
-  loginAsDemo: (role: 'admin' | 'instructor' | 'student1' | 'student2') => Promise<void>;
+  loginAsDemo: (role: DemoAccountKey) => Promise<void>;
   refreshUser: () => Promise<void>;
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
+}
+
+/** The ?redirect= target from the current URL, accepted only for same-site paths. */
+function safeRedirect(): string | null {
+  if (typeof window === 'undefined') return null;
+  const target = new URLSearchParams(window.location.search).get('redirect');
+  return target && target.startsWith('/') && !target.startsWith('//') ? target : null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,7 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
+    // Return to the page that asked for sign-in (e.g. checkout), if any
+    const redirect = safeRedirect();
+    if (redirect) {
+      router.push(redirect);
+    } else if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
       router.push('/admin/dashboard');
     } else {
       router.push('/student/dashboard');
@@ -73,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', res.accessToken);
     }
     setUser(res.user);
-    router.push('/student/dashboard');
+    router.push(safeRedirect() || '/student/dashboard');
   };
 
   const changePassword = async (data: { currentPassword?: string; newPassword: string }) => {
@@ -97,17 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const loginAsDemo = async (role: 'admin' | 'instructor' | 'student1' | 'student2') => {
-    const creds: Record<string, { email: string; password: string }> = {
-      admin: { email: 'admin@creativeit.academy', password: 'Admin@123' },
-      instructor: { email: 'instructor@creativeit.academy', password: 'Instructor@123' },
-      student1: { email: 'student1@creativeit.academy', password: 'Student@123' },
-      student2: { email: 'student2@creativeit.academy', password: 'Student@123' },
-    };
-
-    const target = creds[role];
+  const loginAsDemo = async (role: DemoAccountKey) => {
+    const target = getDemoAccount(role);
     if (target) {
-      await login(target);
+      await login({ email: target.email, password: target.password });
     }
   };
 

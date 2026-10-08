@@ -89,11 +89,11 @@ export default function StudentCoursesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {courses.map((item) => {
             const isLive = item.mode === DeliveryMode.LIVE;
-            const progressPct = Math.round(item.progressPercent || 0);
+            const progressPct = Math.round(item.coursePercent ?? item.progressPercent ?? 0);
 
             return (
               <Card
-                key={item.id}
+                key={(item.courseId ?? item.id)}
                 className="border-slate-800 bg-slate-900/80 hover:border-indigo-500/40 transition-all duration-300 shadow-xl flex flex-col justify-between overflow-hidden group"
               >
                 <div className="p-6 space-y-4">
@@ -183,13 +183,13 @@ export default function StudentCoursesPage() {
                 {/* Card Footer Actions */}
                 <div className="px-6 py-4 bg-slate-950/50 border-t border-slate-800/80 flex items-center justify-between gap-3">
                   <Link
-                    href={`/student/courses/${item.id}`}
-                    className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                    href={`/student/courses/${(item.courseId ?? item.id)}`}
+                    className="text-xs font-semibold text-slate-400 hover:text-ink transition-colors"
                   >
                     View Curriculum
                   </Link>
 
-                  <Link href={`/student/courses/${item.id}/learn`}>
+                  <Link href={`/student/courses/${(item.courseId ?? item.id)}/learn`}>
                     <Button variant="primary" size="sm" className="gap-2 shadow-lg shadow-indigo-500/20">
                       <PlayCircle className="w-4 h-4" />
                       <span>{progressPct > 0 ? 'Resume Course' : 'Start Learning'}</span>

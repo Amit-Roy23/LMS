@@ -8,6 +8,9 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = 'text', error, label, id, ...props }, ref) => {
+    // Always link the label to its field (screen readers, click-to-focus)
+    const autoId = React.useId();
+    id = id || autoId;
     return (
       <div className="w-full space-y-1.5">
         {label && (
@@ -20,7 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           ref={ref}
           className={cn(
-            'flex h-11 w-full rounded-2xl border border-[#dcc6a9] bg-cream-50 px-3.5 py-2 text-sm text-ink placeholder:text-slate-500 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rust/20 focus:border-rust disabled:cursor-not-allowed disabled:opacity-50',
+            'flex h-11 w-full rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-2 text-sm text-ink placeholder:text-slate-500 shadow-sm transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50',
             error && 'border-rose-500 focus:ring-rose-500/50 focus:border-rose-500',
             className
           )}
@@ -40,6 +43,8 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, error, label, id, rows = 4, ...props }, ref) => {
+    const autoId = React.useId();
+    id = id || autoId;
     return (
       <div className="w-full space-y-1.5">
         {label && (
@@ -52,7 +57,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           rows={rows}
           ref={ref}
           className={cn(
-            'flex w-full rounded-2xl border border-[#dcc6a9] bg-cream-50 px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-500 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-rust/20 focus:border-rust disabled:cursor-not-allowed disabled:opacity-50',
+            'flex w-full rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-slate-500 shadow-sm transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-500 disabled:cursor-not-allowed disabled:opacity-50',
             error && 'border-rose-500 focus:ring-rose-500/50 focus:border-rose-500',
             className
           )}

@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { config } from '../config/env.js';
 import { BadRequestError, NotFoundError, UnauthorizedError, ForbiddenError } from '../lib/errors.js';
@@ -39,12 +40,16 @@ export class AuthService {
       mustChangePassword: Boolean(user.mustChangePassword),
     };
 
+    // A unique token id (jti) keeps tokens distinct even when the same user signs in
+    // twice within one second (double click, two tabs); refresh tokens are stored as unique.
     const accessToken = jwt.sign(payload, config.jwt.accessSecret, {
       expiresIn: config.jwt.accessExpiresIn as any,
+      jwtid: randomUUID(),
     });
 
     const refreshToken = jwt.sign(payload, config.jwt.refreshSecret, {
       expiresIn: config.jwt.refreshExpiresIn as any,
+      jwtid: randomUUID(),
     });
 
     return { accessToken, refreshToken };
@@ -73,7 +78,8 @@ export class AuthService {
         email: normalizedEmail,
         passwordHash,
         phone: params.phone?.trim() || null,
-        role: (params.role || Role.STUDENT) as Role,
+        // Public sign-up always creates students; staff accounts are created by an admin
+        role: Role.STUDENT,
         status: 'ACTIVE',
         mustChangePassword: false,
       },

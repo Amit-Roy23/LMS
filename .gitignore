@@ -37,3 +37,6 @@ postgres.log
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local uploads / generated certificates
+uploads/

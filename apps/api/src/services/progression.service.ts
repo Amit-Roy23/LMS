@@ -683,6 +683,10 @@ export const checkCertificateEligibility = isCertificateEligible;
  */
 export class ProgressionService {
   async getCourseProgression(courseId: string, studentId: string) {
+    // Load the course tree together with this student's records at every level in a single
+    // query (relationJoins turns the nested includes into one SQL statement). Serverless
+    // deployments usually run with a tiny connection pool, so one round trip matters.
+    const mine = { where: { studentId } };
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
@@ -695,18 +699,35 @@ export class ProgressionService {
               orderBy: { order: 'asc' },
               include: {
                 lessonResources: true,
-                practiceTasks: { orderBy: { order: 'asc' } },
+                practiceTasks: { orderBy: { order: 'asc' }, include: { progress: mine } },
+                progress: mine,
+                notes: mine,
+                bookmarks: mine,
               },
             },
-            practiceTasks: { orderBy: { order: 'asc' } },
-            quiz: { include: { questions: true } },
-            assignment: true,
+            practiceTasks: { orderBy: { order: 'asc' }, include: { progress: mine } },
+            quiz: {
+              include: {
+                _count: { select: { questions: true } },
+                attempts: { where: { studentId }, orderBy: { createdAt: 'desc' } },
+              },
+            },
+            assignment: {
+              include: { submissions: { where: { studentId }, orderBy: { version: 'desc' } } },
+            },
             liveSessions: { orderBy: { startsAt: 'asc' } },
+            moduleProgress: mine,
           },
         },
-        mockTest: true,
-        finalProject: true,
-        finalAssessment: true,
+        mockTest: { include: { attempts: { where: { studentId }, orderBy: { scorePercent: 'desc' } } } },
+        finalProject: {
+          include: { submissions: { where: { studentId }, orderBy: { createdAt: 'desc' } } },
+        },
+        finalAssessment: {
+          include: { attempts: { where: { studentId }, orderBy: { scorePercent: 'desc' } } },
+        },
+        enrollments: { where: { studentId }, include: { batch: true } },
+        certificates: mine,
       },
     });
 
@@ -727,41 +748,31 @@ export class ProgressionService {
           watermarkEnabled: true,
         });
 
-    // Fetch student enrollment, progress, practice, notes, bookmarks in parallel
-    const [
-      enrollment,
-      lessonProgresses,
-      practiceProgresses,
-      quizAttempts,
-      assignmentSubmissions,
-      mockTestAttempts,
-      projectSubmissions,
-      examAttempts,
-      certificate,
-      lessonNotes,
-      lessonBookmarks,
-    ] = await Promise.all([
-      prisma.enrollment.findUnique({
-        where: { studentId_courseId: { studentId, courseId } },
-        include: { batch: true },
-      }),
-      prisma.lessonProgress.findMany({ where: { studentId } }),
-      prisma.practiceProgress.findMany({ where: { studentId } }),
-      prisma.quizAttempt.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
-      prisma.assignmentSubmission.findMany({
-        where: { studentId },
-        orderBy: { version: 'desc' },
-      }),
-      prisma.mockTestAttempt.findMany({ where: { studentId }, orderBy: { scorePercent: 'desc' } }),
-      prisma.projectSubmission.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }),
-      prisma.examAttempt.findMany({ where: { studentId }, orderBy: { scorePercent: 'desc' } }),
-      prisma.certificate.findUnique({ where: { studentId_courseId: { studentId, courseId } } }),
-      prisma.lessonNote.findMany({ where: { studentId } }),
-      prisma.lessonBookmark.findMany({ where: { studentId } }),
-    ]);
+    // Flatten the student's records out of the course tree
+    const modules = course.modules;
+    const allLessons = modules.flatMap((m) => m.lessons);
+    const enrollment = course.enrollments[0] || null;
+    const certificate = course.certificates[0] || null;
+    const lessonProgresses = allLessons.flatMap((l) => l.progress);
+    const practiceProgresses = [
+      ...modules.flatMap((m) => m.practiceTasks.flatMap((t) => t.progress)),
+      ...allLessons.flatMap((l) => l.practiceTasks.flatMap((t) => t.progress)),
+    ];
+    const quizAttempts = modules.flatMap((m) => m.quiz?.attempts || []);
+    const assignmentSubmissions = modules.flatMap((m) => m.assignment?.submissions || []);
+    const mockTestAttempts = course.mockTest?.attempts || [];
+    const projectSubmissions = course.finalProject?.submissions || [];
+    const examAttempts = course.finalAssessment?.attempts || [];
+    const storedModuleProgress = modules.flatMap((m) => m.moduleProgress);
+    const lessonNotes = allLessons.flatMap((l) => l.notes);
+    const lessonBookmarks = allLessons.flatMap((l) => l.bookmarks);
 
+    const storedModuleStatus = new Map(storedModuleProgress.map((mp) => [mp.moduleId, mp.status]));
+    const moduleProgressWrites: Promise<unknown>[] = [];
+
+    // Content is only unlocked for students holding a paid, active enrollment in this course
     const isAccessAllowed =
-      !enrollment ||
+      !!enrollment &&
       canAccessEnrollmentContent({
         paymentStatus: enrollment.paymentStatus,
         accessStatus: enrollment.accessStatus,
@@ -961,7 +972,7 @@ export class ProgressionService {
               description: mod.quiz.description,
               passingScorePercent: mod.quiz.passingScorePercent,
               maxAttempts: mod.quiz.maxAttempts,
-              questionCount: mod.quiz.questions?.length || mod.quiz.questionCount || 0,
+              questionCount: mod.quiz._count?.questions || mod.quiz.questionCount || 0,
               attemptsCount: modQuizAttempts.length,
               canRetake: canRetakeQuiz(modQuizAttempts.length, mod.quiz.maxAttempts),
               userBestScore: modQuizAttempts.length
@@ -985,23 +996,26 @@ export class ProgressionService {
           : null,
       });
 
-      // Update module progress record in database asynchronously
-      await prisma.moduleProgress.upsert({
-        where: { studentId_moduleId: { studentId, moduleId: mod.id } },
-        update: {
-          status,
-          completedAt: status === ModuleStatus.COMPLETED ? new Date() : null,
-        },
-        create: {
-          studentId,
-          moduleId: mod.id,
-          status,
-          completedAt: status === ModuleStatus.COMPLETED ? new Date() : null,
-        },
-      });
+      // Persist the module status only when it changed (keeps reads cheap)
+      if (storedModuleStatus.get(mod.id) !== status) {
+        moduleProgressWrites.push(
+          prisma.moduleProgress.upsert({
+            where: { studentId_moduleId: { studentId, moduleId: mod.id } },
+            update: { status, completedAt: status === ModuleStatus.COMPLETED ? new Date() : null },
+            create: {
+              studentId,
+              moduleId: mod.id,
+              status,
+              completedAt: status === ModuleStatus.COMPLETED ? new Date() : null,
+            },
+          })
+        );
+      }
 
       isPreviousModuleCompleted = status === ModuleStatus.COMPLETED;
     }
+
+    await Promise.all(moduleProgressWrites);
 
     const totalModules = course.modules.length;
     const completedModules = moduleStatusList.filter(
@@ -1039,6 +1053,7 @@ export class ProgressionService {
     return {
       courseId,
       studentId,
+      hasAccess: isAccessAllowed,
       totalModules,
       completedModules,
       coursePercent:
@@ -1064,26 +1079,23 @@ export class ProgressionService {
 
   // Server-side guard for Lesson Access returning friendly machine-readable codes
   async assertCanAccessLesson(lessonId: string, studentId: string, role: Role) {
-    if (role === Role.ADMIN || role === Role.INSTRUCTOR) return true;
+    if (role === Role.ADMIN || role === Role.INSTRUCTOR) return null;
 
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
-      include: {
-        module: {
-          include: {
-            course: true,
-          },
-        },
-      },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!lesson) throw new NotFoundError('Lesson not found');
 
-    // Check enrollment
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: lesson.module.courseId } },
-      include: { batch: true },
-    });
+    // Enrollment and progression are independent lookups, so fetch them together
+    const [enrollment, progression] = await Promise.all([
+      prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId, courseId: lesson.module.courseId } },
+        include: { batch: true },
+      }),
+      this.getCourseProgression(lesson.module.courseId, studentId),
+    ]);
 
     if (!enrollment) {
       throw new LessonAccessDeniedError(
@@ -1122,7 +1134,6 @@ export class ProgressionService {
       }
     }
 
-    const progression = await this.getCourseProgression(lesson.module.courseId, studentId);
     const mod = progression.modules.find((m: any) => m.id === lesson.moduleId);
     if (!mod || mod.isLocked) {
       throw new LessonAccessDeniedError(
@@ -1139,7 +1150,7 @@ export class ProgressionService {
       );
     }
 
-    return true;
+    return progression;
   }
 
   // Server-side guard for Quiz Submission
@@ -1148,14 +1159,17 @@ export class ProgressionService {
 
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
-      include: { module: { include: { course: true } } },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!quiz) throw new NotFoundError('Quiz not found');
 
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: quiz.module.courseId } },
-    });
+    const [enrollment, progression] = await Promise.all([
+      prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId, courseId: quiz.module.courseId } },
+      }),
+      this.getCourseProgression(quiz.module.courseId, studentId),
+    ]);
 
     if (!enrollment || enrollment.paymentStatus !== 'PAID') {
       throw new LessonAccessDeniedError(
@@ -1164,7 +1178,6 @@ export class ProgressionService {
       );
     }
 
-    const progression = await this.getCourseProgression(quiz.module.courseId, studentId);
     const mod = progression.modules.find((m: any) => m.id === quiz.moduleId);
     if (!mod || mod.isLocked) {
       throw new ProgressionLockedError('This module is locked.');
@@ -1185,14 +1198,17 @@ export class ProgressionService {
 
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
-      include: { module: { include: { course: true } } },
+      include: { module: { select: { courseId: true } } },
     });
 
     if (!assignment) throw new NotFoundError('Assignment not found');
 
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { studentId_courseId: { studentId, courseId: assignment.module.courseId } },
-    });
+    const [enrollment, progression] = await Promise.all([
+      prisma.enrollment.findUnique({
+        where: { studentId_courseId: { studentId, courseId: assignment.module.courseId } },
+      }),
+      this.getCourseProgression(assignment.module.courseId, studentId),
+    ]);
 
     if (!enrollment || enrollment.paymentStatus !== 'PAID') {
       throw new LessonAccessDeniedError(
@@ -1201,7 +1217,6 @@ export class ProgressionService {
       );
     }
 
-    const progression = await this.getCourseProgression(assignment.module.courseId, studentId);
     const mod = progression.modules.find((m: any) => m.id === assignment.moduleId);
     if (!mod || mod.isLocked) {
       throw new ProgressionLockedError('This module is locked.');

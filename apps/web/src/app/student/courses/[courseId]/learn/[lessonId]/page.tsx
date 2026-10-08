@@ -11,6 +11,7 @@ import { Card, CardContent } from '../../../../../../components/ui/card';
 import { Progress } from '../../../../../../components/ui/progress';
 import { Textarea, Input } from '../../../../../../components/ui/input';
 import { useToast } from '../../../../../../providers/toast-provider';
+import { useAuth } from '../../../../../../providers/auth-provider';
 import {
   PlayCircle,
   CheckCircle2,
@@ -46,6 +47,7 @@ export default function LessonPlayerPage() {
   const courseId = (params?.courseId as string) || '';
   const lessonId = (params?.lessonId as string) || '';
   const { success, error: toastError, info } = useToast();
+  const { user } = useAuth();
 
   const [lessonData, setLessonData] = useState<any>(null);
   const [curriculum, setCurriculum] = useState<any>(null);
@@ -83,12 +85,24 @@ export default function LessonPlayerPage() {
         }),
       ]);
 
-      setCurriculum(curriculumRes);
+      // The API returns { course, progression }; the page works with a flat curriculum object
+      setCurriculum(
+        curriculumRes?.progression
+          ? {
+              ...curriculumRes.course,
+              modules: curriculumRes.progression.modules,
+              progressPercent: curriculumRes.progression.coursePercent,
+              progression: curriculumRes.progression,
+            }
+          : curriculumRes
+      );
 
       if (lessonRes) {
-        setLessonData(lessonRes);
-        setIsBookmarked(!!lessonRes.isBookmarked);
-        setPracticeTasks(lessonRes.practiceTasks || []);
+        // The API wraps the lesson as { lesson: {...} }
+        const lesson = lessonRes.lesson || lessonRes;
+        setLessonData(lesson);
+        setIsBookmarked(!!lesson.isBookmarked);
+        setPracticeTasks(lesson.practiceTasks || []);
 
         // Fetch notes
         apiClient<any[]>(`/student/lessons/${lessonId}/notes`)
@@ -156,7 +170,7 @@ export default function LessonPlayerPage() {
   // Delete Note
   const handleDeleteNote = async (noteId: string) => {
     try {
-      await apiClient(`/student/lessons/${lessonId}/notes/${noteId}`, { method: 'DELETE' });
+      await apiClient(`/student/notes/${noteId}`, { method: 'DELETE' });
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
       info('Note deleted');
     } catch (err) {
@@ -268,7 +282,7 @@ export default function LessonPlayerPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={`/student/courses/${courseId}`}>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-slate-400 hover:text-ink">
               <ChevronLeft className="w-4 h-4" />
               <span>Curriculum</span>
             </Button>
@@ -291,7 +305,7 @@ export default function LessonPlayerPage() {
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
                 ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-ink'
             }`}
             title="Bookmark lesson"
           >
@@ -332,7 +346,7 @@ export default function LessonPlayerPage() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white">All module video tutorials completed!</h4>
+              <h4 className="text-xs font-bold text-ink">All module video tutorials completed!</h4>
               <p className="text-[11px] text-purple-200/80">
                 Your Module Assessment Quiz is now unlocked and available.
               </p>
@@ -357,12 +371,14 @@ export default function LessonPlayerPage() {
             videoUrl={lessonData?.playableUrl || lessonData?.videoUrl}
             videoProvider={lessonData?.videoProvider}
             title={lessonData?.title}
-            studentId="STU-2026-AI"
-            studentName="Student"
+            studentId={user?.studentId || user?.email || 'Student'}
+            studentName={user?.name || 'Student'}
             initialPercent={lessonData?.progress?.percent || 0}
             initialWatchedSeconds={lessonData?.progress?.lastPositionSeconds || 0}
             isCompleted={!!lessonData?.progress?.completedAt}
             onProgressUpdate={(pct, isComp) => {
+              // Keep the lesson details in sync with the player
+              setLessonData((prev: any) => (prev ? { ...prev, progress: { ...prev.progress, percent: pct } } : prev));
               if (isComp) loadLessonAndCurriculum();
             }}
           />
@@ -385,7 +401,7 @@ export default function LessonPlayerPage() {
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                     isActive
                       ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                      : 'text-slate-400 hover:text-ink hover:bg-slate-900/60'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -624,7 +640,7 @@ export default function LessonPlayerPage() {
                 >
                   <div className="p-3 bg-slate-950/60 border-b border-slate-800/80 flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-300 truncate">
-                      Module {mIdx + 1}: {mod.title}
+                      {/^module\s+\d+/i.test(mod.title) ? mod.title : `Module ${mIdx + 1}: ${mod.title}`}
                     </span>
                     {isModLocked && <Lock className="w-3.5 h-3.5 text-slate-500" />}
                   </div>
@@ -641,7 +657,7 @@ export default function LessonPlayerPage() {
                           href={isLocked ? '#' : `/student/courses/${courseId}/learn/${l.id}`}
                           className={`p-3 flex items-center justify-between gap-3 text-xs transition-colors ${
                             isActive
-                              ? 'bg-indigo-600/20 border-l-2 border-indigo-500 font-bold text-white'
+                              ? 'bg-indigo-600/20 border-l-2 border-indigo-500 font-bold text-ink'
                               : isLocked
                               ? 'cursor-not-allowed text-slate-500'
                               : 'text-slate-300 hover:bg-slate-800/60'

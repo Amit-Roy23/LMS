@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { apiClient } from '../../../lib/api';
+import { apiClient, apiText } from '../../../lib/api';
 import { Button } from '../../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
@@ -65,8 +65,8 @@ export default function AdminAssessmentsPage() {
   const loadCourses = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await apiClient<{ courses: any[] }>('/courses');
-      const courseList = res?.courses || [];
+      const res = await apiClient<{ items?: any[]; courses?: any[] }>('/admin/courses?limit=100');
+      const courseList = res?.items || res?.courses || [];
       setCourses(courseList);
 
       if (courseList.length > 0 && !selectedCourseId) {
@@ -84,8 +84,19 @@ export default function AdminAssessmentsPage() {
     loadCourses();
   }, [loadCourses]);
 
+  // The course list has no modules, so load the selected course's curriculum (with quizzes)
+  const [courseDetail, setCourseDetail] = useState<any>(null);
+  useEffect(() => {
+    if (!selectedCourseId) return;
+    setCourseDetail(null);
+    apiClient<any>(`/courses/id/${selectedCourseId}`)
+      .then(setCourseDetail)
+      .catch(() => setCourseDetail(null));
+  }, [selectedCourseId]);
+
   // Find active course and quizzes
-  const activeCourse = courses.find((c) => c.id === selectedCourseId);
+  const activeCourse =
+    courseDetail?.id === selectedCourseId ? courseDetail : courses.find((c) => c.id === selectedCourseId);
   const quizzes: any[] = [];
   activeCourse?.modules?.forEach((m: any) => {
     if (m.quiz) {
@@ -137,7 +148,7 @@ export default function AdminAssessmentsPage() {
     try {
       setIsProcessingOverride(true);
       if (overrideModal.type === 'RESET_ATTEMPTS') {
-        await apiClient(`/admin/quizzes/${selectedQuizId}/overrides/reset-attempts`, {
+        await apiClient(`/admin/quizzes/${selectedQuizId}/override/reset-attempts`, {
           method: 'POST',
           body: JSON.stringify({
             studentId: overrideModal.targetId,
@@ -147,7 +158,7 @@ export default function AdminAssessmentsPage() {
         success('Attempts Reset', 'Student attempts have been cleared with audit trail.');
       } else if (overrideModal.type === 'MANUAL_PASS') {
         const activeQ = quizzes.find((q) => q.id === selectedQuizId);
-        await apiClient(`/admin/modules/${activeQ?.moduleId}/overrides/manual-pass`, {
+        await apiClient(`/admin/modules/${activeQ?.moduleId}/quiz/override/pass`, {
           method: 'POST',
           body: JSON.stringify({
             studentId: overrideModal.targetId,
@@ -156,7 +167,7 @@ export default function AdminAssessmentsPage() {
         });
         success('Quiz Passed', 'Module quiz has been administratively marked as PASSED.');
       } else if (overrideModal.type === 'INVALIDATE_ATTEMPT') {
-        await apiClient(`/admin/attempts/${overrideModal.targetId}/invalidate`, {
+        await apiClient(`/admin/attempts/${overrideModal.targetId}/override/invalidate`, {
           method: 'POST',
           body: JSON.stringify({
             reason: overrideReason,
@@ -179,14 +190,12 @@ export default function AdminAssessmentsPage() {
   const handleExportQuestionsCsv = async () => {
     if (!selectedQuizId) return;
     try {
-      const res = await apiClient<{ csvContent: string; filename: string }>(
-        `/admin/quizzes/${selectedQuizId}/questions/export-csv`
-      );
-      const blob = new Blob([res.csvContent], { type: 'text/csv;charset=utf-8;' });
+      const csvContent = await apiText(`/admin/quizzes/${selectedQuizId}/questions/export`);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', res.filename || 'quiz-questions.csv');
+      link.setAttribute('download', 'quiz-questions.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -437,7 +446,7 @@ export default function AdminAssessmentsPage() {
                       <div className="font-semibold text-plum">{att.student?.name}</div>
                       <div className="text-xs text-slate-500">{att.student?.email}</div>
                     </td>
-                    <td className="py-3.5 font-medium text-slate-700">Attempt {att.attemptNumber}</td>
+                    <td className="py-3.5 font-medium text-slate-300">Attempt {att.attemptNumber}</td>
                     <td className="py-3.5 font-semibold text-plum">
                       {att.score} / {att.maxScore}
                     </td>

@@ -80,7 +80,7 @@ export default function AdminNotificationsPage() {
       case 'SMS':
         return <Smartphone className="w-3.5 h-3.5 text-purple-600" />;
       default:
-        return <Bell className="w-3.5 h-3.5 text-slate-600" />;
+        return <Bell className="w-3.5 h-3.5 text-slate-400" />;
     }
   };
 
@@ -101,7 +101,7 @@ export default function AdminNotificationsPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Notification Logs & Dispatch</h1>
+          <h1 className="text-2xl font-extrabold text-ink">Notification Logs & Dispatch</h1>
           <p className="text-xs text-slate-500 mt-1">
             Pluggable queue audit for Email, WhatsApp Cloud API, and SMS delivery.
           </p>
@@ -114,7 +114,7 @@ export default function AdminNotificationsPage() {
       </div>
 
       {/* Filters Bar */}
-      <Card className="border-[#efdfd4] bg-white p-4 shadow-sm">
+      <Card className="border-[#e2e8f0] bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div>
             <label className="block text-[10px] font-mono font-bold text-slate-500 uppercase mb-1">
@@ -126,7 +126,7 @@ export default function AdminNotificationsPage() {
                 setChannelFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 rounded-lg border border-[#f0e2d8] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-lg border border-[#e2e8f0] bg-white px-3 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Channels</option>
               <option value="EMAIL">Email</option>
@@ -145,7 +145,7 @@ export default function AdminNotificationsPage() {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 rounded-lg border border-[#f0e2d8] bg-white px-3 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-9 rounded-lg border border-[#e2e8f0] bg-white px-3 text-xs text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">All Statuses</option>
               <option value="SENT">Sent</option>
@@ -174,10 +174,10 @@ export default function AdminNotificationsPage() {
       </Card>
 
       {/* Logs Table */}
-      <Card className="border-[#efdfd4] bg-white overflow-hidden shadow-sm">
+      <Card className="border-[#e2e8f0] bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#fff8f3] text-slate-600 font-mono uppercase text-[10px] border-b border-[#f0e2d8]">
+            <thead className="bg-[#f8fafc] text-slate-400 font-mono uppercase text-[10px] border-b border-[#e2e8f0]">
               <tr>
                 <th className="p-3.5 pl-4">Channel</th>
                 <th className="p-3.5">Recipient (Masked)</th>
@@ -189,7 +189,7 @@ export default function AdminNotificationsPage() {
                 <th className="p-3.5 pr-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#e2e8f0] text-slate-300">
               {logs.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-400">
@@ -198,17 +198,17 @@ export default function AdminNotificationsPage() {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr key={log.id} className="hover:bg-cream-100 transition-colors">
                     <td className="p-3.5 pl-4">
                       <div className="flex items-center gap-1.5 font-bold font-mono">
                         {getChannelIcon(log.channel)}
                         <span>{log.channel}</span>
                       </div>
                     </td>
-                    <td className="p-3.5 font-mono font-semibold text-slate-900">
+                    <td className="p-3.5 font-mono font-semibold text-ink">
                       {log.to}
                     </td>
-                    <td className="p-3.5 font-mono text-[11px] text-slate-600">
+                    <td className="p-3.5 font-mono text-[11px] text-slate-400">
                       {log.templateKey}
                     </td>
                     <td className="p-3.5 font-mono text-[10px] text-slate-400 truncate max-w-[140px]">

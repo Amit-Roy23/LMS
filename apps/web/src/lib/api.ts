@@ -79,3 +79,24 @@ export async function apiClient<T = any>(
 
   return data.data as T;
 }
+
+/** Fetch a plain-text response (e.g. a CSV download) with the same auth as apiClient. */
+export async function apiText(endpoint: string): Promise<string> {
+  const url = endpoint.startsWith('http') ? endpoint : `${getApiBase()}${endpoint}`;
+  const headers = new Headers();
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('accessToken');
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const response = await fetch(url, { headers, credentials: 'include' });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new ApiError(
+      body?.error?.message || response.statusText || 'Download failed',
+      response.status,
+      body?.error?.code || `HTTP_${response.status}`
+    );
+  }
+  return response.text();
+}

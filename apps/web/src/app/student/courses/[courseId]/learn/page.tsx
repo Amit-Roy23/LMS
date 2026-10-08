@@ -657,7 +657,7 @@ export default function CoursePlayerPage() {
                   <CertificateCard certificate={progression.certificate} />
                 </div>
               ) : progression?.certificateEligible ? (
-                <Card className="border-[#e7d5bd] bg-[#fffbf4] p-8 text-center space-y-6 shadow-xl">
+                <Card className="border-[#e2e8f0] bg-[#ffffff] p-8 text-center space-y-6 shadow-xl">
                   <div className="w-14 h-14 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
                     <Award className="w-7 h-7" />
                   </div>

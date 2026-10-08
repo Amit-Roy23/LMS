@@ -142,7 +142,7 @@ export default function CourseOverviewPage() {
                   {progressPercent}% Complete
                 </span>
               </div>
-              <div className="w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center font-mono font-bold text-xs text-white">
+              <div className="w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center font-mono font-bold text-xs text-ink">
                 {progressPercent}%
               </div>
             </div>
