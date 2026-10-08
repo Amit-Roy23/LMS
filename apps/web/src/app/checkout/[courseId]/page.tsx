@@ -78,7 +78,7 @@ export default function CheckoutPage() {
       success('🎉 Admission Confirmed!', 'You have successfully enrolled in the course.');
 
       // Redirect to course player
-      router.push(`/student/courses/${courseId}/learn`);
+      router.push(`/student/courses/${courseId}`);
     } catch (err: any) {
       toastError('Enrollment Failed', err.message || 'Payment processing failed');
     } finally {

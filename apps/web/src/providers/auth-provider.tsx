@@ -17,6 +17,13 @@ interface AuthContextType {
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
 }
 
+/** The ?redirect= target from the current URL, accepted only for same-site paths. */
+function safeRedirect(): string | null {
+  if (typeof window === 'undefined') return null;
+  const target = new URLSearchParams(window.location.search).get('redirect');
+  return target && target.startsWith('/') && !target.startsWith('//') ? target : null;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -57,7 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
+    // Return to the page that asked for sign-in (e.g. checkout), if any
+    const redirect = safeRedirect();
+    if (redirect) {
+      router.push(redirect);
+    } else if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
       router.push('/admin/dashboard');
     } else {
       router.push('/student/dashboard');
@@ -74,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('accessToken', res.accessToken);
     }
     setUser(res.user);
-    router.push('/student/dashboard');
+    router.push(safeRedirect() || '/student/dashboard');
   };
 
   const changePassword = async (data: { currentPassword?: string; newPassword: string }) => {

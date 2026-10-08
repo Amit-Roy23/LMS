@@ -68,7 +68,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative overflow-hidden hero-mesh text-white">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-[1.1fr_1fr] gap-14 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20 lg:pt-24 lg:pb-28 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-14 items-center">
           <div className="animate-fade-up">
             <span className="inline-flex items-center gap-2 rounded-full glass-dark px-3.5 py-1.5 text-xs sm:text-sm font-medium text-night-200">
               <Sparkles className="w-4 h-4 text-amber-500" />
@@ -233,7 +233,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section className="py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-start">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-12 items-start">
           <Reveal className="lg:sticky lg:top-28">
             <p className="text-sm font-semibold text-indigo-400">Built for academies</p>
             <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-ink">
@@ -269,7 +269,7 @@ export default function HomePage() {
       <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24">
         <Reveal className="relative max-w-7xl mx-auto overflow-hidden rounded-3xl hero-mesh text-white px-6 py-12 sm:px-12 lg:py-16">
           <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-          <div className="relative grid lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+          <div className="relative grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
             <div>
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-500">
                 <ShieldCheck className="w-4 h-4" /> Public verification registry

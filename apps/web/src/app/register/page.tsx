@@ -43,7 +43,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-[1fr_1.1fr] bg-cream">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] bg-cream">
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden hero-mesh text-white p-12">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
         <Link href="/" className="relative flex items-center gap-3">
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         <p className="relative text-sm text-night-400">Join learners building careers in tech, design and marketing.</p>
       </aside>
 
-      <main className="flex flex-col justify-center px-4 py-10 sm:px-10 lg:px-16">
+      <main className="min-w-0 flex flex-col justify-center px-4 py-10 sm:px-10 lg:px-16">
         <div className="w-full max-w-md mx-auto space-y-8 animate-fade-up">
           <div className="lg:hidden flex items-center gap-3">
             <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">

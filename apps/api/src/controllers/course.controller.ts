@@ -5,6 +5,21 @@ import { courseService } from '../services/course.service.js';
 import { progressionService } from '../services/progression.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 
+/** Removes `isCorrect` from every question option in a course payload. */
+function stripAnswerKeys<T>(course: T): T {
+  const clean = (questions?: any[]) =>
+    questions?.map((q) => ({ ...q, options: q.options?.map(({ isCorrect, ...o }: any) => o) }));
+  const c: any = course;
+  return {
+    ...c,
+    modules: c.modules?.map((m: any) => (m.quiz ? { ...m, quiz: { ...m.quiz, questions: clean(m.quiz.questions) } } : m)),
+    mockTest: c.mockTest ? { ...c.mockTest, questions: clean(c.mockTest.questions) } : c.mockTest,
+    finalAssessment: c.finalAssessment
+      ? { ...c.finalAssessment, questions: clean(c.finalAssessment.questions) }
+      : c.finalAssessment,
+  };
+}
+
 // Edge cache for public, non-personalised responses (served stale while refreshing)
 const PUBLIC_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600';
 
@@ -68,7 +83,9 @@ export class CourseController {
     try {
       const id = req.params.id as string;
       const course = await courseService.getCourseById(id);
-      return sendSuccess(res, course);
+      const isStaff = req.user?.role === Role.ADMIN || req.user?.role === Role.INSTRUCTOR;
+      // Students may see questions and options, but never which option is correct
+      return sendSuccess(res, isStaff ? course : stripAnswerKeys(course));
     } catch (err) {
       next(err);
     }

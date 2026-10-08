@@ -65,8 +65,8 @@ export default function AdminAssessmentsPage() {
   const loadCourses = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await apiClient<{ courses: any[] }>('/courses');
-      const courseList = res?.courses || [];
+      const res = await apiClient<{ items?: any[]; courses?: any[] }>('/admin/courses?limit=100');
+      const courseList = res?.items || res?.courses || [];
       setCourses(courseList);
 
       if (courseList.length > 0 && !selectedCourseId) {
@@ -84,8 +84,19 @@ export default function AdminAssessmentsPage() {
     loadCourses();
   }, [loadCourses]);
 
+  // The course list has no modules, so load the selected course's curriculum (with quizzes)
+  const [courseDetail, setCourseDetail] = useState<any>(null);
+  useEffect(() => {
+    if (!selectedCourseId) return;
+    setCourseDetail(null);
+    apiClient<any>(`/courses/id/${selectedCourseId}`)
+      .then(setCourseDetail)
+      .catch(() => setCourseDetail(null));
+  }, [selectedCourseId]);
+
   // Find active course and quizzes
-  const activeCourse = courses.find((c) => c.id === selectedCourseId);
+  const activeCourse =
+    courseDetail?.id === selectedCourseId ? courseDetail : courses.find((c) => c.id === selectedCourseId);
   const quizzes: any[] = [];
   activeCourse?.modules?.forEach((m: any) => {
     if (m.quiz) {

@@ -177,7 +177,7 @@ export default function CourseDetailPage() {
       {/* Hero */}
       <section className="relative hero-mesh text-white overflow-hidden">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid lg:grid-cols-[1fr_380px] gap-10">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
           <div className="space-y-5 animate-fade-up">
             <nav className="flex items-center gap-1.5 text-sm text-night-400">
               <Link href="/courses" className="hover:text-white">Courses</Link>
@@ -219,7 +219,7 @@ export default function CourseDetailPage() {
         </div>
       </section>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14 grid lg:grid-cols-[1fr_380px] gap-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 lg:py-14 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10">
         <div className="space-y-12 min-w-0">
           {learnPoints.length > 0 && (
             <Reveal className="rounded-3xl bg-white border border-[#e2e8f0] p-6 sm:p-8">

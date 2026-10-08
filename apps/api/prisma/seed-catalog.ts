@@ -172,6 +172,38 @@ export async function seedDemoCatalog(
     }
   }
 
+  // Live classes: replace dead recording links and give every live batch a weekly schedule
+  const recording = manifest.lessons[`fullstack-ai-engineering::${Object.keys(catalog.fullstackLessons)[0]}`]?.videoUrl;
+  if (recording) {
+    await prisma.liveSession.updateMany({
+      where: { recordingUrl: { contains: 'gtv-videos-bucket' } },
+      data: { recordingUrl: recording },
+    });
+  }
+  const liveBatches = await prisma.batch.findMany({ where: { mode: DeliveryMode.LIVE } });
+  const topics = Object.keys(catalog.fullstackLessons).map((t) => t.replace(/^\d+\.\d+\s+/, ''));
+  for (const batch of liveBatches) {
+    const sessions = [];
+    // Two recorded past classes, then ten upcoming weekly classes (keeps the demo schedule populated)
+    for (let w = -2; w < 10; w++) {
+      if (w === 0) continue;
+      const startsAt = new Date();
+      startsAt.setUTCDate(startsAt.getUTCDate() + w * 7 + 1);
+      startsAt.setUTCHours(13, 0, 0, 0); // 6:30 pm IST
+      sessions.push({
+        batchId: batch.id,
+        title: `Live Class: ${topics[(w + 2) % topics.length]}`,
+        startsAt,
+        durationMinutes: 75,
+        provider: 'MEET',
+        joinUrl: 'https://meet.google.com/academy-live-class',
+        recordingUrl: w < 0 ? recording || null : null,
+        status: w < 0 ? 'COMPLETED' : 'SCHEDULED',
+      });
+    }
+    await prisma.liveSession.createMany({ data: sessions as any });
+  }
+
   // 3. Catalogue courses
   const courseIds: string[] = [];
   for (const [ci, c] of catalog.courses.entries()) {
@@ -455,11 +487,16 @@ export async function seedDemoCatalog(
               textContent: 'Submission for review: see the linked project.',
               linkUrl: 'https://github.com/academy-demo/student-project',
               files: [],
-              status: SubmissionStatus.APPROVED,
-              grade: 80 + Math.floor(rand() * 20),
-              feedback: 'Well done: clear structure and good attention to detail.',
-              reviewedById: course.instructorId,
-              reviewedAt: new Date(enrolledAt.getTime() + 10 * 86400000),
+              // Halfway learners are waiting for their instructor's review (fills the review queue)
+              ...(stage === 1
+                ? { status: SubmissionStatus.PENDING }
+                : {
+                    status: SubmissionStatus.APPROVED,
+                    grade: 80 + Math.floor(rand() * 20),
+                    feedback: 'Well done: clear structure and good attention to detail.',
+                    reviewedById: course.instructorId,
+                    reviewedAt: new Date(enrolledAt.getTime() + 10 * 86400000),
+                  }),
             },
           });
         }

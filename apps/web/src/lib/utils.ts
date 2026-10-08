@@ -13,10 +13,12 @@ export function formatDuration(seconds: number): string {
   return `${mins}m ${secs > 0 ? `${secs}s` : ''}`.trim();
 }
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency = 'INR'): string {
+  // The academy prices courses in INR; use Indian digit grouping for it
+  return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
     style: 'currency',
     currency,
+    maximumFractionDigits: currency === 'INR' ? 0 : 2,
   }).format(amount);
 }
 

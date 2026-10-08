@@ -99,7 +99,7 @@ export default function StudentDashboardPage() {
       {/* Welcome */}
       <section className="relative overflow-hidden rounded-3xl hero-mesh text-white p-6 sm:p-8 animate-fade-up">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-        <div className="relative grid lg:grid-cols-[1fr_auto] gap-6 items-center">
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center min-w-0">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {user?.studentId && <span className="rounded-full glass-dark px-3 py-1 font-semibold">{user.studentId}</span>}
@@ -114,7 +114,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {resume ? (
-            <Link href={courseHref(resume)} className="group block rounded-2xl glass-dark p-4 w-full lg:w-80 hover:bg-white/10 transition-colors">
+            <Link href={courseHref(resume)} className="group block min-w-0 rounded-2xl glass-dark p-4 w-full lg:w-80 hover:bg-white/10 transition-colors">
               <p className="text-xs font-semibold uppercase tracking-wider text-indigo-500">Continue learning</p>
               <p className="mt-1.5 font-bold text-white truncate">{resume.title}</p>
               {resume.nextUpLesson && <p className="text-sm text-night-400 truncate">Next: {resume.nextUpLesson.title}</p>}
@@ -193,11 +193,11 @@ export default function StudentDashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {courses.map((c, i) => (
-              <Reveal key={c.enrollmentId} delay={(i % 2) * 80}>
+              <Reveal key={c.enrollmentId} delay={(i % 2) * 80} className="min-w-0">
                 <Link href={courseHref(c)} className="group flex flex-col sm:flex-row gap-4 rounded-2xl bg-white border border-[#e2e8f0] p-4 card-hover h-full">
-                  <div className="relative sm:w-40 aspect-video sm:aspect-[4/3] rounded-xl overflow-hidden bg-night-900 shrink-0">
+                  <div className="relative sm:w-44 aspect-video rounded-xl overflow-hidden bg-night-900 shrink-0 self-start">
                     {c.thumbnail && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={c.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

@@ -8,6 +8,9 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = 'text', error, label, id, ...props }, ref) => {
+    // Always link the label to its field (screen readers, click-to-focus)
+    const autoId = React.useId();
+    id = id || autoId;
     return (
       <div className="w-full space-y-1.5">
         {label && (
@@ -40,6 +43,8 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, error, label, id, rows = 4, ...props }, ref) => {
+    const autoId = React.useId();
+    id = id || autoId;
     return (
       <div className="w-full space-y-1.5">
         {label && (
