@@ -84,7 +84,7 @@ function ResetPasswordForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <p className="text-xs text-slate-500 leading-relaxed">
             {isSetup
-              ? 'Welcome to Online Creative & IT Academy! Set your personal account password to complete admission setup.'
+              ? 'Welcome to ADSIGN Skill Academy! Set your personal account password to complete admission setup.'
               : 'Choose a new permanent password for your academy student account.'}
           </p>
 

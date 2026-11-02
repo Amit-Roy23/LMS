@@ -835,7 +835,7 @@ export class StudentPlayerController {
       const ics = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//Creative & IT Academy//Student LMS//EN',
+        'PRODID:-//ADSIGN Skill Academy//Student LMS//EN',
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
         'BEGIN:VEVENT',

@@ -41,7 +41,7 @@ import { seedDemoCatalog } from './seed-catalog';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting comprehensive database seed for Online Creative & IT Academy...');
+  console.log('🌱 Starting comprehensive database seed for ADSIGN Skill Academy...');
 
   // 1. Clean existing data in dependency order
   await prisma.auditLog.deleteMany();
@@ -1189,7 +1189,7 @@ async function main() {
         recipientName: 'Jane Smith',
         courseTitle: course1.title,
         gradeEarned: 'Distinction (96%)',
-        issuer: 'Online Creative & IT Academy Academic Council',
+        issuer: 'ADSIGN Skill Academy Academic Council',
       },
     },
   });
@@ -1369,13 +1369,13 @@ async function main() {
       {
         key: 'REGISTRATION_CONFIRMATION',
         channel: NotificationChannel.EMAIL,
-        subject: 'Welcome to Online Creative & IT Academy - Admission Confirmed',
+        subject: 'Welcome to ADSIGN Skill Academy - Admission Confirmed',
         body: 'Dear {{name}}, your enrollment in {{courseTitle}} ({{mode}} track) is confirmed. Your Student ID: {{studentId}}. Dashboard: {{dashboardUrl}}',
       },
       {
         key: 'REGISTRATION_CONFIRMATION',
         channel: NotificationChannel.WHATSAPP,
-        body: 'Hello {{name}}! Welcome to Online Creative & IT Academy. Your admission in {{courseTitle}} is confirmed. Access your learning portal: {{dashboardUrl}}',
+        body: 'Hello {{name}}! Welcome to ADSIGN Skill Academy. Your admission in {{courseTitle}} is confirmed. Access your learning portal: {{dashboardUrl}}',
       },
       {
         key: 'LIVE_CLASS_REMINDER',
@@ -1385,7 +1385,7 @@ async function main() {
       {
         key: 'PAYMENT_RECEIPT',
         channel: NotificationChannel.SMS,
-        body: 'Online Creative & IT Academy: Payment of INR {{amount}} received for {{courseTitle}}. Ref: {{paymentRef}}',
+        body: 'ADSIGN Skill Academy: Payment of INR {{amount}} received for {{courseTitle}}. Ref: {{paymentRef}}',
       },
       {
         key: 'ASSIGNMENT_APPROVED',

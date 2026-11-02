@@ -40,7 +40,7 @@ describe('Account Provisioning & Security Unit / Integration Suite', { timeout: 
 
     const currentYear = new Date().getFullYear();
     for (const id of studentIds) {
-      expect(id).toMatch(new RegExp(`^OCA-${currentYear}-\\d{6}$`));
+      expect(id).toMatch(new RegExp(`^ADS-${currentYear}-\\d{6}$`));
     }
 
     // Uniqueness verification
@@ -94,7 +94,7 @@ describe('Account Provisioning & Security Unit / Integration Suite', { timeout: 
 
     expect(result.success).toBe(true);
     expect(result.isNewUser).toBe(true);
-    expect(result.studentId).toMatch(/^OCA-\d{4}-\d{6}$/);
+    expect(result.studentId).toMatch(/^ADS-\d{4}-\d{6}$/);
 
     // Verify DB user
     const user = await prisma.user.findUnique({

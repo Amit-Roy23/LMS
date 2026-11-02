@@ -47,7 +47,7 @@ export default function CertificateVerificationPage() {
           </Badge>
           <h1 className="text-3xl font-extrabold text-ink">Certificate Authentication</h1>
           <p className="text-xs text-slate-400">
-            Cryptographic ledger validation for Online Creative & IT Academy credentials
+            Cryptographic ledger validation for ADSIGN Skill Academy credentials
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export default function CertificateVerificationPage() {
 
             {/* Issuer Badge */}
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/80 text-center text-xs text-slate-400">
-              Issued by <span className="text-ink font-semibold">Online Creative & IT Academy</span> • Accreditations verified through ISO 9001 compliance standards.
+              Issued by <span className="text-ink font-semibold">ADSIGN Skill Academy</span> • Accreditations verified through ISO 9001 compliance standards.
             </div>
           </Card>
         )}

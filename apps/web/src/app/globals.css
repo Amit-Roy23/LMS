@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 216 33% 97%;
+    --foreground: 217 22% 12%;
 
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 243 75% 59%;
+    --primary: 206 100% 34%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
@@ -22,7 +22,7 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 35%;
 
-    --accent: 38 92% 50%;
+    --accent: 359 81% 51%;
     --accent-foreground: 222 47% 11%;
 
     --destructive: 347 77% 50%;
@@ -30,7 +30,7 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 243 75% 59%;
+    --ring: 203 100% 37%;
 
     --radius: 0.875rem;
   }
@@ -41,8 +41,8 @@
   }
 
   body {
-    background-color: #f8fafc;
-    color: #0f172a;
+    background-color: #F5F7FA;
+    color: #171C24;
     font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
@@ -66,7 +66,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid #0077BF;
     outline-offset: 2px;
   }
 }
@@ -79,23 +79,23 @@
 
   /* Brand gradient text */
   .text-gradient {
-    background-image: linear-gradient(100deg, #6366f1 0%, #8b5cf6 45%, #ec4899 100%);
+    background-image: linear-gradient(100deg, #E71E24 0%, #E93E08 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
   .bg-brand-gradient {
-    background-image: linear-gradient(120deg, #4f46e5 0%, #7c3aed 55%, #a855f7 100%);
+    background-image: linear-gradient(120deg, #0063AD 0%, #0077BF 100%);
   }
 
   /* Deep navy hero with soft glowing colour mesh */
   .hero-mesh {
-    background-color: #0b1020;
+    background-color: #171C24;
     background-image:
-      radial-gradient(60% 70% at 85% 10%, rgba(99, 102, 241, 0.45) 0%, transparent 60%),
-      radial-gradient(50% 60% at 10% 90%, rgba(168, 85, 247, 0.32) 0%, transparent 60%),
-      radial-gradient(35% 40% at 55% 55%, rgba(14, 165, 233, 0.18) 0%, transparent 70%);
+      radial-gradient(60% 70% at 85% 10%, rgba(0, 119, 191, 0.42) 0%, transparent 60%),
+      radial-gradient(50% 60% at 10% 90%, rgba(233, 62, 8, 0.2) 0%, transparent 60%),
+      radial-gradient(35% 40% at 55% 55%, rgba(0, 99, 173, 0.2) 0%, transparent 70%);
   }
 
   /* Subtle grid lines for dark sections */
@@ -110,7 +110,7 @@
   /* Subtle dotted texture for light sections */
   .tech-dot-grid {
     background-size: 22px 22px;
-    background-image: radial-gradient(rgba(79, 70, 229, 0.12) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0, 99, 173, 0.12) 1px, transparent 1px);
   }
 
   .tech-grid {
@@ -122,10 +122,10 @@
 
   /* Auth page backdrop (kept under its earlier name) */
   .checker-pink {
-    background-color: #0b1020;
+    background-color: #171C24;
     background-image:
-      radial-gradient(55% 60% at 80% 0%, rgba(99, 102, 241, 0.5) 0%, transparent 60%),
-      radial-gradient(45% 55% at 0% 100%, rgba(168, 85, 247, 0.38) 0%, transparent 60%);
+      radial-gradient(55% 60% at 80% 0%, rgba(0, 119, 191, 0.45) 0%, transparent 60%),
+      radial-gradient(45% 55% at 0% 100%, rgba(233, 62, 8, 0.22) 0%, transparent 60%);
   }
 
   .hero-stripes {
@@ -137,7 +137,7 @@
   /* Highlighted word inside a heading */
   .highlight-pill {
     display: inline-block;
-    background-image: linear-gradient(120deg, #4f46e5, #7c3aed);
+    background-image: linear-gradient(120deg, #E71E24, #E93E08);
     color: #ffffff;
     padding: 0 0.3em 0.05em;
     border-radius: 0.45em;
@@ -149,7 +149,7 @@
   }
 
   .glass-dark {
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(23, 28, 36, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(14px);
   }
@@ -166,8 +166,8 @@
   }
 
   .panel-active {
-    background: #eef2ff;
-    border: 1px solid #6366f1;
+    background: #F0F7FC;
+    border: 1px solid #0077BF;
   }
 
   /* Lift on hover for interactive cards */
@@ -177,7 +177,7 @@
   .card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px -18px rgba(15, 23, 42, 0.28);
-    border-color: #c7d2fe;
+    border-color: #B9DBF1;
   }
 
   /* Loading skeleton */

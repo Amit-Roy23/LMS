@@ -9,7 +9,6 @@ import { Role } from '@academy/shared';
 import { Button } from '../ui/button';
 import { DEMO_ACCOUNTS, DemoAccountKey } from '../../lib/demo-accounts';
 import {
-  GraduationCap,
   Sparkles,
   BookOpen,
   Briefcase,
@@ -22,6 +21,7 @@ import {
   Zap,
   Loader2,
 } from 'lucide-react';
+import { BrandLogo } from './brand-logo';
 
 const NAV_LINKS = [
   { href: '/courses', label: 'Courses', icon: BookOpen },
@@ -120,13 +120,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-[72px]">
           {/* Brand */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </span>
-            <span className="flex flex-col leading-tight">
-              <span className="font-extrabold text-[15px] sm:text-base tracking-tight text-ink">Creative &amp; IT Academy</span>
-              <span className="hidden sm:block text-[11px] text-slate-500 font-medium">Learn · Build · Get certified</span>
-            </span>
+            <BrandLogo className="group-hover:opacity-90 transition-opacity" />
           </Link>
 
           {/* Desktop links */}

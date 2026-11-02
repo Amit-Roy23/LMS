@@ -1,10 +1,10 @@
 export const swaggerSpec = {
   openapi: '3.0.0',
   info: {
-    title: 'Online Creative & IT Academy API',
+    title: 'ADSIGN Skill Academy API',
     version: '1.0.0',
     description:
-      'Production-grade RESTful API for Online Creative & IT Academy LMS with server-enforced progression state machines, video streaming, quizzes, assignments, exams, and verified certificates.',
+      'Production-grade RESTful API for ADSIGN Skill Academy LMS with server-enforced progression state machines, video streaming, quizzes, assignments, exams, and verified certificates.',
   },
   servers: [
     {

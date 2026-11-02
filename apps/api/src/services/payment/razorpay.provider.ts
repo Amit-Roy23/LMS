@@ -29,7 +29,7 @@ export class RazorpayProvider implements IPaymentProvider {
         order_id: orderId,
         amount: Math.round(params.amount * 100), // in paise/cents
         currency: params.currency,
-        name: 'Online Creative & IT Academy',
+        name: 'ADSIGN Skill Academy',
       },
     };
   }

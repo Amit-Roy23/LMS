@@ -120,7 +120,7 @@ export class AuthService {
 
   /**
    * Student / Staff Login
-   * Supports Student ID (OCA-2026-000123) OR Email OR Phone + Password
+   * Supports Student ID (ADS-2026-000123) OR Email OR Phone + Password
    * Implements account lockout (5 attempts -> 15 min lock) and generic responses for enumeration safety
    */
   async login(params: { email?: string; identifier?: string; password: string }) {

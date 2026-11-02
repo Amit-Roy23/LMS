@@ -107,7 +107,7 @@ export default function CheckoutPage() {
           <Badge variant="primary" className="mb-2">Admission Checkout</Badge>
           <h1 className="text-3xl font-extrabold text-ink">Complete Your Enrollment</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Secure admission portal for Online Creative & IT Academy
+            Secure admission portal for ADSIGN Skill Academy
           </p>
         </div>
 

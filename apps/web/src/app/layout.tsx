@@ -5,7 +5,7 @@ import { QueryProvider } from '../providers/query-provider';
 import { AuthProvider } from '../providers/auth-provider';
 
 export const metadata: Metadata = {
-  title: 'Online Creative & IT Academy | Modern LMS & Certification',
+  title: 'ADSIGN Skill Academy | Modern LMS & Certification',
   description:
     'Master modern software engineering, AI engineering, and full-stack development with industry-recognized verifiable certificates.',
 };
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0b1020',
+  themeColor: '#171C24',
 };
 
 export default function RootLayout({

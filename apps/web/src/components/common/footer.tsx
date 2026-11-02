@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { GraduationCap, Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { BrandLogo } from './brand-logo';
+import { BRAND } from '../../lib/brand';
 
 const COLUMNS = [
   {
@@ -47,10 +49,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
           <div className="col-span-2 space-y-5">
             <Link href="/" className="flex items-center gap-3">
-              <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-white" />
-              </span>
-              <span className="font-extrabold text-lg text-white tracking-tight">Creative &amp; IT Academy</span>
+              <BrandLogo tone="dark" size="lg" caption="Skill Academy · Creative | Digital | Studio" />
             </Link>
             <p className="text-sm leading-relaxed max-w-sm">
               Job-ready programs in technology, design and marketing, with mentor-reviewed projects and
@@ -95,7 +94,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <p>© {new Date().getFullYear()} Online Creative &amp; IT Academy. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
           <p className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Certificates verifiable at /verify
           </p>

@@ -6,7 +6,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { useAuth } from '../../providers/auth-provider';
 import { useToast } from '../../providers/toast-provider';
-import { GraduationCap, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { BrandLogo } from '../../components/common/brand-logo';
+import { BRAND } from '../../lib/brand';
 
 const PERKS = [
   'Free preview lessons in every course',
@@ -34,7 +36,7 @@ export default function RegisterPage() {
     try {
       setIsLoading(true);
       await register({ name, email, password, phone });
-      success('Account Created!', 'Welcome to Online Creative & IT Academy.');
+      success('Account Created!', `Welcome to ${BRAND.name}.`);
     } catch (err: any) {
       toastError('Registration Failed', err.message || 'Could not create your account.');
     } finally {
@@ -46,11 +48,8 @@ export default function RegisterPage() {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] bg-cream">
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden hero-mesh text-white p-12">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-        <Link href="/" className="relative flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </span>
-          <span className="font-bold text-lg tracking-tight">Creative &amp; IT Academy</span>
+        <Link href="/" className="relative self-start">
+          <BrandLogo tone="dark" size="lg" caption="Skill Academy · Creative | Digital | Studio" />
         </Link>
         <div className="relative space-y-8 animate-fade-up">
           <h1 className="text-4xl xl:text-5xl font-extrabold leading-[1.1] text-white">
@@ -71,12 +70,9 @@ export default function RegisterPage() {
 
       <main className="min-w-0 flex flex-col justify-center px-4 py-10 sm:px-10 lg:px-16">
         <div className="w-full max-w-md mx-auto space-y-8 animate-fade-up">
-          <div className="lg:hidden flex items-center gap-3">
-            <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </span>
-            <span className="font-bold text-lg tracking-tight text-ink">Creative &amp; IT Academy</span>
-          </div>
+          <Link href="/" className="lg:hidden inline-flex">
+            <BrandLogo />
+          </Link>
 
           <div className="space-y-2">
             <h2 className="text-3xl font-extrabold text-ink">Create your account</h2>

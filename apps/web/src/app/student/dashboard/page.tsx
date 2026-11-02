@@ -291,7 +291,7 @@ export default function StudentDashboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-extrabold text-lg text-ink">Payment receipt</h3>
-                <p className="text-sm text-slate-500">Online Creative &amp; IT Academy</p>
+                <p className="text-sm text-slate-500">ADSIGN Skill Academy</p>
               </div>
               <button onClick={() => setSelectedReceipt(null)} className="p-2 -m-2 rounded-lg hover:bg-cream-100" aria-label="Close">
                 <X className="w-5 h-5 text-slate-400" />

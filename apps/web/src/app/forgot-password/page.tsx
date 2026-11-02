@@ -75,12 +75,12 @@ export default function ForgotPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Enter your registered Student ID (e.g. <code>OCA-2026-000123</code>), Email Address, or Phone Number to receive password reset instructions.
+                  Enter your registered Student ID (e.g. <code>ADS-2026-000123</code>), Email Address, or Phone Number to receive password reset instructions.
                 </p>
 
                 <Input
                   label="Student ID / Email / Phone"
-                  placeholder="e.g. OCA-2026-000123 or student@example.com"
+                  placeholder="e.g. ADS-2026-000123 or student@example.com"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required

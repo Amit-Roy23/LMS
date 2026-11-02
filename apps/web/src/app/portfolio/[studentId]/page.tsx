@@ -37,7 +37,7 @@ export default function StudentPortfolioPage() {
               Full-Stack Engineer & AI Systems Specialist
             </p>
             <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
-              Graduate of the Online Creative & IT Academy. Specializing in high-performance Next.js architectures, Prisma ORM, and automated progression state machine engines.
+              Graduate of the ADSIGN Skill Academy. Specializing in high-performance Next.js architectures, Prisma ORM, and automated progression state machine engines.
             </p>
           </div>
         </Card>
@@ -53,7 +53,7 @@ export default function StudentPortfolioPage() {
                 <Award className="w-4 h-4 text-emerald-400" />
               </div>
               <h3 className="text-base font-bold text-ink">
-                Online Creative & IT Academy LMS Platform
+                ADSIGN Skill Academy LMS Platform
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Complete LMS scaffold built with npm workspaces, Next.js 15, Node.js Express, Prisma ORM, and PDF certificate generator with QR code verification.
@@ -98,7 +98,7 @@ export default function StudentPortfolioPage() {
                 <p className="text-sm font-bold text-ink">
                   Full-Stack Web Development & Modern AI Engineering
                 </p>
-                <p className="text-xs text-slate-400">Issued by Online Creative & IT Academy</p>
+                <p className="text-xs text-slate-400">Issued by ADSIGN Skill Academy</p>
               </div>
             </div>
 

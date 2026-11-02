@@ -53,7 +53,7 @@ export const SEED_TEMPLATES: DefaultNotificationTemplate[] = [
     key: 'registration_confirmation',
     channel: 'EMAIL',
     locale: 'en',
-    subject: 'Admission Confirmed: {{courseTitle}} - Online Creative & IT Academy',
+    subject: 'Admission Confirmed: {{courseTitle}} - ADSIGN Skill Academy',
     body: `<h2>Congratulations {{studentName}}!</h2>
 <p>Your payment of <strong>{{amount}} {{currency}}</strong> for <strong>{{courseTitle}}</strong> ({{mode}} Mode) has been received and verified.</p>
 <p><strong>Order Summary:</strong><br/>
@@ -64,7 +64,7 @@ export const SEED_TEMPLATES: DefaultNotificationTemplate[] = [
 • Admission Status: Confirmed</p>
 <p>You can access your admission receipt here: <a href="{{receiptUrl}}">{{receiptUrl}}</a></p>
 <p>Your student account credentials have been dispatched in a separate notification.</p>
-<p>Best regards,<br/>Online Creative & IT Academy Team</p>`,
+<p>Best regards,<br/>ADSIGN Skill Academy Team</p>`,
   },
   {
     key: 'registration_confirmation',
@@ -80,13 +80,13 @@ Your payment of *{{amount}} {{currency}}* for *{{courseTitle}}* ({{mode}} Mode) 
 • Payment Ref: {{paymentId}}
 • Receipt: {{receiptUrl}}
 
-Your login credentials have been sent. Welcome to Online Creative & IT Academy!`,
+Your login credentials have been sent. Welcome to ADSIGN Skill Academy!`,
   },
   {
     key: 'registration_confirmation',
     channel: 'SMS',
     locale: 'en',
-    body: `Creative & IT Academy: Hi {{studentName}}, admission confirmed for {{courseTitle}} ({{mode}}). Fee: {{amount}} {{currency}}. Receipt: {{receiptUrl}}`,
+    body: `ADSIGN Skill Academy: Hi {{studentName}}, admission confirmed for {{courseTitle}} ({{mode}}). Fee: {{amount}} {{currency}}. Receipt: {{receiptUrl}}`,
   },
 
   // 1. Registration Confirmation (Bengali - Marked for Client Review)
@@ -128,8 +128,8 @@ Your login credentials have been sent. Welcome to Online Creative & IT Academy!`
     key: 'account_credentials',
     channel: 'EMAIL',
     locale: 'en',
-    subject: 'Your Student Portal Access & Credentials - Creative & IT Academy',
-    body: `<h2>Welcome to Online Creative & IT Academy</h2>
+    subject: 'Your Student Portal Access & Credentials - ADSIGN Skill Academy',
+    body: `<h2>Welcome to ADSIGN Skill Academy</h2>
 <p>Hello {{studentName}},</p>
 <p>Your personalized Student LMS account is ready with your official Student ID:</p>
 <div style="background:#f1f5f9;padding:16px;border-radius:8px;font-family:monospace;">
@@ -167,7 +167,7 @@ Please log in and begin your enrolled course. Welcome aboard!`,
     key: 'account_credentials',
     channel: 'SMS',
     locale: 'en',
-    body: `Creative & IT Academy: Hello {{studentName}}, your Student ID is {{studentId}}. Login at {{loginUrl}} to set up password and access courses.`,
+    body: `ADSIGN Skill Academy: Hello {{studentName}}, your Student ID is {{studentId}}. Login at {{loginUrl}} to set up password and access courses.`,
   },
 
   // 2. Account Credentials (Bengali - Marked for Client Review)
@@ -228,7 +228,7 @@ Log in at {{loginUrl}} to begin learning.`,
     key: 'course_added',
     channel: 'SMS',
     locale: 'en',
-    body: `Creative & IT Academy: {{courseTitle}} added to your Student ID {{studentId}}. Login at {{loginUrl}} to view.`,
+    body: `ADSIGN Skill Academy: {{courseTitle}} added to your Student ID {{studentId}}. Login at {{loginUrl}} to view.`,
   },
 
   // 4. Password Reset
@@ -236,7 +236,7 @@ Log in at {{loginUrl}} to begin learning.`,
     key: 'password_reset',
     channel: 'EMAIL',
     locale: 'en',
-    subject: 'Reset Your Password - Online Creative & IT Academy',
+    subject: 'Reset Your Password - ADSIGN Skill Academy',
     body: `<h2>Password Reset Request</h2>
 <p>Hello {{name}},</p>
 <p>We received a request to reset your password. Click the link below to set a new password:</p>
@@ -260,7 +260,7 @@ If you did not request this, please ignore this message.`,
     key: 'password_reset',
     channel: 'SMS',
     locale: 'en',
-    body: `Creative & IT Academy: Password reset link for {{name}}: {{resetUrl}} (Expires in {{expiresInHours}}h).`,
+    body: `ADSIGN Skill Academy: Password reset link for {{name}}: {{resetUrl}} (Expires in {{expiresInHours}}h).`,
   },
 
   // 5. Payment Failed

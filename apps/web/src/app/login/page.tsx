@@ -8,7 +8,6 @@ import { useAuth } from '../../providers/auth-provider';
 import { useToast } from '../../providers/toast-provider';
 import { DEMO_ACCOUNTS, DemoAccountKey } from '../../lib/demo-accounts';
 import {
-  GraduationCap,
   ArrowRight,
   Sparkles,
   ShieldCheck,
@@ -17,6 +16,8 @@ import {
   Loader2,
   ChevronRight,
 } from 'lucide-react';
+import { BrandLogo } from '../../components/common/brand-logo';
+import { BRAND } from '../../lib/brand';
 
 const HIGHLIGHTS = [
   { icon: PlayCircle, text: 'Video lessons with tamper-proof watch tracking' },
@@ -70,11 +71,8 @@ export default function LoginPage() {
       {/* Brand panel */}
       <aside className="relative hidden lg:flex flex-col justify-between overflow-hidden hero-mesh text-white p-12">
         <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
-        <Link href="/" className="relative flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </span>
-          <span className="font-bold text-lg tracking-tight">Creative &amp; IT Academy</span>
+        <Link href="/" className="relative self-start">
+          <BrandLogo tone="dark" size="lg" caption="Skill Academy · Creative | Digital | Studio" />
         </Link>
 
         <div className="relative space-y-8 animate-fade-up">
@@ -112,12 +110,9 @@ export default function LoginPage() {
       {/* Form + demo accounts */}
       <main className="min-w-0 flex flex-col justify-center px-4 py-10 sm:px-10 lg:px-16">
         <div className="w-full max-w-lg mx-auto space-y-8 animate-fade-up">
-          <div className="lg:hidden flex items-center gap-3">
-            <span className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
-              <GraduationCap className="w-5 h-5 text-white" />
-            </span>
-            <span className="font-bold text-lg tracking-tight text-ink">Creative &amp; IT Academy</span>
-          </div>
+          <Link href="/" className="lg:hidden inline-flex">
+            <BrandLogo />
+          </Link>
 
           <div className="space-y-2">
             <h2 className="text-3xl font-extrabold text-ink">Welcome back</h2>
@@ -129,7 +124,7 @@ export default function LoginPage() {
               label="Student ID, email or phone"
               type="text"
               autoComplete="username"
-              placeholder="e.g. OCA-2026-000123 or you@example.com"
+              placeholder="e.g. ADS-2026-000123 or you@example.com"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
