@@ -376,7 +376,7 @@ def main() -> None:
         'slug': 'fullstack-ai-engineering',
         'title': 'Full-Stack Web Development & Modern AI Engineering',
         'category': 'Full-Stack Engineering',
-        'palette': ['#6366f1', '#a855f7'],
+        'palette': ['#0063AD', '#0077BF'],
         'mark': 'FS',
         'modules': [{'lessons': [dict(fs[k], title=k) for k in fs_titles]}],
     })
