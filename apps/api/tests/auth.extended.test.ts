@@ -13,7 +13,7 @@ describe('Student Authentication, Lockout, and Password Reset Flow', { timeout: 
 
   beforeAll(async () => {
     const passwordHash = await bcrypt.hash(rawPassword, 10);
-    studentId = `OCA-2026-${String(Date.now()).slice(-6)}`;
+    studentId = `ADS-2026-${String(Date.now()).slice(-6)}`;
 
     testStudent = await prisma.user.create({
       data: {
@@ -29,7 +29,7 @@ describe('Student Authentication, Lockout, and Password Reset Flow', { timeout: 
     });
   });
 
-  it('allows student login using official Student ID (OCA-...)', async () => {
+  it('allows student login using official Student ID (ADS-...)', async () => {
     const res = await authService.login({
       identifier: studentId,
       password: rawPassword,

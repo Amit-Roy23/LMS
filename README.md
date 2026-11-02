@@ -1,4 +1,4 @@
-# Online Creative & IT Academy — Enterprise LMS Monorepo
+# ADSIGN Skill Academy — Enterprise LMS Monorepo
 
 A production-quality Learning Management System (LMS) web application featuring a **three-layer architecture**, **dual delivery modes (RECORDED self-paced & LIVE scheduled batches)**, **server-enforced progression state machine**, video watch tracking ($\ge 90\%$), automated MCQ assessments, instructor-reviewed practical assignments with per-module toggles, timed mock exams, capstone projects, final certification assessments, and **cryptographically verifiable PDF certificates with anti-tamper QR verification**.
 
@@ -143,7 +143,7 @@ Default development environments are pre-configured:
   SMTP_SECURE=false
   SMTP_USER=""
   SMTP_PASS=""
-  SMTP_FROM="Creative & IT Academy <admissions@creativeit.academy>"
+  SMTP_FROM="ADSIGN Skill Academy <admissions@creativeit.academy>"
 
   # WhatsApp Delivery (LOG | META | TWILIO | GUPSHUP)
   WHATSAPP_PROVIDER="LOG"

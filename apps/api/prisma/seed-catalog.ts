@@ -390,7 +390,7 @@ export async function seedDemoCatalog(
 
   for (const [i, [name, city]] of LEARNERS.entries()) {
     const [first, last] = name.toLowerCase().split(' ');
-    const studentCode = `OCA-${year}-${String(101 + i).padStart(6, '0')}`;
+    const studentCode = `ADS-${year}-${String(101 + i).padStart(6, '0')}`;
     const user = await prisma.user.create({
       data: {
         studentId: studentCode,
@@ -538,7 +538,7 @@ export async function seedDemoCatalog(
             status: CertificateStatus.VALID,
             issuedAt: new Date(enrolledAt.getTime() + 21 * 86400000),
             pdfUrl: `/uploads/certificates/${certificateId}.pdf`,
-            metadata: { recipientName: name, courseTitle: course.title, gradeEarned: 'Merit (90%)', issuer: 'Online Creative & IT Academy Academic Council' },
+            metadata: { recipientName: name, courseTitle: course.title, gradeEarned: 'Merit (90%)', issuer: 'ADSIGN Skill Academy Academic Council' },
           },
         });
       }

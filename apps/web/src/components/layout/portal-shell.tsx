@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { GraduationCap, LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { LogOut, Menu, X, ChevronRight } from 'lucide-react';
+import { BrandLogo, BrandMark } from '../common/brand-logo';
 
 export interface PortalNavItem {
   href: string;
@@ -58,13 +59,7 @@ export function PortalShell({
     <div className="flex h-full flex-col bg-night-950 text-night-300">
       <div className="flex items-center justify-between px-5 h-16 lg:h-[72px] shrink-0">
         <Link href="/" className="flex items-center gap-3">
-          <span className="w-9 h-9 rounded-xl bg-brand-gradient flex items-center justify-center shadow-soft">
-            <GraduationCap className="w-4 h-4 text-white" />
-          </span>
-          <span className="leading-tight">
-            <span className="block font-extrabold text-white tracking-tight">Creative &amp; IT</span>
-            <span className="block text-[11px] font-semibold text-indigo-500 uppercase tracking-wider">{portalLabel}</span>
-          </span>
+          <BrandLogo tone="dark" size="sm" caption={<span className="uppercase tracking-wider">{portalLabel}</span>} />
         </Link>
         <button
           className="lg:hidden p-2 rounded-lg text-night-400 hover:text-white hover:bg-white/5"
@@ -174,9 +169,7 @@ export function PortalLoading() {
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <span className="w-12 h-12 rounded-2xl bg-brand-gradient flex items-center justify-center shadow-soft animate-pulse">
-          <GraduationCap className="w-6 h-6 text-white" />
-        </span>
+        <BrandMark className="h-12 animate-pulse" />
         <span className="text-sm font-medium text-slate-500">Loading your workspace…</span>
       </div>
     </div>

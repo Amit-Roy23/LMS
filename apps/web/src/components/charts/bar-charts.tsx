@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 /** Single-series bar colour (validated against the light surface). */
-const BAR = '#6366f1';
+const BAR = '#0063AD';
 
 interface ColumnDatum {
   label: string;

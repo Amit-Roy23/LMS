@@ -49,7 +49,7 @@ describe('End-to-End Admission, Provisioning, Login & LMS Gating Flow', { timeou
     const provRes = await provisioningService.provisionRegistration(registrationId);
     expect(provRes.success).toBe(true);
     expect(provRes.isNewUser).toBe(true);
-    expect(provRes.studentId).toMatch(/^OCA-\d{4}-\d{6}$/);
+    expect(provRes.studentId).toMatch(/^ADS-\d{4}-\d{6}$/);
 
     studentId = provRes.studentId;
     createdUserId = provRes.userId;

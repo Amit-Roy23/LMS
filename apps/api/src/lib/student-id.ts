@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { prisma } from './prisma.js';
 
 /**
- * Generates a race-safe, sequential, human-friendly Student ID (e.g., OCA-2026-000123).
+ * Generates a race-safe, sequential, human-friendly Student ID (e.g., ADS-2026-000123).
  * Uses atomic sequence counter table with database row-level locking / atomic upsert.
  */
 export async function generateStudentId(tx: any = prisma): Promise<string> {
@@ -17,7 +17,7 @@ export async function generateStudentId(tx: any = prisma): Promise<string> {
   });
 
   const formattedNumber = String(counter.value).padStart(6, '0');
-  return `OCA-${currentYear}-${formattedNumber}`;
+  return `ADS-${currentYear}-${formattedNumber}`;
 }
 
 /**

@@ -23,7 +23,7 @@ export interface PaymentSucceededEvent {
 
 export interface AccountCreatedEvent {
   userId: string;
-  studentId: string; // e.g. OCA-2026-000123
+  studentId: string; // e.g. ADS-2026-000123
   name: string;
   email: string;
   phone?: string | null;

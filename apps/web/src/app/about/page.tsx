@@ -14,7 +14,7 @@ export default function AboutPage() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <Badge variant="primary">About Our Institute</Badge>
           <h1 className="text-4xl sm:text-5xl font-extrabold text-ink tracking-tight">
-            Online Creative & IT Academy
+            ADSIGN Skill Academy
           </h1>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
             Pioneering verifiable computer science education through server-enforced progression state machines, multi-stage human code reviews, and enterprise certifications.

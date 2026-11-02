@@ -1,9 +1,13 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * "Academy" theme: clean white surfaces on a cool slate canvas, an indigo → violet brand
- * gradient, amber highlights and a deep navy ("night") for hero sections, sidebars,
- * the footer and the video player.
+ * ADSIGN brand theme: white surfaces on a light gray canvas, ADSIGN primary blue (#0063AD)
+ * with supporting bright blue (#0077BF), ADSIGN red (#E71E24) and red-orange (#E93E08)
+ * accents, and charcoal (#171C24, the "night" scale) for hero sections, sidebars, the
+ * footer and the video player.
+ *
+ * The `indigo`/`blue` scales carry the ADSIGN blues, `violet`/`purple`/`pink` carry the
+ * ADSIGN reds and `sky`/`cyan` the bright blue, so existing class names pick up the brand.
  *
  * The UI was originally written against a dark palette, so the light-mode colour scales
  * below keep that "dark-theme" naming but carry light values:
@@ -13,61 +17,61 @@ import type { Config } from 'tailwindcss';
  * Use the `night` scale (a true dark scale) for genuinely dark surfaces.
  */
 const indigo = {
-  50: '#eef2ff',
-  100: '#e0e7ff',
-  200: '#3730a3',
-  300: '#4338ca',
-  400: '#4f46e5',
-  500: '#6366f1',
-  600: '#4f46e5',
-  700: '#4338ca',
-  800: '#c7d2fe',
-  900: '#e0e7ff',
-  950: '#eef2ff',
+  50: '#F0F7FC',
+  100: '#DCEEF9',
+  200: '#003F70',
+  300: '#00508C',
+  400: '#0063AD',
+  500: '#0077BF',
+  600: '#0063AD',
+  700: '#00528F',
+  800: '#B9DBF1',
+  900: '#DCEEF9',
+  950: '#F0F7FC',
 };
 
 const violet = {
-  50: '#f5f3ff',
-  100: '#ede9fe',
-  200: '#5b21b6',
-  300: '#6d28d9',
-  400: '#7c3aed',
-  500: '#8b5cf6',
-  600: '#7c3aed',
-  700: '#6d28d9',
-  800: '#ddd6fe',
-  900: '#ede9fe',
-  950: '#f5f3ff',
+  50: '#FFF2EE',
+  100: '#FFE1D9',
+  200: '#8E1014',
+  300: '#B5161B',
+  400: '#E71E24',
+  500: '#E93E08',
+  600: '#E71E24',
+  700: '#C4161B',
+  800: '#FBC4B5',
+  900: '#FFE1D9',
+  950: '#FFF2EE',
 };
 
 const sky = {
-  50: '#f0f9ff',
-  100: '#e0f2fe',
-  200: '#075985',
-  300: '#0369a1',
-  400: '#0284c7',
-  500: '#0ea5e9',
-  600: '#0284c7',
-  700: '#0369a1',
-  800: '#bae6fd',
-  900: '#e0f2fe',
-  950: '#f0f9ff',
+  50: '#EEF8FD',
+  100: '#D6EEFA',
+  200: '#004A75',
+  300: '#005F94',
+  400: '#0077BF',
+  500: '#1A8FD6',
+  600: '#0077BF',
+  700: '#00629E',
+  800: '#B3DDF3',
+  900: '#D6EEFA',
+  950: '#EEF8FD',
 };
 
 /** A true dark scale for dark surfaces (hero, sidebar, footer, video player). */
 const night = {
-  DEFAULT: '#0f172a',
-  50: '#f8fafc',
-  100: '#f1f5f9',
-  200: '#e2e8f0',
-  300: '#cbd5e1',
-  400: '#94a3b8',
-  500: '#64748b',
-  600: '#475569',
-  700: '#334155',
-  800: '#1e293b',
-  900: '#0f172a',
-  950: '#0b1020',
+  DEFAULT: '#171C24',
+  50: '#F5F7FA',
+  100: '#F1F4F8',
+  200: '#E2E8F0',
+  300: '#CBD5E1',
+  400: '#94A3B8',
+  500: '#64748B',
+  600: '#4A5363',
+  700: '#343C4B',
+  800: '#222936',
+  900: '#171C24',
+  950: '#10141A',
 };
 
 const amber = {
@@ -102,19 +106,19 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         // Main heading/body ink colour
-        ink: '#0f172a',
+        ink: '#171C24',
         night,
-        brand: { DEFAULT: '#4f46e5', dark: '#4338ca', ...indigo },
-        primary: { DEFAULT: '#4f46e5', foreground: '#ffffff', ...indigo },
+        brand: { DEFAULT: '#0063AD', dark: '#00528F', bright: '#0077BF', red: '#E71E24', orange: '#E93E08', ...indigo },
+        primary: { DEFAULT: '#0063AD', foreground: '#ffffff', ...indigo },
         // Earlier theme token names, mapped onto the academy palette
-        cream: { DEFAULT: '#f8fafc', 50: '#ffffff', 100: '#f1f5f9', 200: '#e2e8f0' },
-        plum: { ...night, DEFAULT: '#0f172a', 500: '#1e293b' },
-        rust: { DEFAULT: '#4f46e5', ...indigo },
+        cream: { DEFAULT: '#F5F7FA', 50: '#FFFFFF', 100: '#F0F7FC', 200: '#E2E8F0' },
+        plum: { ...night, DEFAULT: '#171C24', 500: '#222936' },
+        rust: { DEFAULT: '#0063AD', ...indigo },
         peach: { DEFAULT: '#f59e0b', ...amber },
         coral: { DEFAULT: '#f59e0b', ...amber },
-        pink: { DEFAULT: '#8b5cf6', ...violet },
+        pink: { DEFAULT: '#E71E24', ...violet },
         surface: {
-          dark: '#f8fafc',
+          dark: '#F5F7FA',
           card: '#ffffff',
           cardHover: '#f1f5f9',
           border: '#e2e8f0',
@@ -122,8 +126,8 @@ const config: Config = {
         },
         // Neutral scale (inverted: high numbers are light surfaces, low numbers are dark ink)
         slate: {
-          50: '#0f172a',
-          100: '#0f172a',
+          50: '#171C24',
+          100: '#171C24',
           200: '#1e293b',
           300: '#334155',
           400: '#475569',
@@ -133,7 +137,7 @@ const config: Config = {
           800: '#e2e8f0',
           850: '#f1f5f9',
           900: '#ffffff',
-          950: '#f8fafc',
+          950: '#F5F7FA',
         },
         blue: indigo,
         indigo,
@@ -169,12 +173,12 @@ const config: Config = {
           950: '#fff1f2',
         },
         accent: {
-          blue: '#4f46e5',
+          blue: '#0063AD',
           emerald: '#059669',
           amber: '#d97706',
-          purple: '#7c3aed',
+          purple: '#E71E24',
           rose: '#e11d48',
-          cyan: '#0284c7',
+          cyan: '#0077BF',
         },
       },
       borderRadius: {
@@ -193,7 +197,7 @@ const config: Config = {
         code: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       boxShadow: {
-        soft: '0 12px 32px -12px rgba(79, 70, 229, 0.35)',
+        soft: '0 12px 32px -12px rgba(0, 99, 173, 0.35)',
         card: '0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.12)',
         lift: '0 20px 40px -18px rgba(15, 23, 42, 0.28)',
       },

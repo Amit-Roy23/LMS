@@ -38,7 +38,7 @@ W, H, FPS = 1280, 720, 24
 BG = (11, 16, 32)
 INK = (241, 245, 249)
 MUTED = (148, 163, 184)
-BRAND = 'Creative & IT Academy'
+BRAND = 'ADSIGN Skill Academy'
 
 FONT_DIRS = ['/usr/share/fonts/opentype/inter', '/usr/share/fonts/truetype/dejavu']
 
@@ -376,7 +376,7 @@ def main() -> None:
         'slug': 'fullstack-ai-engineering',
         'title': 'Full-Stack Web Development & Modern AI Engineering',
         'category': 'Full-Stack Engineering',
-        'palette': ['#6366f1', '#a855f7'],
+        'palette': ['#0063AD', '#0077BF'],
         'mark': 'FS',
         'modules': [{'lessons': [dict(fs[k], title=k) for k in fs_titles]}],
     })
