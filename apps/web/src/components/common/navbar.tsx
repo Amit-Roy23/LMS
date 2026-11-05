@@ -20,11 +20,13 @@ import {
   ChevronDown,
   Zap,
   Loader2,
+  Users,
 } from 'lucide-react';
 import { BrandLogo } from './brand-logo';
 
 const NAV_LINKS = [
   { href: '/courses', label: 'Courses', icon: BookOpen },
+  { href: '/instructors', label: 'Instructors', icon: Users },
   { href: '/ai', label: 'AI & Labs', icon: Sparkles },
   { href: '/career', label: 'Career', icon: Briefcase },
   { href: '/verify/CERT-2026-AI-001', label: 'Verify Certificate', icon: Award },

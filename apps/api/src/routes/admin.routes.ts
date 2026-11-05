@@ -10,6 +10,8 @@ import { billingController } from '../controllers/billing.controller.js';
 import { consoleController } from '../controllers/console.controller.js';
 import { CONSOLE_ROLES, ownCourse, ownStudent, courseOf, scopedCourseIds } from '../lib/access.js';
 import { streamService } from '../services/stream.service.js';
+import { instructorService } from '../services/instructor.service.js';
+import { recordAudit } from '../lib/audit.js';
 import { requireStepUp } from '../services/step-up.service.js';
 import { adminStudentController } from '../controllers/admin-student.controller.js';
 import { notificationController } from '../controllers/notification.controller.js';
@@ -78,6 +80,24 @@ router.get('/admin/security', consoleController.securityStatus);
 router.put('/admin/security/pin', authorizeRoles(ADMIN), consoleController.setPin);
 router.post('/admin/security/step-up', authorizeRoles(ADMIN), consoleController.startStepUp);
 router.post('/admin/security/step-up/verify', authorizeRoles(ADMIN), consoleController.verifyStepUp);
+
+// Own public instructor profile (instructors and admins who teach)
+router.get('/admin/instructor-profile', teaching, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await instructorService.getOwn(req.user!.userId));
+  } catch (err) {
+    next(err);
+  }
+});
+router.put('/admin/instructor-profile', teaching, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const profile = await instructorService.upsertOwn(req.user!.userId, req.body || {});
+    await recordAudit(req, { action: 'INSTRUCTORPROFILE_UPDATED', entityType: 'InstructorProfile', entityId: profile.id, details: { slug: profile.slug } });
+    return sendSuccess(res, profile);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Activity log with undo (main admins)
 router.get('/admin/activity', authorizeRoles(ADMIN), consoleController.listActivity);

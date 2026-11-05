@@ -94,6 +94,9 @@ export const config = {
       .filter(Boolean),
     credentialDelivery: (process.env.CREDENTIAL_DELIVERY || 'setup_link') as 'password' | 'setup_link',
     fallbackEnabled: process.env.NOTIFY_FALLBACK !== 'false',
+    /** Where new website enquiries are announced (defaults to all active admins and staff). */
+    admissionsEmails: (process.env.ADMISSIONS_EMAILS || '').split(',').map((e) => e.trim()).filter(Boolean),
+    admissionsWhatsapp: process.env.ADMISSIONS_WHATSAPP || '',
     smtp: {
       host: process.env.SMTP_HOST || '',
       port: parseInt(process.env.SMTP_PORT || '587', 10),

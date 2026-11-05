@@ -1,88 +1,60 @@
-'use client';
-
-import React, { useState } from 'react';
+import type { Metadata } from 'next';
 import { Navbar } from '../../components/common/navbar';
 import { Footer } from '../../components/common/footer';
-import { Button } from '../../components/ui/button';
-import { Input, Textarea } from '../../components/ui/input';
-import { Card, CardTitle, CardContent } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Mail, Phone, MapPin, Send, MessageSquare } from 'lucide-react';
-import { useToast } from '../../providers/toast-provider';
+import { EnquiryForm } from '../../components/marketing/enquiry-form';
+import { ACADEMY } from '../../components/legal/policy-page';
+import { Mail, Phone, MapPin, Clock3, MessageCircle } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Admissions & contact',
+  description: 'Ask ADSIGN Skill Academy about courses, batch timings, fees and EMI. Our admissions team replies within one working day.',
+  alternates: { canonical: '/contact' },
+};
 
 export default function ContactPage() {
-  const { success } = useToast();
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    success('Message Sent!', 'Our academic admissions team will get back to you shortly.');
-  };
+  const rows = [
+    ACADEMY.email && { icon: Mail, label: 'Email', value: ACADEMY.email, href: `mailto:${ACADEMY.email}` },
+    ACADEMY.phone && { icon: Phone, label: 'Phone / WhatsApp', value: ACADEMY.phone, href: `tel:${ACADEMY.phone}` },
+    ACADEMY.address && { icon: MapPin, label: 'Address', value: ACADEMY.address },
+    { icon: Clock3, label: 'Office hours', value: 'Monday to Saturday, 10am – 7pm IST' },
+  ].filter(Boolean) as { icon: any; label: string; value: string; href?: string }[];
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-cream">
       <Navbar />
+      <section className="relative overflow-hidden hero-mesh text-white">
+        <div className="absolute inset-0 grid-lines pointer-events-none" aria-hidden />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16 animate-fade-up">
+          <p className="text-sm font-semibold text-sky-800">Admissions &amp; enquiries</p>
+          <h1 className="mt-2 text-4xl font-extrabold text-white">Talk to an advisor</h1>
+          <p className="mt-3 max-w-2xl text-night-300 text-lg">Questions about a course, batch timings, fees or EMI? Send us a message and we'll call or WhatsApp you back.</p>
+        </div>
+      </section>
 
-      <main className="flex-1 max-w-5xl mx-auto px-4 py-20 w-full space-y-12">
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <Badge variant="primary">Admissions & Inquiries</Badge>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-ink">Get in Touch</h1>
-          <p className="text-xs sm:text-sm text-slate-400">
-            Have questions regarding curriculum requirements, corporate training, or certification validation?
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-8 items-start">
+        <div className="rounded-2xl bg-white border border-[#e2e8f0] p-6 shadow-card space-y-5">
+          <h2 className="font-bold text-ink">How to reach us</h2>
+          <ul className="space-y-4">
+            {rows.map(({ icon: Icon, label, value, href }) => (
+              <li key={label} className="flex items-start gap-3">
+                <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-400 flex items-center justify-center shrink-0"><Icon className="w-4 h-4" /></span>
+                <span>
+                  <span className="block text-xs text-slate-500">{label}</span>
+                  {href ? <a href={href} className="font-semibold text-ink hover:text-indigo-400">{value}</a> : <span className="font-semibold text-ink">{value}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="flex items-start gap-2 rounded-xl bg-cream-100 p-4 text-sm text-slate-400">
+            <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            Every enquiry goes straight to our admissions team, who usually reply within one working day.
           </p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="p-6 border-slate-800 bg-slate-900/80 space-y-6">
-            <h3 className="font-bold text-base text-ink">Contact Information</h3>
-
-            <div className="space-y-4 text-xs text-slate-300">
-              <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-slate-400">Admissions Email</p>
-                  <p className="font-semibold text-ink">admissions@creativeit.academy</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-slate-400">Direct Support</p>
-                  <p className="font-semibold text-ink">+1 (800) 555-0199</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-slate-400">Academy Headquarters</p>
-                  <p className="font-semibold text-ink">Innovation Campus, Tech District</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="md:col-span-2 border-slate-800 bg-slate-900/80 p-6">
-            <CardTitle className="text-base text-ink mb-4">Send Us a Message</CardTitle>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input label="Your Name" placeholder="John Doe" required />
-                <Input label="Your Email" type="email" placeholder="john@example.com" required />
-              </div>
-              <Input label="Subject / Program of Interest" placeholder="e.g. Admission for Full-Stack AI Course" required />
-              <Textarea label="Message" placeholder="How can our counselors assist you?" rows={4} required />
-
-              <Button type="submit" variant="primary" size="md">
-                <Send className="w-4 h-4 mr-1.5" />
-                <span>Send Inquiry</span>
-              </Button>
-            </form>
-          </Card>
+        <div className="rounded-2xl bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-card">
+          <h2 className="text-xl font-bold text-ink mb-5">Send an enquiry</h2>
+          <EnquiryForm source="CONTACT_PAGE" />
         </div>
       </main>
-
       <Footer />
     </div>
   );

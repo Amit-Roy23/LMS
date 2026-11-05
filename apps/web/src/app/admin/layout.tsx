@@ -22,6 +22,7 @@ import {
   BadgeCheck,
   PlayCircle,
   Receipt,
+  UserRound,
 } from 'lucide-react';
 import { StepUpProvider } from '../../components/admin/step-up-provider';
 
@@ -84,6 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { href: '/admin/users', label: 'Users & Roles', icon: UserCheck },
         ]
       : []),
+    ...(is(Role.ADMIN, Role.INSTRUCTOR) ? [{ href: '/admin/profile', label: 'Public Profile', icon: UserRound }] : []),
     { href: '/admin/security', label: 'My Security', icon: ShieldCheck },
   ];
 

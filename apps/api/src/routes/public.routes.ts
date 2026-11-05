@@ -1,3 +1,4 @@
+import { instructorService } from '../services/instructor.service.js';
 import { streamService } from '../services/stream.service.js';
 import { billingController } from '../controllers/billing.controller.js';
 import { Router } from 'express';
@@ -55,7 +56,25 @@ router.get('/courses', courseController.listPublicCourses);
 router.get('/courses/:slug', optionalAuthenticate, courseController.getCourseBySlug);
 
 // Public Inquiries & Lead Generation
-router.post('/inquiries', validateBody(createInquirySchema), adminStudentController.createInquiry);
+router.post('/inquiries', authRateLimiter, validateBody(createInquirySchema), adminStudentController.createInquiry);
+
+// Public instructor profiles
+router.get('/instructors', async (req, res, next) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
+    res.json({ success: true, data: await instructorService.listPublic() });
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/instructors/:slug', async (req, res, next) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
+    res.json({ success: true, data: await instructorService.getPublic(String(req.params.slug)) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Public Certificate Verification
 router.get('/certificates/verify/:certificateId', certificateController.verifyCertificate);

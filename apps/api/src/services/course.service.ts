@@ -51,9 +51,7 @@ export class CourseService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          instructor: {
-            select: { id: true, name: true, email: true, avatar: true },
-          },
+          instructor: { select: { id: true, name: true, avatar: true, instructorProfile: { select: { slug: true, headline: true, isPublic: true } } } },
           _count: {
             select: {
               modules: true,
@@ -101,7 +99,8 @@ export class CourseService {
     const course = await prisma.course.findUnique({
       where: { slug },
       include: {
-        instructor: { select: { id: true, name: true, email: true, avatar: true } },
+        // Public page: instructor's public profile, never their email
+        instructor: { select: { id: true, name: true, avatar: true, instructorProfile: { select: { slug: true, headline: true, isPublic: true } } } },
         modules: {
           where: { deletedAt: null },
           orderBy: { order: 'asc' },

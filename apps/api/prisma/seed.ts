@@ -1470,6 +1470,25 @@ async function main() {
     const phone = u.phone ? '+' + u.phone.replace(/\D/g, '') : null;
     await prisma.user.update({ where: { id: u.id }, data: { isDemo: true, phone } });
   }
+  // Public instructor profiles
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const profiles = JSON.parse(fs.readFileSync(path.join(__dirname, 'demo-content/instructor-profiles.json'), 'utf8'));
+    for (const [email, p] of Object.entries<any>(profiles)) {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) continue;
+      await prisma.instructorProfile.upsert({
+        where: { userId: user.id },
+        create: { userId: user.id, ...p },
+        update: p,
+      });
+    }
+    console.log(`✅ Seeded ${Object.keys(profiles).length} instructor profiles`);
+  } catch (err) {
+    console.warn('Instructor profiles skipped', err);
+  }
+
   // Protected streaming: non-preview lessons play as AES-128 encrypted HLS (see scripts/demo-media/build_hls.py)
   const hlsKeys = loadHlsKeys();
   const videoLessons = await prisma.lesson.findMany({ where: { videoProvider: 'MP4', isPreview: false }, select: { id: true, videoUrl: true } });
@@ -1485,6 +1504,76 @@ async function main() {
     hlsCount++;
   }
   console.log(`✅ ${hlsCount} lessons switched to encrypted HLS streaming`);
+
+  // Demo console history: a staff mistake to undo, a pending mobile change and video viewing logs
+  const staffUser = await prisma.user.findUnique({ where: { email: 'staff@creativeit.academy' } });
+  const typoLesson = await prisma.lesson.findFirst({ where: { title: '1.2 User Research & Personas' } });
+  if (staffUser && typoLesson) {
+    const wrong = '1.2 User Reserch & Personas (DRAFT - do not publish)';
+    await prisma.lesson.update({ where: { id: typoLesson.id }, data: { title: wrong } });
+    await prisma.auditLog.create({
+      data: {
+        userId: staffUser.id,
+        actorRole: 'STAFF',
+        action: 'LESSON_UPDATED',
+        entityType: 'Lesson',
+        entityId: typoLesson.id,
+        before: { title: typoLesson.title },
+        after: { title: wrong },
+        details: { title: wrong },
+        createdAt: new Date(Date.now() - 2 * 3600_000),
+      },
+    });
+  }
+  const enquiry = await prisma.inquiry.findFirst({ where: { name: 'Priya Patel' } });
+  if (staffUser && enquiry) {
+    await prisma.inquiry.update({ where: { id: enquiry.id }, data: { status: 'CLOSED' } });
+    await prisma.auditLog.create({
+      data: {
+        userId: staffUser.id,
+        actorRole: 'STAFF',
+        action: 'INQUIRY_UPDATED',
+        entityType: 'Inquiry',
+        entityId: enquiry.id,
+        before: { status: 'NEW' },
+        after: { status: 'CLOSED' },
+        details: { name: enquiry.name },
+        createdAt: new Date(Date.now() - 50 * 60_000),
+      },
+    });
+  }
+  const vikram = await prisma.user.findUnique({ where: { email: 'student4@creativeit.academy' } });
+  if (vikram) {
+    await prisma.changeRequest.create({
+      data: { userId: vikram.id, type: 'PHONE', oldValue: vikram.phone, newValue: '+919876500999', reason: 'Lost my old SIM card', createdAt: new Date(Date.now() - 3 * 3600_000) },
+    });
+  }
+  const viewers = await prisma.user.findMany({
+    where: { email: { in: ['student1@creativeit.academy', 'student2@creativeit.academy', 'student3@creativeit.academy', 'student4@creativeit.academy'] } },
+    include: { enrollments: { take: 1, include: { course: { include: { modules: { take: 1, include: { lessons: { take: 3 } } } } } } } },
+  });
+  const DEVICES = ['Chrome on Windows', 'Safari on iPhone', 'Chrome on Android', 'Edge on Windows', 'Safari on Mac'];
+  for (const [vi, v] of viewers.entries()) {
+    const enr = v.enrollments[0];
+    const lessons = enr?.course.modules[0]?.lessons || [];
+    for (const [li, lesson] of lessons.entries()) {
+      // Rahul (student3) shows up from three different networks in a day: flagged as possible sharing
+      const shared = v.email === 'student3@creativeit.academy';
+      await prisma.videoViewLog.create({
+        data: {
+          userId: v.id,
+          lessonId: lesson.id,
+          courseId: enr.courseId,
+          deviceLabel: DEVICES[(vi + li) % DEVICES.length],
+          ipAddress: shared ? `49.36.${10 + li * 37}.${20 + li * 11}` : `103.21.58.${40 + vi}`,
+          startedAt: new Date(Date.now() - (li * 5 + vi + 1) * 3600_000),
+          lastSeenAt: new Date(Date.now() - (li * 5 + vi + 1) * 3600_000 + 40 * 60_000),
+          watchedSeconds: 30 + ((vi * 7 + li * 13) % 25),
+        },
+      });
+    }
+  }
+  console.log('✅ Seeded demo activity log, a pending mobile change and video viewing logs');
 
   // GST tax invoices for every completed demo payment
   const { invoiceService } = await import('../src/services/invoice.service');

@@ -78,11 +78,19 @@ export default function AdminDashboardPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link href="/admin/reviews">
-              <Button variant="primary">
-                <ClipboardCheck className="w-4 h-4" /> Review queue ({summary.pendingReviewsCount || 0})
-              </Button>
-            </Link>
+            {user?.role === 'STAFF' ? (
+              <Link href="/admin/enquiries">
+                <Button variant="primary">
+                  <ClipboardCheck className="w-4 h-4" /> Open enquiries
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/admin/reviews">
+                <Button variant="primary">
+                  <ClipboardCheck className="w-4 h-4" /> Review queue ({summary.pendingReviewsCount || 0})
+                </Button>
+              </Link>
+            )}
             <Link href="/admin/courses/new">
               <Button variant="secondary" className="bg-white/10 hover:bg-white/15 text-white border-white/15">
                 <Plus className="w-4 h-4" /> New course
@@ -198,9 +206,16 @@ export default function AdminDashboardPage() {
           <div className="mt-4 grid gap-2">
             {[
               { href: '/admin/courses/new', icon: BookOpen, label: 'Create a new course', tone: 'text-indigo-400' },
-              { href: '/admin/reviews', icon: ClipboardCheck, label: 'Grade submissions', tone: 'text-amber-400' },
+              ...(user?.role === 'STAFF'
+                ? [
+                    { href: '/admin/enquiries', icon: ClipboardCheck, label: 'Follow up enquiries', tone: 'text-amber-400' },
+                    { href: '/admin/invoices', icon: CreditCard, label: 'Payments & invoices', tone: 'text-violet-400' },
+                  ]
+                : [
+                    { href: '/admin/reviews', icon: ClipboardCheck, label: 'Grade submissions', tone: 'text-amber-400' },
+                    { href: '/admin/assessments', icon: BarChart3, label: 'Quiz analytics', tone: 'text-violet-400' },
+                  ]),
               { href: '/admin/students', icon: Users, label: 'Track student progress', tone: 'text-sky-400' },
-              { href: '/admin/assessments', icon: BarChart3, label: 'Quiz analytics', tone: 'text-violet-400' },
             ].map(({ href, icon: Icon, label, tone }) => (
               <Link
                 key={href}

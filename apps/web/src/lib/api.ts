@@ -14,7 +14,10 @@ export function getApiBase(): string {
     return '/api/v1';
   }
 
-  // On the server (SSR)
+  // On the server (SSR): an internal API address wins (local dev or a VPS behind Nginx)
+  if (process.env.INTERNAL_API_URL) {
+    return process.env.INTERNAL_API_URL;
+  }
   if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
@@ -203,4 +206,16 @@ export async function openAuthenticatedFile(endpoint: string): Promise<void> {
   if (tab) tab.location.href = blobUrl;
   else window.location.href = blobUrl;
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+}
+
+/** Server-side fetch for public pages (SEO): cached, never throws, returns null on failure. */
+export async function fetchPublic<T>(endpoint: string, revalidate = 60): Promise<T | null> {
+  try {
+    const res = await fetch(`${getApiBase()}${endpoint}`, { next: { revalidate } } as any);
+    if (!res.ok) return null;
+    const body = await res.json();
+    return body?.success ? (body.data as T) : null;
+  } catch {
+    return null;
+  }
 }

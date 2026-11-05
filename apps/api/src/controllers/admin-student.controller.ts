@@ -4,6 +4,40 @@ import { sendSuccess, sendPaginated } from '../lib/utils.js';
 import { prisma } from '../lib/prisma.js';
 import { recordAudit, changedFields } from '../lib/audit.js';
 import { BadRequestError, NotFoundError } from '../lib/errors.js';
+import { normalizePhone } from '../lib/phone.js';
+import { logger } from '../lib/logger.js';
+import { config } from '../config/env.js';
+import { notificationService } from '../services/notification/notification.service.js';
+import { NotificationChannel } from '@academy/shared';
+
+async function alertAdmissionsTeam(inquiry: { id: string; name: string; phone: string; email: string; message: string; source: string }, courseTitle?: string) {
+  const recipients = config.notifications.admissionsEmails.length
+    ? config.notifications.admissionsEmails
+    : (await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'STAFF'] }, status: 'ACTIVE', deletedAt: null }, select: { email: true } })).map((u) => u.email);
+  const variables = {
+    name: inquiry.name,
+    phone: inquiry.phone,
+    email: inquiry.email,
+    message: inquiry.message,
+    messageShort: inquiry.message.slice(0, 120),
+    courseTitle: courseTitle || 'General enquiry',
+    courseSuffix: courseTitle ? ` about ${courseTitle}` : '',
+    source: inquiry.source.replace(/_/g, ' ').toLowerCase(),
+    inboxUrl: `${config.clientUrl}/admin/enquiries`,
+  };
+  for (const to of recipients) {
+    await notificationService.enqueueNotification({ to, channel: NotificationChannel.EMAIL, templateKey: 'inquiry_alert', variables, idempotencyKey: `inquiry_${inquiry.id}_${to}` });
+  }
+  if (config.notifications.admissionsWhatsapp) {
+    await notificationService.enqueueNotification({
+      to: config.notifications.admissionsWhatsapp,
+      channel: NotificationChannel.WHATSAPP,
+      templateKey: 'inquiry_alert',
+      variables,
+      idempotencyKey: `inquiry_${inquiry.id}_wa`,
+    });
+  }
+}
 
 export class AdminStudentController {
   /**
@@ -75,12 +109,27 @@ export class AdminStudentController {
     }
   }
 
+  /** Public enquiry form: saves the lead and alerts the admissions team by email/WhatsApp. */
   async createInquiry(req: Request, res: Response, next: NextFunction) {
     try {
+      // Bots fill the hidden "website" field; pretend success and drop it
+      if ((req.body as any).website) return sendSuccess(res, { id: 'ok' }, 201);
+      const phone = normalizePhone(req.body.phone) || String(req.body.phone).trim();
+      const course = req.body.courseId
+        ? await prisma.course.findFirst({ where: { id: req.body.courseId, deletedAt: null }, select: { id: true, title: true } })
+        : null;
       const inquiry = await prisma.inquiry.create({
-        data: req.body,
+        data: {
+          name: String(req.body.name).trim(),
+          email: String(req.body.email).trim().toLowerCase(),
+          phone,
+          courseId: course?.id || null,
+          message: String(req.body.message).trim(),
+          source: String(req.body.source || 'WEBSITE').toUpperCase().replace(/[^A-Z_]/g, '').slice(0, 40) || 'WEBSITE',
+        },
       });
-      return sendSuccess(res, inquiry, 201);
+      alertAdmissionsTeam(inquiry, course?.title).catch((err) => logger.error({ err }, 'Enquiry alert failed'));
+      return sendSuccess(res, { id: inquiry.id, message: 'Thanks! Our admissions team will contact you shortly.' }, 201);
     } catch (err) {
       next(err);
     }

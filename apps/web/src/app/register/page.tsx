@@ -7,6 +7,7 @@ import { Input } from '../../components/ui/input';
 import { useAuth, OtpChallenge } from '../../providers/auth-provider';
 import { OtpStep } from '../../components/auth/otp-step';
 import { apiClient } from '../../lib/api';
+import { track } from '../../lib/analytics';
 import { useToast } from '../../providers/toast-provider';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { BrandLogo } from '../../components/common/brand-logo';
@@ -60,6 +61,7 @@ export default function RegisterPage() {
   // Step 2: create the account once the mobile number is verified
   const verifyAndCreate = async (code: string) => {
     await register({ name, email, password, phone, challengeId: otp!.challengeId, otpCode: code });
+    track('sign_up', { method: 'mobile_otp' });
     success('Account Created!', `Welcome to ${BRAND.name}.`);
   };
 

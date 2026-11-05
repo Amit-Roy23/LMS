@@ -15,6 +15,7 @@ import { useAuth } from '../../../providers/auth-provider';
 import { useToast } from '../../../providers/toast-provider';
 import { ShieldCheck, Lock, Receipt, Smartphone, CreditCard, Landmark, Wallet, FlaskConical } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
+import { track } from '../../../lib/analytics';
 import confetti from 'canvas-confetti';
 
 interface CheckoutConfig {
@@ -83,6 +84,8 @@ export default function CheckoutPage() {
         }
       );
 
+      track('begin_checkout', { value: price, currency: course?.currency || 'INR', items: [{ item_id: courseId, item_name: course?.title }] });
+
       // 2. Pay: Razorpay Checkout (UPI, cards, net banking, wallets) or the demo gateway
       let verifyBody: Record<string, any> = { paymentId: order.paymentId };
       if (order.provider === 'RAZORPAY') {
@@ -100,6 +103,7 @@ export default function CheckoutPage() {
       // 3. The server verifies the payment signature with Razorpay before granting access
       await apiClient('/enrollments/verify', { method: 'POST', body: JSON.stringify(verifyBody) });
 
+      track('purchase', { transaction_id: order.paymentId, value: price, currency: course?.currency || 'INR', items: [{ item_id: courseId, item_name: course?.title }] });
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0063AD', '#0077BF', '#E71E24', '#E93E08'] });
       success('🎉 Admission confirmed!', 'Your GST invoice has been emailed to you.');
       router.push(`/student/courses/${courseId}`);
