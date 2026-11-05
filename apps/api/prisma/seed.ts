@@ -1459,6 +1459,12 @@ async function main() {
     const phone = u.phone ? '+' + u.phone.replace(/\D/g, '') : null;
     await prisma.user.update({ where: { id: u.id }, data: { isDemo: true, phone } });
   }
+  // GST tax invoices for every completed demo payment
+  const { invoiceService } = await import('../src/services/invoice.service');
+  const completed = await prisma.payment.findMany({ where: { status: 'COMPLETED' }, orderBy: { createdAt: 'asc' }, select: { id: true } });
+  for (const p of completed) await invoiceService.issueForPayment(p.id, { email: false });
+  console.log(`✅ Issued ${completed.length} GST invoices`);
+
   await prisma.$executeRawUnsafe(
     `UPDATE "StudentProfile" SET phone = '+' || regexp_replace(phone, '\\D', '', 'g') WHERE phone IS NOT NULL`
   );

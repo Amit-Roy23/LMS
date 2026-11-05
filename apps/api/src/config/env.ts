@@ -40,7 +40,22 @@ export const config = {
     razorpay: {
       keyId: process.env.RAZORPAY_KEY_ID || '',
       keySecret: process.env.RAZORPAY_KEY_SECRET || '',
+      webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     },
+  },
+  /** Seller details printed on GST tax invoices. */
+  invoice: {
+    sellerName: process.env.INVOICE_SELLER_NAME || 'ADSIGN Skill Academy',
+    gstin: process.env.INVOICE_GSTIN || '',
+    address: process.env.INVOICE_ADDRESS || '',
+    state: process.env.INVOICE_STATE || 'West Bengal',
+    stateCode: process.env.INVOICE_STATE_CODE || '19',
+    email: process.env.INVOICE_EMAIL || '',
+    phone: process.env.INVOICE_PHONE || '',
+    /** SAC 999293: commercial training and coaching services */
+    sacCode: process.env.INVOICE_SAC || '999293',
+    gstRate: parseFloat(process.env.INVOICE_GST_RATE || '18'),
+    prefix: process.env.INVOICE_PREFIX || 'ADS',
   },
   redisUrl: process.env.REDIS_URL || '',
   security: {

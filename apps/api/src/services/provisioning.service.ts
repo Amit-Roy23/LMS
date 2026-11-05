@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma.js';
+import { invoiceService } from './invoice.service.js';
 import { config } from '../config/env.js';
 import { logger } from '../lib/logger.js';
 import {
@@ -42,6 +43,12 @@ export class ProvisioningService {
       } else {
         await this.provisionFromPaymentDirectly(event);
       }
+      // GST tax invoice for the completed payment (idempotent)
+      const payment = await prisma.payment.findFirst({
+        where: { status: PaymentStatus.COMPLETED, OR: [{ id: event.paymentId }, { providerRef: event.providerRef || event.paymentId }] },
+        select: { id: true },
+      }).catch(() => null);
+      if (payment) await invoiceService.issueForPayment(payment.id);
     } catch (err: any) {
       logger.error(
         {
@@ -208,7 +215,7 @@ export class ProvisioningService {
               data: {
                 studentId: user.id,
                 courseId: course.id,
-                provider: 'MOCK',
+                provider: ((registration.metadata as any)?.provider || 'MOCK') as any,
                 amount: registration.amount,
                 currency: registration.currency,
                 status: PaymentStatus.COMPLETED,
@@ -223,7 +230,7 @@ export class ProvisioningService {
             data: {
               studentId: user.id,
               courseId: course.id,
-              provider: 'MOCK',
+              provider: ((registration.metadata as any)?.provider || 'MOCK') as any,
               amount: registration.amount,
               currency: registration.currency,
               status: PaymentStatus.COMPLETED,

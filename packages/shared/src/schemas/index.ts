@@ -402,6 +402,15 @@ export const checkoutEnrollmentSchema = z.object({
   batchId: z.string().uuid().optional().nullable(),
   mode: z.nativeEnum(DeliveryMode).default(DeliveryMode.RECORDED),
   paymentProvider: z.nativeEnum(PaymentProvider).default(PaymentProvider.MOCK),
+  /** Billing details printed on the GST invoice */
+  billing: z
+    .object({
+      name: z.string().max(120).optional(),
+      state: z.string().max(60).optional(),
+      gstin: z.string().max(20).optional(),
+      address: z.string().max(300).optional(),
+    })
+    .optional(),
 });
 
 export const submitMockTestSchema = z.object({

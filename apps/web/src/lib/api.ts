@@ -185,3 +185,22 @@ export async function apiText(endpoint: string): Promise<string> {
   }
   return response.text();
 }
+
+/** Opens an authenticated PDF/file response (e.g. a GST invoice) in a new tab. */
+export async function openAuthenticatedFile(endpoint: string): Promise<void> {
+  const url = endpoint.startsWith('http') ? endpoint : `${getApiBase()}${endpoint}`;
+  const headers = authHeaders();
+  headers.delete('Content-Type');
+  // Open the tab first so popup blockers allow it
+  const tab = typeof window !== 'undefined' ? window.open('', '_blank') : null;
+  const response = await fetch(url, { headers, credentials: 'include' });
+  if (!response.ok) {
+    tab?.close();
+    const body = await response.json().catch(() => null);
+    throw new ApiError(body?.error?.message || 'Download failed', response.status, body?.error?.code || `HTTP_${response.status}`);
+  }
+  const blobUrl = URL.createObjectURL(await response.blob());
+  if (tab) tab.location.href = blobUrl;
+  else window.location.href = blobUrl;
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+}

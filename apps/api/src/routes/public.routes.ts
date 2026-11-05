@@ -1,3 +1,4 @@
+import { billingController } from '../controllers/billing.controller.js';
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller.js';
 import { courseController } from '../controllers/course.controller.js';
@@ -60,6 +61,9 @@ router.get('/certificates/verify/:certificateId', certificateController.verifyCe
 
 // Webhook status stubs
 router.post('/webhooks/whatsapp', notificationController.webhookWhatsApp);
+router.post('/webhooks/razorpay', billingController.razorpayWebhook);
+router.get('/payments/config', billingController.checkoutConfig);
+router.get('/invoices/:id/pdf', billingController.publicInvoicePdf);
 router.post('/webhooks/sms', notificationController.webhookSms);
 
 export { router as publicRouter };

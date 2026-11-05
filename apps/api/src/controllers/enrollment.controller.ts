@@ -56,12 +56,9 @@ export class EnrollmentController {
 
   async createCheckout(req: Request, res: Response, next: NextFunction) {
     try {
-      const { courseId, paymentProvider } = req.body;
-      const order = await paymentService.createEnrollmentOrder(
-        req.user!.userId,
-        courseId,
-        paymentProvider
-      );
+      const { courseId, billing } = req.body;
+      // The gateway is chosen by the server; any provider sent by the browser is ignored
+      const order = await paymentService.createEnrollmentOrder(req.user!.userId, courseId, undefined, billing);
       return sendSuccess(res, order, 201);
     } catch (err) {
       next(err);
@@ -70,12 +67,14 @@ export class EnrollmentController {
 
   async verifyPayment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { paymentId, providerRef, signature } = req.body;
+      // Razorpay Checkout returns razorpay_order_id, razorpay_payment_id and razorpay_signature
+      const { paymentId, providerRef, signature, razorpayPaymentId, razorpaySignature } = req.body;
       const result = await paymentService.verifyAndCompleteEnrollment(
         paymentId,
         providerRef,
-        signature,
-        req.user!.userId
+        razorpaySignature || signature,
+        req.user!.userId,
+        razorpayPaymentId
       );
       return sendSuccess(res, result);
     } catch (err) {

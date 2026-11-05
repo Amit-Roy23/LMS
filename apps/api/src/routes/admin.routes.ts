@@ -6,6 +6,7 @@ import { assignmentController } from '../controllers/assignment.controller.js';
 import { reviewController } from '../controllers/review.controller.js';
 import { certificateController } from '../controllers/certificate.controller.js';
 import { reportController, userController, consoleUserController } from '../controllers/misc.controller.js';
+import { billingController } from '../controllers/billing.controller.js';
 import { consoleController } from '../controllers/console.controller.js';
 import { CONSOLE_ROLES, ownCourse, ownStudent, courseOf } from '../lib/access.js';
 import { requireStepUp } from '../services/step-up.service.js';
@@ -183,6 +184,9 @@ router.post('/reviews/projects/:submissionId', teaching, validateBody(reviewFina
 
 // Enrollments & Billing
 router.get('/admin/enrollments', enrollmentController.listAllEnrollments);
+router.get('/admin/payments', office, billingController.listPayments);
+router.get('/admin/invoices/:id/pdf', office, billingController.adminInvoicePdf);
+router.post('/admin/payments/:id/refund', requireStepUp('refund a payment'), billingController.refund);
 
 // Reports & Analytics
 router.get('/admin/reports/analytics', reportController.getAnalytics);

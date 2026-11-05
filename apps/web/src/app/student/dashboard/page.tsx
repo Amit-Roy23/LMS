@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../providers/auth-provider';
-import { apiClient } from '../../../lib/api';
+import { apiClient, openAuthenticatedFile } from '../../../lib/api';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { Reveal } from '../../../components/motion/reveal';
@@ -274,7 +274,12 @@ export default function StudentDashboardPage() {
                     <span className="block text-xs text-slate-500">{r.ref} · {new Date(r.createdAt).toLocaleDateString()}</span>
                   </span>
                   <span className="font-bold text-ink">{formatCurrency(r.amount, r.currency || 'INR')}</span>
-                  <Badge variant="success">{r.status}</Badge>
+                  <Badge variant={r.status === 'REFUNDED' ? 'warning' : 'success'}>{r.status}</Badge>
+                  {r.invoice && (
+                    <Button variant="outline" size="sm" onClick={() => openAuthenticatedFile(`/student/invoices/${r.invoice.id}/pdf`).catch(() => undefined)}>
+                      <FileCheck className="w-3.5 h-3.5" /> GST invoice
+                    </Button>
+                  )}
                   <Button variant="secondary" size="sm" onClick={() => setSelectedReceipt(r)}>View</Button>
                 </li>
               ))}
@@ -300,6 +305,7 @@ export default function StudentDashboardPage() {
             <dl className="text-sm rounded-2xl bg-cream border border-[#e2e8f0] divide-y divide-[#e2e8f0]">
               {[
                 ['Receipt no.', selectedReceipt.ref],
+                ...(selectedReceipt.invoice ? [['Tax invoice', selectedReceipt.invoice.invoiceNumber]] : []),
                 ['Student ID', user?.studentId || '—'],
                 ['Learner', selectedReceipt.applicantName || user?.name],
                 ['Course', selectedReceipt.title],
@@ -318,9 +324,15 @@ export default function StudentDashboardPage() {
             </dl>
             <div className="flex justify-end gap-2">
               <Button variant="secondary" onClick={() => setSelectedReceipt(null)}>Close</Button>
-              <Button variant="primary" onClick={() => window.print()}>
-                <Printer className="w-4 h-4" /> Print / save PDF
-              </Button>
+              {selectedReceipt.invoice ? (
+                <Button variant="primary" onClick={() => openAuthenticatedFile(`/student/invoices/${selectedReceipt.invoice.id}/pdf`).catch(() => undefined)}>
+                  <Printer className="w-4 h-4" /> Download GST invoice
+                </Button>
+              ) : (
+                <Button variant="primary" onClick={() => window.print()}>
+                  <Printer className="w-4 h-4" /> Print / save PDF
+                </Button>
+              )}
             </div>
           </div>
         </div>

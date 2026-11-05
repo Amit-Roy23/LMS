@@ -100,8 +100,8 @@ export class NotificationController {
    */
   async verifyAdmissionPayment(req: Request, res: Response, next: NextFunction) {
     try {
-      const { registrationId, providerRef, signature } = req.body;
-      const result = await paymentService.verifyRegistrationPayment(registrationId, providerRef, signature);
+      const { registrationId, providerRef, signature, razorpayPaymentId, razorpaySignature } = req.body;
+      const result = await paymentService.verifyRegistrationPayment(registrationId, providerRef, razorpaySignature || signature, razorpayPaymentId);
       return sendSuccess(res, result);
     } catch (err) {
       next(err);

@@ -16,6 +16,7 @@ import { authenticate, requirePasswordChanged } from '../middleware/auth.middlew
 import { validateBody } from '../middleware/validate.middleware.js';
 import { prisma } from '../lib/prisma.js';
 import { sendSuccess } from '../lib/utils.js';
+import { billingController } from '../controllers/billing.controller.js';
 import { changeRequestService } from '../services/change-request.service.js';
 import {
   updateLessonProgressSchema,
@@ -138,7 +139,7 @@ router.get('/student/receipts', async (req: Request, res: Response, next: NextFu
     const [payments, registrations] = await Promise.all([
       prisma.payment.findMany({
         where: { studentId: userId },
-        include: { course: true },
+        include: { course: true, invoice: { select: { id: true, invoiceNumber: true, issuedAt: true } } },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.registration.findMany({
@@ -159,6 +160,10 @@ router.get('/student/receipts', async (req: Request, res: Response, next: NextFu
     next(err);
   }
 });
+
+// GST tax invoices
+router.get('/student/invoices', billingController.myInvoices);
+router.get('/student/invoices/:id/pdf', billingController.myInvoicePdf);
 
 // ==========================================
 // Guard: Force Password Change before Accessing Courses
