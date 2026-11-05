@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { authService } from '../src/services/auth.service.js';
 import { prisma } from '../src/lib/prisma.js';
+import { config } from '../src/config/env.js';
 import { createApp } from '../src/app.js';
 import http from 'http';
 import { Role } from '@academy/shared';
@@ -14,6 +15,9 @@ describe('Authentication Flow & Service Test Suite', () => {
   let adminUserId: string;
 
   beforeAll(async () => {
+    // These suites cover password/lockout/provisioning logic; OTP and device rules are in otp-device.test.ts
+    config.security.requireOtpNewDevice = false;
+    config.security.requireOtpRegistration = false;
     const app = createApp();
     server = http.createServer(app);
     await new Promise<void>((resolve) => {

@@ -233,6 +233,9 @@ export class NotificationService {
     if ('resetToken' in sanitized) {
       sanitized.resetToken = '[REDACTED_TOKEN]';
     }
+    if ('code' in sanitized) {
+      sanitized.code = '[REDACTED_OTP]';
+    }
     return sanitized;
   }
 

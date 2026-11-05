@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '../src/lib/prisma.js';
+import { config } from '../src/config/env.js';
 import { authService } from '../src/services/auth.service.js';
 import { Role, UserStatus } from '@academy/shared';
 import bcrypt from 'bcryptjs';
@@ -12,6 +13,9 @@ describe('Student Authentication, Lockout, and Password Reset Flow', { timeout: 
   const phone = `+91998877${String(Date.now()).slice(-4)}`;
 
   beforeAll(async () => {
+    // These suites cover password/lockout/provisioning logic; OTP and device rules are in otp-device.test.ts
+    config.security.requireOtpNewDevice = false;
+    config.security.requireOtpRegistration = false;
     const passwordHash = await bcrypt.hash(rawPassword, 10);
     studentId = `ADS-2026-${String(Date.now()).slice(-6)}`;
 

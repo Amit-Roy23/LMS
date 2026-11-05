@@ -2,15 +2,36 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserSummary, Role } from '@academy/shared';
-import { apiClient } from '../lib/api';
+import { apiClient, SESSION_REVOKED_EVENT } from '../lib/api';
 import { useRouter } from 'next/navigation';
 import { DemoAccountKey, getDemoAccount } from '../lib/demo-accounts';
+
+/** OTP challenge returned by the API (new device sign-in, registration, password reset, etc.). */
+export interface OtpChallenge {
+  challengeId: string;
+  channel: 'SMS' | 'WHATSAPP' | 'EMAIL';
+  maskedTarget: string;
+  expiresAt: string;
+  /** Present only in demo mode, when no SMS gateway is configured. */
+  devCode?: string;
+}
+
+/** Result of a sign-in attempt: either signed in, or an OTP is needed for this new device. */
+export type LoginOutcome = { otpRequired: false; signedOut?: string[] } | ({ otpRequired: true } & OtpChallenge);
 
 interface AuthContextType {
   user: UserSummary | null;
   isLoading: boolean;
-  login: (credentials: { email?: string; identifier?: string; password: string }) => Promise<void>;
-  register: (data: { name: string; email: string; password: string; role?: Role; phone?: string | null }) => Promise<void>;
+  login: (credentials: { email?: string; identifier?: string; password: string }) => Promise<LoginOutcome>;
+  verifyLoginOtp: (challengeId: string, code: string) => Promise<{ signedOut?: string[] }>;
+  register: (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string | null;
+    challengeId?: string;
+    otpCode?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   loginAsDemo: (role: DemoAccountKey) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -47,12 +68,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const login = async (credentials: { email?: string; identifier?: string; password: string }) => {
-    const res = await apiClient<{ user: UserSummary; accessToken: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+  // This device was signed out elsewhere (device limit or "sign out device"): return to sign-in
+  useEffect(() => {
+    const onRevoked = () => {
+      setUser(null);
+      router.push('/login?reason=signed-out');
+    };
+    window.addEventListener(SESSION_REVOKED_EVENT, onRevoked);
+    return () => window.removeEventListener(SESSION_REVOKED_EVENT, onRevoked);
+  }, [router]);
 
+  const completeSignIn = (res: { user: UserSummary; accessToken: string }) => {
     if (res?.accessToken) {
       localStorage.setItem('accessToken', res.accessToken);
     }
@@ -68,14 +94,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const redirect = safeRedirect();
     if (redirect) {
       router.push(redirect);
-    } else if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR) {
+    } else if (res.user.role === Role.ADMIN || res.user.role === Role.INSTRUCTOR || res.user.role === Role.STAFF) {
       router.push('/admin/dashboard');
     } else {
       router.push('/student/dashboard');
     }
   };
 
-  const register = async (data: { name: string; email: string; password: string; role?: Role; phone?: string | null }) => {
+  const login = async (credentials: { email?: string; identifier?: string; password: string }): Promise<LoginOutcome> => {
+    const res = await apiClient<any>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    });
+    if (res?.otpRequired) {
+      return res as LoginOutcome;
+    }
+    completeSignIn(res);
+    return { otpRequired: false, signedOut: res.signedOut };
+  };
+
+  const verifyLoginOtp = async (challengeId: string, code: string) => {
+    const res = await apiClient<any>('/auth/login/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ challengeId, code }),
+    });
+    completeSignIn(res);
+    return { signedOut: res.signedOut };
+  };
+
+  const register = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string | null;
+    challengeId?: string;
+    otpCode?: string;
+  }) => {
     const res = await apiClient<{ user: UserSummary; accessToken: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -122,6 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading,
         login,
+        verifyLoginOtp,
         register,
         logout,
         loginAsDemo,

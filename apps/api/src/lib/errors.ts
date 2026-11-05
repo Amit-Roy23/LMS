@@ -64,3 +64,10 @@ export class LessonAccessDeniedError extends AppError {
   }
 }
 
+
+export class TooManyRequestsError extends AppError {
+  constructor(message = 'Too many requests. Please wait and try again.', details?: any) {
+    super(message, 429, 'TOO_MANY_REQUESTS', details);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}

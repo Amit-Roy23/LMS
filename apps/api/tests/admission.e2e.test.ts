@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '../src/lib/prisma.js';
+import { config } from '../src/config/env.js';
 import { paymentService } from '../src/services/payment/payment.service.js';
 import { provisioningService } from '../src/services/provisioning.service.js';
 import { authService } from '../src/services/auth.service.js';
@@ -16,6 +17,9 @@ describe('End-to-End Admission, Provisioning, Login & LMS Gating Flow', { timeou
   const initialNewPassword = 'E2EPermanentPassword@123';
 
   beforeAll(async () => {
+    // These suites cover password/lockout/provisioning logic; OTP and device rules are in otp-device.test.ts
+    config.security.requireOtpNewDevice = false;
+    config.security.requireOtpRegistration = false;
     course = await prisma.course.findUnique({
       where: { slug: 'fullstack-ai-engineering' },
       include: { modules: true },

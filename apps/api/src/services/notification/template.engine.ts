@@ -48,6 +48,74 @@ export interface DefaultNotificationTemplate {
 }
 
 export const SEED_TEMPLATES: DefaultNotificationTemplate[] = [
+  // One-time passcodes (registration, new device, password reset, mobile change, admin confirmation)
+  {
+    key: 'otp_code',
+    channel: 'SMS',
+    locale: 'en',
+    body: '{{code}} is your ADSIGN Skill Academy code to {{purposeLabel}}. It expires in {{minutes}} minutes. Never share this code.',
+  },
+  {
+    key: 'otp_code',
+    channel: 'WHATSAPP',
+    locale: 'en',
+    body: '{{code}} is your ADSIGN Skill Academy code to {{purposeLabel}}. It expires in {{minutes}} minutes. Never share this code.',
+  },
+  {
+    key: 'otp_code',
+    channel: 'EMAIL',
+    locale: 'en',
+    subject: 'Your ADSIGN verification code: {{code}}',
+    body: `<p>Hello,</p>
+<p>Use this code to {{purposeLabel}}:</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:6px;color:#0063AD">{{code}}</p>
+<p>The code expires in {{minutes}} minutes. If you did not request it, you can ignore this email; nobody can sign in without the code.</p>
+<p>ADSIGN Skill Academy</p>`,
+  },
+  // New website enquiry alert for the admissions team
+  {
+    key: 'inquiry_alert',
+    channel: 'EMAIL',
+    locale: 'en',
+    subject: 'New enquiry from {{name}}{{courseSuffix}}',
+    body: `<h3>New website enquiry</h3>
+<p><strong>Name:</strong> {{name}}<br/>
+<strong>Phone:</strong> {{phone}}<br/>
+<strong>Email:</strong> {{email}}<br/>
+<strong>Course:</strong> {{courseTitle}}<br/>
+<strong>Source:</strong> {{source}}</p>
+<p><strong>Message:</strong><br/>{{message}}</p>
+<p><a href="{{inboxUrl}}">Open the enquiry inbox</a></p>`,
+  },
+  {
+    key: 'inquiry_alert',
+    channel: 'WHATSAPP',
+    locale: 'en',
+    body: 'New ADSIGN enquiry: {{name}} ({{phone}}) about {{courseTitle}}. "{{messageShort}}" Open: {{inboxUrl}}',
+  },
+  // GST invoice issued after a successful payment
+  {
+    key: 'invoice_issued',
+    channel: 'EMAIL',
+    locale: 'en',
+    subject: 'Tax invoice {{invoiceNumber}} - {{courseTitle}}',
+    body: `<p>Dear {{studentName}},</p>
+<p>Thank you for your payment. Your GST tax invoice <strong>{{invoiceNumber}}</strong> for <strong>{{courseTitle}}</strong> (total {{total}}) is ready.</p>
+<p><a href="{{downloadUrl}}">Download invoice (PDF)</a></p>
+<p>You can also download it any time from your student dashboard under Receipts &amp; invoices.</p>
+<p>ADSIGN Skill Academy</p>`,
+  },
+  // Mobile number change decision
+  {
+    key: 'phone_change_decision',
+    channel: 'EMAIL',
+    locale: 'en',
+    subject: 'Your mobile number change request was {{decision}}',
+    body: `<p>Dear {{studentName}},</p>
+<p>Your request to change your registered mobile number to <strong>{{newPhone}}</strong> was <strong>{{decision}}</strong> by the academy.</p>
+<p>{{note}}</p>
+<p>ADSIGN Skill Academy</p>`,
+  },
   // 1. Registration Confirmation (English)
   {
     key: 'registration_confirmation',

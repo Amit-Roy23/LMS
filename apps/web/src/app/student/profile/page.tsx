@@ -10,14 +10,14 @@ import { Badge } from '../../../components/ui/badge';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 import { KeyRound, ShieldCheck, CheckCircle2, User, Phone, MessageSquare, MapPin, GraduationCap } from 'lucide-react';
-import { formatDate } from '../../../lib/utils';
+import { PhoneChangeCard } from '../../../components/account/phone-change-card';
+import { DevicesCard } from '../../../components/account/devices-card';
 
 export default function StudentProfilePage() {
   const { user, refreshUser } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [name, setName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || user?.studentProfile?.phone || '');
   const [whatsappNumber, setWhatsappNumber] = useState(user?.studentProfile?.whatsappNumber || '');
   const [city, setCity] = useState(user?.studentProfile?.city || '');
   const [education, setEducation] = useState(user?.studentProfile?.education || '');
@@ -27,7 +27,6 @@ export default function StudentProfilePage() {
   useEffect(() => {
     if (user) {
       setName(user.name || '');
-      setPhone(user.phone || user.studentProfile?.phone || '');
       setWhatsappNumber(user.studentProfile?.whatsappNumber || '');
       setCity(user.studentProfile?.city || '');
       setEducation(user.studentProfile?.education || '');
@@ -43,7 +42,6 @@ export default function StudentProfilePage() {
         method: 'PUT',
         body: JSON.stringify({
           name,
-          phone,
           whatsappNumber,
           city,
           education,
@@ -126,10 +124,10 @@ export default function StudentProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
-                label="Primary Phone Number"
-                placeholder="+91 98765 43210"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                label="Registered mobile (change below)"
+                value={user?.phone || ''}
+                readOnly
+                className="opacity-75 bg-cream font-code"
               />
 
               <Input
@@ -175,6 +173,11 @@ export default function StudentProfilePage() {
             </Button>
           </form>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PhoneChangeCard currentPhone={user?.phone} onChanged={refreshUser} />
+        <DevicesCard />
       </div>
     </div>
   );

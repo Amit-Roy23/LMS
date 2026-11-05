@@ -1438,6 +1438,17 @@ async function main() {
   // 14. Demo catalogue: more courses, instructors, rendered lesson videos and learners
   await seedDemoCatalog(prisma, { defaultInstructorId: instructor.id, adminId: admin.id });
 
+  // Seeded accounts are demo personas: they skip new-device OTP and device limits so the
+  // one-click demo logins keep working. Phone numbers are stored in canonical +91XXXXXXXXXX form.
+  const seededUsers = await prisma.user.findMany({ select: { id: true, phone: true } });
+  for (const u of seededUsers) {
+    const phone = u.phone ? '+' + u.phone.replace(/\D/g, '') : null;
+    await prisma.user.update({ where: { id: u.id }, data: { isDemo: true, phone } });
+  }
+  await prisma.$executeRawUnsafe(
+    `UPDATE "StudentProfile" SET phone = '+' || regexp_replace(phone, '\\D', '', 'g') WHERE phone IS NOT NULL`
+  );
+
   console.log('🎉 Comprehensive database seeding completed successfully!');
 }
 

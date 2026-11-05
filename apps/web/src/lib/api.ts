@@ -1,4 +1,5 @@
 import { ApiResponse } from '@academy/shared';
+import { getDeviceId } from './device';
 
 export function getApiBase(): string {
   // In the browser, always use relative path unless an explicit external API host is configured
@@ -37,31 +38,77 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiClient<T = any>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const baseUrl = getApiBase();
-  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+/** Fired on window when the API says this device was signed out (device limit, remote sign-out). */
+export const SESSION_REVOKED_EVENT = 'adsign:session-revoked';
 
-  const headers = new Headers(options.headers || {});
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+let refreshing: Promise<boolean> | null = null;
+
+/** Exchanges the httpOnly refresh cookie for a new access token (one request at a time). */
+export function refreshAccessToken(): Promise<boolean> {
+  if (!refreshing) {
+    refreshing = fetch(`${getApiBase()}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'X-Device-Id': getDeviceId() },
+    })
+      .then(async (r) => {
+        const body = await r.json().catch(() => null);
+        if (!r.ok || !body?.success || !body.data?.accessToken) return false;
+        localStorage.setItem('accessToken', body.data.accessToken);
+        return true;
+      })
+      .catch(() => false)
+      .finally(() => {
+        setTimeout(() => (refreshing = null), 0);
+      });
+  }
+  return refreshing;
+}
+
+/** Headers every API call carries: JSON content type, bearer token and this browser's device id. */
+export function authHeaders(init?: HeadersInit, body?: BodyInit | null): Headers {
+  const headers = new Headers(init || {});
+  if (!headers.has('Content-Type') && !(body instanceof FormData)) {
     headers.set('Content-Type', 'application/json');
   }
-
-  // Check if token exists in localStorage for SSR fallback
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('accessToken');
     if (token && !headers.has('Authorization')) {
       headers.set('Authorization', `Bearer ${token}`);
     }
+    const deviceId = getDeviceId();
+    if (deviceId) headers.set('X-Device-Id', deviceId);
   }
+  return headers;
+}
+
+export async function apiClient<T = any>(
+  endpoint: string,
+  options: RequestInit = {},
+  retried = false
+): Promise<T> {
+  const baseUrl = getApiBase();
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
+  const headers = authHeaders(options.headers, options.body);
 
   const response = await fetch(url, {
     ...options,
     headers,
     credentials: 'include', // sends cookies
   });
+
+  if (response.status === 401 && typeof window !== 'undefined' && !endpoint.startsWith('/auth/refresh')) {
+    const peek = await response.clone().json().catch(() => null);
+    const code = peek?.error?.code;
+    if (code === 'SESSION_REVOKED') {
+      localStorage.removeItem('accessToken');
+      window.dispatchEvent(new CustomEvent(SESSION_REVOKED_EVENT, { detail: peek?.error?.message }));
+    } else if (!retried && (code === 'TOKEN_EXPIRED' || code === 'UNAUTHORIZED') && localStorage.getItem('accessToken')) {
+      // Access tokens are short-lived; renew silently once and retry the request
+      if (await refreshAccessToken()) return apiClient<T>(endpoint, options, true);
+    }
+  }
 
   const data: ApiResponse<T> = await response.json().catch(() => ({
     success: false,
@@ -83,11 +130,8 @@ export async function apiClient<T = any>(
 /** Fetch a plain-text response (e.g. a CSV download) with the same auth as apiClient. */
 export async function apiText(endpoint: string): Promise<string> {
   const url = endpoint.startsWith('http') ? endpoint : `${getApiBase()}${endpoint}`;
-  const headers = new Headers();
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) headers.set('Authorization', `Bearer ${token}`);
-  }
+  const headers = authHeaders();
+  headers.delete('Content-Type');
 
   const response = await fetch(url, { headers, credentials: 'include' });
   if (!response.ok) {

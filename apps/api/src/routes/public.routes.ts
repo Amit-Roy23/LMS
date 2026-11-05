@@ -32,7 +32,11 @@ router.get('/health', (req, res) => {
 });
 
 // Authentication
+router.post('/auth/register/request-otp', authRateLimiter, authController.requestRegistrationOtp);
 router.post('/auth/register', authRateLimiter, validateBody(registerSchema), authController.register);
+router.post('/auth/login/verify-otp', authRateLimiter, authController.verifyLoginOtp);
+router.post('/auth/forgot-password/otp', authRateLimiter, authController.forgotPasswordOtp);
+router.post('/auth/reset-password/otp', authRateLimiter, authController.resetPasswordOtp);
 router.post('/auth/login', authRateLimiter, validateBody(loginSchema), authController.login);
 router.post('/auth/forgot-password', authRateLimiter, validateBody(forgotPasswordSchema), authController.forgotPassword);
 router.post('/auth/reset-password', authRateLimiter, validateBody(resetPasswordSchema), authController.resetPassword);

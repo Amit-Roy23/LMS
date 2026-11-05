@@ -43,6 +43,35 @@ export const config = {
     },
   },
   redisUrl: process.env.REDIS_URL || '',
+  security: {
+    /** Secret for OTP hashes, step-up tokens and signed video tokens. */
+    signingSecret:
+      process.env.APP_SIGNING_SECRET || process.env.JWT_SECRET || 'academy_signing_secret_development_key_24680',
+    /**
+     * When no real SMS gateway is configured the OTP is also returned to the browser so the
+     * demo can be tried end to end. Set OTP_DEMO_MODE=false in production once SMS is live.
+     */
+    otpDemoMode:
+      process.env.OTP_DEMO_MODE !== undefined
+        ? process.env.OTP_DEMO_MODE === 'true'
+        : (process.env.SMS_PROVIDER || 'LOG').toUpperCase() === 'LOG',
+    /** Ask for an OTP when an account signs in from a browser/phone it has not used before. */
+    requireOtpNewDevice: process.env.REQUIRE_OTP_NEW_DEVICE !== 'false',
+    /** Ask new students to verify their mobile number with an OTP when registering. */
+    requireOtpRegistration: process.env.REQUIRE_OTP_REGISTRATION !== 'false',
+    /** Channel used for OTPs to a phone number: SMS (default) or WHATSAPP. */
+    otpPhoneChannel: (process.env.OTP_PHONE_CHANNEL || 'SMS').toUpperCase(),
+    /** Verified devices a student may keep signed in at once, per kind. */
+    deviceLimitMobile: parseInt(process.env.DEVICE_LIMIT_MOBILE || '1', 10),
+    deviceLimitDesktop: parseInt(process.env.DEVICE_LIMIT_DESKTOP || '1', 10),
+    /** Maximum number of main administrators. */
+    maxAdmins: parseInt(process.env.MAX_ADMINS || '3', 10),
+    /** Comma-separated origins allowed to play protected video (besides CLIENT_URL). */
+    allowedVideoOrigins: (process.env.ALLOWED_VIDEO_ORIGINS || '')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  },
   notifications: {
     channelsRegistration: (process.env.NOTIFY_CHANNELS_REGISTRATION || 'email,whatsapp,sms')
       .split(',')
