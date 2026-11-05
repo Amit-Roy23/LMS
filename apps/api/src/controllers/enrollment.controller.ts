@@ -30,9 +30,12 @@ export class EnrollmentController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       const skip = (page - 1) * limit;
+      // Instructors see enrolments in their own courses only
+      const where = req.user!.role === 'INSTRUCTOR' ? { course: { instructorId: req.user!.userId } } : {};
 
       const [items, total] = await Promise.all([
         prisma.enrollment.findMany({
+          where,
           skip,
           take: limit,
           orderBy: { enrolledAt: 'desc' },
@@ -42,7 +45,7 @@ export class EnrollmentController {
             payment: true,
           },
         }),
-        prisma.enrollment.count(),
+        prisma.enrollment.count({ where }),
       ]);
 
       return sendPaginated(res, items, total, page, limit);

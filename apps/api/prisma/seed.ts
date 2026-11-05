@@ -103,6 +103,8 @@ async function main() {
       role: Role.ADMIN,
       phone: '+91 98765 43210',
       status: UserStatus.ACTIVE,
+      // Demo security PIN for sensitive actions (prices, deletions, roles); OTP is shown on screen in demo mode
+      pinHash: await bcrypt.hash('2580', 10),
     },
   });
 
@@ -113,6 +115,18 @@ async function main() {
       passwordHash: instructorPassword,
       role: Role.INSTRUCTOR,
       phone: '+91 98765 43211',
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  // Office staff: day-to-day admissions and content work, no deletes/prices/roles
+  await prisma.user.create({
+    data: {
+      email: 'staff@creativeit.academy',
+      name: 'Meera Das (Office Staff)',
+      passwordHash: await bcrypt.hash('Staff@123', 10),
+      role: Role.STAFF,
+      phone: '+91 98765 43218',
       status: UserStatus.ACTIVE,
     },
   });

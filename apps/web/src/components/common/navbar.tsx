@@ -70,7 +70,7 @@ export function Navbar() {
     };
   }, [mobileMenuOpen]);
 
-  const isStaff = user && (user.role === Role.ADMIN || user.role === Role.INSTRUCTOR);
+  const isStaff = user && (user.role === Role.ADMIN || user.role === Role.INSTRUCTOR || user.role === Role.STAFF);
   const dashboardHref = isStaff ? '/admin/dashboard' : '/student/dashboard';
 
   const demoLogin = async (key: DemoAccountKey) => {

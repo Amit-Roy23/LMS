@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { adminStudentService } from '../services/admin-student.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 import { prisma } from '../lib/prisma.js';
+import { recordAudit, changedFields } from '../lib/audit.js';
+import { BadRequestError, NotFoundError } from '../lib/errors.js';
 
 export class AdminStudentController {
   /**
@@ -79,6 +81,33 @@ export class AdminStudentController {
         data: req.body,
       });
       return sendSuccess(res, inquiry, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** Update an enquiry's follow-up status, notes or owner. */
+  async updateInquiry(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = String(req.params.id);
+      const { status, notes, assignedToId } = req.body || {};
+      if (status && !['NEW', 'CONTACTED', 'CONVERTED', 'CLOSED'].includes(status)) throw new BadRequestError('Unknown status');
+      const existing = await prisma.inquiry.findUnique({ where: { id } });
+      if (!existing) throw new NotFoundError('Enquiry not found');
+      const patch: any = {};
+      if (status !== undefined) patch.status = status;
+      if (notes !== undefined) patch.notes = notes ? String(notes).slice(0, 2000) : null;
+      if (assignedToId !== undefined) patch.assignedToId = assignedToId || null;
+      const inquiry = await prisma.inquiry.update({
+        where: { id },
+        data: patch,
+        include: { course: { select: { id: true, title: true } }, assignedTo: { select: { id: true, name: true } } },
+      });
+      const diff = changedFields(existing, patch);
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'INQUIRY_UPDATED', entityType: 'Inquiry', entityId: id, ...diff, details: { name: existing.name } });
+      }
+      return sendSuccess(res, inquiry);
     } catch (err) {
       next(err);
     }

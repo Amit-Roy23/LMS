@@ -65,6 +65,34 @@ export function refreshAccessToken(): Promise<boolean> {
   return refreshing;
 }
 
+const STEP_UP_KEY = 'adsign.stepUp';
+type StepUpHandler = (code: 'STEP_UP_REQUIRED' | 'PIN_NOT_SET', message: string) => Promise<string | null>;
+let stepUpHandler: StepUpHandler | null = null;
+
+/** The admin console registers a PIN + OTP dialog here; protected requests wait for it and retry. */
+export function setStepUpHandler(handler: StepUpHandler | null) {
+  stepUpHandler = handler;
+}
+
+export function storeStepUpToken(token: string, expiresAt: string) {
+  try {
+    sessionStorage.setItem(STEP_UP_KEY, JSON.stringify({ token, expiresAt }));
+  } catch {
+    /* ignore */
+  }
+}
+
+function currentStepUpToken(): string | null {
+  try {
+    const raw = sessionStorage.getItem(STEP_UP_KEY);
+    if (!raw) return null;
+    const { token, expiresAt } = JSON.parse(raw);
+    return new Date(expiresAt).getTime() - Date.now() > 15_000 ? token : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Headers every API call carries: JSON content type, bearer token and this browser's device id. */
 export function authHeaders(init?: HeadersInit, body?: BodyInit | null): Headers {
   const headers = new Headers(init || {});
@@ -78,6 +106,8 @@ export function authHeaders(init?: HeadersInit, body?: BodyInit | null): Headers
     }
     const deviceId = getDeviceId();
     if (deviceId) headers.set('X-Device-Id', deviceId);
+    const stepUp = currentStepUpToken();
+    if (stepUp && !headers.has('X-Step-Up-Token')) headers.set('X-Step-Up-Token', stepUp);
   }
   return headers;
 }
@@ -117,6 +147,17 @@ export async function apiClient<T = any>(
       message: `Unexpected response from API (HTTP ${response.status}) at ${url}`,
     },
   }));
+
+  // Sensitive admin action: ask for PIN + OTP once, then retry with the step-up token
+  const code = data.error?.code;
+  if (response.status === 403 && (code === 'STEP_UP_REQUIRED' || code === 'PIN_NOT_SET') && stepUpHandler && !retried) {
+    const token = await stepUpHandler(code, data.error?.message || '');
+    if (token) {
+      const retryHeaders = new Headers(options.headers || {});
+      retryHeaders.set('X-Step-Up-Token', token);
+      return apiClient<T>(endpoint, { ...options, headers: retryHeaders }, true);
+    }
+  }
 
   if (!response.ok || !data.success) {
     const errorMsg = data.error?.message || response.statusText || 'An unexpected error occurred';

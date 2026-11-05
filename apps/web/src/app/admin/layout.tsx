@@ -16,7 +16,21 @@ import {
   ShieldAlert,
   MessageSquareText,
   Eye,
+  Inbox,
+  History,
+  ShieldCheck,
+  BadgeCheck,
+  PlayCircle,
+  Receipt,
 } from 'lucide-react';
+import { StepUpProvider } from '../../components/admin/step-up-provider';
+
+const CONSOLE_ROLES: string[] = [Role.ADMIN, Role.STAFF, Role.INSTRUCTOR];
+const PORTAL_LABELS: Record<string, string> = {
+  ADMIN: 'Admin Console',
+  STAFF: 'Staff Console',
+  INSTRUCTOR: 'Instructor Console',
+};
 import { PortalShell, PortalLoading, PortalNavItem } from '../../components/layout/portal-shell';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isLoading) {
       if (!user) {
         router.push('/login');
-      } else if (user.role !== Role.ADMIN && user.role !== Role.INSTRUCTOR) {
+      } else if (!CONSOLE_ROLES.includes(user.role)) {
         router.push('/student/dashboard');
       }
     }
@@ -36,27 +50,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isLoading) return <PortalLoading />;
 
-  if (!user || (user.role !== Role.ADMIN && user.role !== Role.INSTRUCTOR)) {
+  if (!user || !CONSOLE_ROLES.includes(user.role)) {
     return null;
   }
 
+  const role = user.role;
+  const is = (...roles: string[]) => roles.includes(role);
+  // Each role sees only the sections it can use
   const navItems: PortalNavItem[] = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/courses', label: 'Courses', icon: BookOpen },
-    { href: '/admin/assessments', label: 'Assessments', icon: ClipboardCheck },
-    { href: '/admin/reviews', label: 'Review Queue', icon: MessageSquareText },
-    { href: '/admin/students', label: 'Students', icon: Users },
-    { href: '/admin/enrollments', label: 'Enrollments', icon: CreditCard },
-    { href: '/admin/notifications', label: 'Notifications', icon: ShieldAlert },
-    { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
-    ...(user.role === Role.ADMIN
-      ? [{ href: '/admin/users', label: 'Users', icon: UserCheck }]
+    { href: '/admin/courses', label: is(Role.INSTRUCTOR) ? 'My Courses' : 'Courses', icon: BookOpen },
+    ...(is(Role.ADMIN, Role.INSTRUCTOR)
+      ? [
+          { href: '/admin/assessments', label: 'Assessments', icon: ClipboardCheck },
+          { href: '/admin/reviews', label: 'Review Queue', icon: MessageSquareText },
+        ]
       : []),
+    { href: '/admin/students', label: is(Role.INSTRUCTOR) ? 'My Students' : 'Students', icon: Users },
+    { href: '/admin/enrollments', label: 'Enrollments', icon: CreditCard },
+    ...(is(Role.ADMIN, Role.STAFF)
+      ? [
+          { href: '/admin/enquiries', label: 'Enquiries', icon: Inbox },
+          { href: '/admin/approvals', label: 'Approvals', icon: BadgeCheck },
+          { href: '/admin/invoices', label: 'Payments & Invoices', icon: Receipt },
+          { href: '/admin/notifications', label: 'Notifications', icon: ShieldAlert },
+        ]
+      : []),
+    ...(is(Role.ADMIN, Role.STAFF, Role.INSTRUCTOR) ? [{ href: '/admin/video-activity', label: 'Video Activity', icon: PlayCircle }] : []),
+    { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
+    ...(is(Role.ADMIN)
+      ? [
+          { href: '/admin/activity', label: 'Activity Log', icon: History },
+          { href: '/admin/users', label: 'Users & Roles', icon: UserCheck },
+        ]
+      : []),
+    { href: '/admin/security', label: 'My Security', icon: ShieldCheck },
   ];
 
   return (
     <PortalShell
-      portalLabel={user.role === Role.ADMIN ? 'Admin Console' : 'Instructor Console'}
+      portalLabel={PORTAL_LABELS[role] || 'Console'}
       navItems={navItems}
       user={user}
       onLogout={logout}
@@ -69,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Link>
       }
     >
-      {children}
+      <StepUpProvider>{children}</StepUpProvider>
     </PortalShell>
   );
 }

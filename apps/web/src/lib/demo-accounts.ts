@@ -4,6 +4,7 @@
  */
 export type DemoAccountKey =
   | 'admin'
+  | 'staff'
   | 'instructor'
   | 'designer'
   | 'student1'
@@ -27,11 +28,20 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     key: 'admin',
     label: 'Administrator',
-    persona: 'Revenue, users, reports & full control',
+    persona: 'Full control · security PIN 2580 for protected actions',
     email: 'admin@creativeit.academy',
     password: 'Admin@123',
     group: 'Staff',
     tone: 'from-indigo-500 to-violet-500',
+  },
+  {
+    key: 'staff',
+    label: 'Office Staff',
+    persona: 'Admissions, enquiries & content; no deletes or prices',
+    email: 'staff@creativeit.academy',
+    password: 'Staff@123',
+    group: 'Staff',
+    tone: 'from-emerald-500 to-sky-500',
   },
   {
     key: 'instructor',
