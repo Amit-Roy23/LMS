@@ -34,6 +34,15 @@ export function errorHandler(
     statusCode = 404;
     code = 'NOT_FOUND';
     message = 'Requested record was not found.';
+  } else if (err?.code === 'P2021' || err?.code === 'P2022') {
+    // Table or column missing: the code was deployed but the database was not updated
+    logger.error({ prismaCode: err.code, meta: err.meta, url: req.originalUrl }, 'Database schema is out of date');
+    return sendError(
+      res,
+      'The database needs an update after the latest release. An administrator must run "npm run db:push" (and "npm run db:seed" for the demo data).',
+      503,
+      'DB_SCHEMA_OUTDATED'
+    );
   }
 
   // 3. Handle Client / Domain Errors (4xx)
