@@ -22,17 +22,18 @@ interface Device {
 }
 
 /** Devices signed in to this account, with "sign out" for each (students: 1 phone + 1 computer). */
-export function DevicesCard({ showLimit = true }: { showLimit?: boolean }) {
+export function DevicesCard({ showLimit = true, userId }: { showLimit?: boolean; /** Support view of a student's devices */ userId?: string }) {
   const { success, error: toastError } = useToast();
   const [devices, setDevices] = useState<Device[]>([]);
+  const base = userId ? `/admin/users/${userId}/devices` : '/auth/devices';
   const load = useCallback(() => {
-    apiClient<Device[]>('/auth/devices').then(setDevices).catch(() => undefined);
-  }, []);
+    apiClient<Device[]>(base).then(setDevices).catch(() => undefined);
+  }, [base]);
   useEffect(load, [load]);
 
   const signOut = async (d: Device) => {
     try {
-      await apiClient(`/auth/devices/${d.id}`, { method: 'DELETE' });
+      await apiClient(`${base}/${d.id}`, { method: 'DELETE' });
       success('Device signed out', d.label);
       load();
     } catch (err: any) {

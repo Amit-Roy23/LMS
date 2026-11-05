@@ -232,7 +232,7 @@ router.get('/admin/video-activity', async (req: Request, res: Response, next: Ne
 router.post('/admin/certificates/:certificateId/revoke', requireStepUp('revoke a certificate'), certificateController.revokeCertificate);
 router.get('/admin/users', authorizeRoles(ADMIN), userController.listUsers);
 router.post('/admin/users', requireStepUp('create a staff, instructor or admin account'), consoleUserController.create);
-router.get('/admin/users/:id', authorizeRoles(ADMIN), userController.getUser);
+router.get('/admin/users/:id', ownStudent('id'), userController.getUser);
 router.put('/admin/users/:id/status', requireStepUp('suspend or reactivate an account'), userController.updateUserStatus);
 router.put('/admin/users/:id/role', requireStepUp('change a role'), consoleUserController.updateRole);
 

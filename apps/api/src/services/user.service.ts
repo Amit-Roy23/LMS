@@ -57,6 +57,8 @@ export class UserService {
   async getUserById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
+      // Never return password or PIN hashes
+      omit: { passwordHash: true, pinHash: true },
       include: {
         enrollments: {
           include: {

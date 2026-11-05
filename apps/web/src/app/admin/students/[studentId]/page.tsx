@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { DevicesCard } from '../../../../components/account/devices-card';
 import { apiClient } from '../../../../lib/api';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../../components/ui/card';
 import { Badge } from '../../../../components/ui/badge';
@@ -122,6 +123,9 @@ export default function AdminStudentDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* Support: sign out a lost or shared device */}
+      <DevicesCard userId={studentId} showLimit={false} />
     </div>
   );
 }
