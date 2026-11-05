@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { useAuth } from '../../providers/auth-provider';
+import { useAuth, OtpChallenge } from '../../providers/auth-provider';
+import { OtpStep } from '../../components/auth/otp-step';
 import { useToast } from '../../providers/toast-provider';
 import { DEMO_ACCOUNTS, DemoAccountKey } from '../../lib/demo-accounts';
 import {
@@ -26,8 +27,22 @@ const HIGHLIGHTS = [
 ];
 
 export default function LoginPage() {
-  const { login, loginAsDemo } = useAuth();
-  const { error: toastError, success } = useToast();
+  const { login, loginAsDemo, verifyLoginOtp } = useAuth();
+  const { error: toastError, success, info } = useToast();
+  const [otp, setOtp] = useState<OtpChallenge | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('reason') === 'signed-out') {
+      setNotice('You were signed out on this device because your account signed in somewhere else or the session was ended. Please sign in again.');
+    }
+  }, []);
+
+  const announceSignedOut = (signedOut?: string[]) => {
+    if (signedOut && signedOut.length) {
+      info('Device limit', `For your security, ${signedOut.join(', ')} was signed out.`);
+    }
+  };
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -43,7 +58,12 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
-      await login({ identifier, password });
+      const outcome = await login({ identifier, password });
+      if (outcome.otpRequired) {
+        setOtp(outcome);
+        return;
+      }
+      announceSignedOut(outcome.signedOut);
       success('Welcome Back!', 'Logged in successfully.');
     } catch (err: any) {
       toastError('Login Failed', err.message || 'Invalid credentials.');
@@ -119,6 +139,31 @@ export default function LoginPage() {
             <p className="text-slate-400">Sign in to continue learning, or try a demo account below.</p>
           </div>
 
+          {notice && (
+            <div className="rounded-xl border border-amber-800 bg-amber-50 px-4 py-3 text-sm text-amber-200" role="status">
+              {notice}
+            </div>
+          )}
+
+          {otp ? (
+            <OtpStep
+              challenge={otp}
+              title="Verify this device"
+              description="This browser hasn't been used with your account before. We sent a 6-digit code"
+              submitLabel="Verify & sign in"
+              onVerify={async (code) => {
+                const res = await verifyLoginOtp(otp.challengeId, code);
+                announceSignedOut(res.signedOut);
+                success('Welcome Back!', 'Device verified and signed in.');
+              }}
+              onResend={async () => {
+                const again = await login({ identifier, password });
+                if (!again.otpRequired) throw new Error('Already signed in');
+                return again;
+              }}
+              onCancel={() => setOtp(null)}
+            />
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Student ID, email or phone"
@@ -152,6 +197,7 @@ export default function LoginPage() {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
+          )}
 
           {/* Demo accounts */}
           <section className="space-y-4">

@@ -13,6 +13,7 @@ datasource db {
 enum Role {
   STUDENT
   INSTRUCTOR
+  STAFF
   ADMIN
 }
 
@@ -256,13 +257,17 @@ model User {
   name                String
   passwordHash        String
   role                Role        @default(STUDENT)
-  phone               String?
+  phone               String?     @unique
   avatar              String?
   status              UserStatus  @default(ACTIVE)
   mustChangePassword  Boolean     @default(false)
   failedLoginAttempts Int         @default(0)
   lockedUntil         DateTime?
   lastLoginAt         DateTime?
+  /// bcrypt hash of the admin security PIN (main admins only)
+  pinHash             String?
+  /// Seeded demo accounts skip new-device OTP and device limits so one-click demo logins keep working
+  isDemo              Boolean     @default(false)
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
   deletedAt           DateTime?
@@ -293,11 +298,19 @@ model User {
   lessonNotes              LessonNote[]
   lessonBookmarks          LessonBookmark[]
   feedbacks                Feedback[]
-  auditLogs                AuditLog[]
+  auditLogs                AuditLog[]               @relation("AuditActor")
+  revertedAuditLogs        AuditLog[]               @relation("AuditReverter")
+  devices                  UserDevice[]
+  otpChallenges            OtpChallenge[]
+  changeRequests           ChangeRequest[]          @relation("ChangeRequester")
+  reviewedChangeRequests   ChangeRequest[]          @relation("ChangeReviewer")
+  instructorProfile        InstructorProfile?
+  videoViews               VideoViewLog[]
+  streamSession            StreamSession?
+  invoices                 Invoice[]
 
   @@index([email])
   @@index([studentId])
-  @@index([phone])
   @@index([role])
   @@index([status])
 }
@@ -327,12 +340,15 @@ model RefreshToken {
   userId    String
   expiresAt DateTime
   revokedAt DateTime?
+  /// UserDevice this session belongs to (revoking the device revokes the session)
+  deviceSid String?
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([userId])
+  @@index([deviceSid])
 }
 
 model Course {
@@ -370,6 +386,8 @@ model Course {
   finalAssessment FinalAssessment?
   certificates    Certificate[]
   feedbacks       Feedback[]
+  invoices        Invoice[]
+  videoViews      VideoViewLog[]
 
   @@index([slug])
   @@index([status])
@@ -535,6 +553,8 @@ model Lesson {
   isPreview       Boolean       @default(false)
   resources       Json          @default("[]")
   liveSessionId   String?
+  /// AES-128 key (hex) for the encrypted HLS stream; never sent to the browser except via the key endpoint
+  hlsKeyHex       String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   deletedAt       DateTime?
@@ -678,6 +698,7 @@ model Payment {
   student     User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
   course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
+  invoice     Invoice?
 
   @@index([studentId])
   @@index([providerRef])
@@ -1195,17 +1216,183 @@ model Feedback {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  userId     String?
-  action     String
-  entityType String
-  entityId   String?
-  details    Json?
-  ipAddress  String?
-  createdAt  DateTime @default(now())
+  id           String    @id @default(uuid())
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  details      Json?
+  /// Snapshot of the changed fields before / after the action, used to undo staff mistakes
+  before       Json?
+  after        Json?
+  /// Role of the user at the time of the action
+  actorRole    String?
+  ipAddress    String?
+  revertedAt   DateTime?
+  revertedById String?
+  createdAt    DateTime  @default(now())
 
-  user User? @relation(fields: [userId], references: [id])
+  user       User? @relation("AuditActor", fields: [userId], references: [id])
+  revertedBy User? @relation("AuditReverter", fields: [revertedById], references: [id])
 
   @@index([action])
   @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+/// One-time passcodes for registration, new-device sign-in, password reset,
+/// mobile number changes and admin step-up confirmation.
+model OtpChallenge {
+  id          String              @id @default(uuid())
+  userId      String?
+  purpose     String
+  channel     NotificationChannel
+  target      String
+  codeHash    String
+  attempts    Int                 @default(0)
+  maxAttempts Int                 @default(5)
+  expiresAt   DateTime
+  verifiedAt  DateTime?
+  consumedAt  DateTime?
+  metadata    Json?
+  createdAt   DateTime            @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([target, purpose])
+  @@index([userId])
+}
+
+/// A browser/phone a user has verified. Students may keep a limited number per kind.
+model UserDevice {
+  id         String    @id @default(uuid())
+  userId     String
+  deviceId   String
+  kind       String
+  label      String
+  ipAddress  String?
+  trustedAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  revokedReason String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+}
+
+/// Profile changes that need admin approval (currently: mobile number).
+model ChangeRequest {
+  id           String    @id @default(uuid())
+  userId       String
+  type         String
+  oldValue     String?
+  newValue     String
+  reason       String?
+  status       String    @default("PENDING")
+  reviewNote   String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user       User  @relation("ChangeRequester", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("ChangeReviewer", fields: [reviewedById], references: [id])
+
+  @@index([status])
+  @@index([userId])
+}
+
+/// Public instructor profile shown on the website.
+model InstructorProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  slug            String   @unique
+  headline        String
+  bio             String
+  skills          String[] @default([])
+  experienceYears Int?
+  avatar          String?
+  socials         Json     @default("{}")
+  isPublic        Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// GST tax invoice issued for a completed payment.
+model Invoice {
+  id            String   @id @default(uuid())
+  invoiceNumber String   @unique
+  paymentId     String   @unique
+  studentId     String
+  courseId      String
+  financialYear String
+  issuedAt      DateTime @default(now())
+  buyerName     String
+  buyerEmail    String
+  buyerPhone    String?
+  buyerAddress  String?
+  buyerState    String?
+  buyerGstin    String?
+  sellerName    String
+  sellerGstin   String?
+  sellerAddress String?
+  sellerState   String
+  placeOfSupply String
+  sacCode       String
+  description   String
+  currency      String   @default("INR")
+  gstRate       Decimal  @db.Decimal(5, 2)
+  taxableAmount Decimal  @db.Decimal(12, 2)
+  cgstAmount    Decimal  @db.Decimal(12, 2)
+  sgstAmount    Decimal  @db.Decimal(12, 2)
+  igstAmount    Decimal  @db.Decimal(12, 2)
+  totalAmount   Decimal  @db.Decimal(12, 2)
+  emailedAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([issuedAt])
+}
+
+/// Who watched which lesson, from where and for how long.
+model VideoViewLog {
+  id             String   @id @default(uuid())
+  userId         String
+  lessonId       String
+  courseId       String
+  deviceSid      String?
+  deviceLabel    String?
+  ipAddress      String?
+  userAgent      String?
+  startedAt      DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
+  watchedSeconds Int      @default(0)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+  @@index([lessonId])
+  @@index([startedAt])
+}
+
+/// The single active video stream allowed per account.
+model StreamSession {
+  userId     String   @id
+  deviceSid  String
+  lessonId   String
+  viewLogId  String?
+  lastBeatAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,0 +1,38 @@
+{
+  "instructor@creativeit.academy": {
+    "slug": "alex-morgan",
+    "headline": "Senior Full-Stack Engineer · AI product builder",
+    "bio": "Alex has spent 12 years building web platforms for start-ups and enterprises, most recently shipping AI features used by millions. He teaches by building real products end to end: modern React, typed APIs, databases, and the AI tooling teams now expect.",
+    "skills": ["Next.js", "TypeScript", "Node.js", "PostgreSQL", "Python", "LLM apps"],
+    "experienceYears": 12,
+    "socials": { "linkedin": "https://www.linkedin.com/", "github": "https://github.com/" },
+    "displayOrder": 1
+  },
+  "priya.design@creativeit.academy": {
+    "slug": "priya-nair",
+    "headline": "Lead Product Designer · UX researcher",
+    "bio": "Priya leads product design for consumer apps and has mentored more than 300 designers. Her classes move from research and wireframes to polished, tested Figma prototypes, with honest portfolio feedback along the way.",
+    "skills": ["Figma", "UX research", "Design systems", "Prototyping", "Brand identity"],
+    "experienceYears": 9,
+    "socials": { "linkedin": "https://www.linkedin.com/", "behance": "https://www.behance.net/" },
+    "displayOrder": 2
+  },
+  "daniel.marketing@creativeit.academy": {
+    "slug": "daniel-brooks",
+    "headline": "Growth Marketing Lead · performance & analytics",
+    "bio": "Daniel has run paid, SEO and lifecycle campaigns for D2C and EdTech brands. He teaches marketing as a measurable system: research, content, ads, analytics and experiments you can show to an employer.",
+    "skills": ["SEO", "Meta & Google Ads", "Analytics", "Content strategy", "Email marketing"],
+    "experienceYears": 10,
+    "socials": { "linkedin": "https://www.linkedin.com/" },
+    "displayOrder": 3
+  },
+  "arjun.cloud@creativeit.academy": {
+    "slug": "arjun-mehta",
+    "headline": "Principal DevOps Engineer · cloud & security",
+    "bio": "Arjun designs cloud platforms and CI/CD for engineering teams, and teaches practical security alongside DevOps. Expect hands-on labs with Docker, Kubernetes, pipelines and monitoring.",
+    "skills": ["Docker", "Kubernetes", "AWS", "CI/CD", "Linux", "Security"],
+    "experienceYears": 11,
+    "socials": { "linkedin": "https://www.linkedin.com/", "github": "https://github.com/" },
+    "displayOrder": 4
+  }
+}

@@ -1,0 +1,9 @@
+# ADSIGN Skill Academy backups (installed to /etc/cron.d/adsign)
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Database every day at 02:30 IST (21:00 UTC)
+0 21 * * * adsign /srv/adsign/scripts/backup/backup.sh db >> /var/log/adsign/backup.log 2>&1
+# Uploaded files every Sunday at 03:30 IST
+0 22 * * 0 adsign /srv/adsign/scripts/backup/backup.sh files >> /var/log/adsign/backup.log 2>&1
+# Monthly restore test on the 1st at 04:30 IST
+0 23 1 * * adsign /srv/adsign/scripts/backup/test-restore.sh >> /var/log/adsign/backup.log 2>&1

@@ -1,0 +1,2 @@
+# HLS video segments are binary MPEG-TS files, not TypeScript
+apps/web/public/media/hls/**/*.ts binary linguist-generated

@@ -4,11 +4,14 @@ import { userService } from '../services/user.service.js';
 import { storageService } from '../services/storage/storage.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 import { BadRequestError } from '../lib/errors.js';
+import { scopedCourseIds } from '../lib/access.js';
+import { recordAudit } from '../lib/audit.js';
+import { Role } from '@academy/shared';
 
 export class ReportController {
   async getAnalytics(req: Request, res: Response, next: NextFunction) {
     try {
-      const data = await reportService.getAdminAnalytics();
+      const data = await reportService.getAdminAnalytics(await scopedCourseIds(req));
       return sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -60,7 +63,10 @@ export class UserController {
   async updateUserStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
+      if (id === req.user!.userId) throw new BadRequestError('You cannot change your own account status');
+      const before = await userService.getUserById(id);
       const user = await userService.updateUserStatus(id, req.body.status);
+      await recordAudit(req, { action: 'USER_STATUS_CHANGED', entityType: 'User', entityId: id, before: { status: before.status }, after: { status: user.status }, details: { email: user.email } });
       return sendSuccess(res, user);
     } catch (err) {
       next(err);
@@ -68,6 +74,29 @@ export class UserController {
   }
 }
 
+export class ConsoleUserController {
+  async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user, tempPassword } = await userService.createConsoleUser(req.body || {});
+      await recordAudit(req, { action: 'USER_CREATED', entityType: 'User', entityId: user.id, after: { role: user.role, email: user.email } });
+      return sendSuccess(res, { user, tempPassword }, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateRole(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { before, user } = await userService.updateRole(req.user!.userId, String(req.params.id), req.body?.role as Role);
+      await recordAudit(req, { action: 'USER_ROLE_CHANGED', entityType: 'User', entityId: user.id, before, after: { role: user.role }, details: { email: user.email } });
+      return sendSuccess(res, user);
+    } catch (err) {
+      next(err);
+    }
+  }
+}
+
+export const consoleUserController = new ConsoleUserController();
 export const reportController = new ReportController();
 export const uploadController = new UploadController();
 export const userController = new UserController();

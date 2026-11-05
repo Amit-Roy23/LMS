@@ -9,9 +9,13 @@ import { Badge } from '../../../components/ui/badge';
 import { BookOpen, Plus, Edit, Trash2, Users, ExternalLink } from 'lucide-react';
 import { formatCurrency } from '../../../lib/utils';
 import { useToast } from '../../../providers/toast-provider';
+import { useAuth } from '../../../providers/auth-provider';
 
 export default function AdminCoursesPage() {
   const { success, error: toastError } = useToast();
+  const { user } = useAuth();
+  // Only main admins delete (with PIN + OTP); deleted courses can be restored from the activity log
+  const canDelete = user?.role === 'ADMIN';
   const [courses, setCourses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,10 +36,10 @@ export default function AdminCoursesPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
+    if (!confirm('Move this course to the trash? You can restore it from the Activity log.')) return;
     try {
       await apiClient(`/admin/courses/${id}`, { method: 'DELETE' });
-      success('Course Deleted', 'Course was archived.');
+      success('Course deleted', 'Restore it any time from the Activity log.');
       loadCourses();
     } catch (err: any) {
       toastError('Delete Failed', err.message);
@@ -97,14 +101,17 @@ export default function AdminCoursesPage() {
                   </Button>
                 </Link>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(c.id)}
-                  className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
+                {canDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Delete ${c.title}`}
+                    onClick={() => handleDelete(c.id)}
+                    className="text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </div>
             </Card>
           ))}

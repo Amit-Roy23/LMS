@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { progressionService, mergeWatchedIntervals } from '../services/progression.service.js';
+import { streamService } from '../services/stream.service.js';
 import { storageService } from '../services/storage.service.js';
 import { eventBus } from '../events/event-bus.js';
 import { sendSuccess } from '../lib/utils.js';
@@ -159,6 +160,7 @@ export class StudentPlayerController {
         progressionService.assertCanAccessLesson(lessonId, studentId, role),
         prisma.lesson.findUnique({
           where: { id: lessonId },
+          omit: { hlsKeyHex: false },
           include: {
             module: {
               include: {
@@ -197,8 +199,26 @@ export class StudentPlayerController {
         throw new NotFoundError('Lesson not found');
       }
 
+      // Encrypted HLS: signed per-student playlist link, one live stream per account
+      let stream: Record<string, any> | null = null;
+      if (streamService.isHls(lesson)) {
+        if (req.query.refresh === '1') {
+          // Progress refresh while the player keeps its current stream
+          stream = { type: 'hls', reuse: true };
+        } else {
+          const started = await streamService.startStream(req, { id: lesson.id, courseId: lesson.module.courseId }, req.query.takeover === '1');
+          stream = 'conflict' in started ? { type: 'hls', conflict: started.conflict } : { type: 'hls', ...started };
+        }
+      }
+      const hlsMatch = lesson.videoUrl.match(/^\/media\/hls\/([^/]+)\/([^/]+)\/index\.m3u8$/);
+      const posterUrl = hlsMatch
+        ? `/media/lessons/${hlsMatch[1]}/${hlsMatch[2]}.jpg`
+        : /^\/media\/.+\.mp4$/.test(lesson.videoUrl)
+          ? lesson.videoUrl.replace(/\.mp4$/, '.jpg')
+          : null;
+
       // Generate authorized playable URL
-      const { playableUrl } = storageService.getPlayableVideoUrl(
+      const { playableUrl: directUrl } = storageService.getPlayableVideoUrl(
         {
           id: lesson.id,
           videoUrl: lesson.videoUrl,
@@ -206,6 +226,7 @@ export class StudentPlayerController {
         },
         studentId
       );
+      const playableUrl = stream ? stream.url || null : directUrl;
 
       // Sign resource download URLs
       const resourcesWithSignedUrls = lesson.lessonResources.map((resItem) => ({
@@ -266,6 +287,8 @@ export class StudentPlayerController {
           type: lesson.type,
           videoProvider: lesson.videoProvider,
           playableUrl,
+          posterUrl,
+          stream,
           durationSeconds: lesson.durationSeconds,
           order: lesson.order,
           resources: resourcesWithSignedUrls,
@@ -316,6 +339,7 @@ export class StudentPlayerController {
         progressionService.assertCanAccessLesson(lessonId, studentId, role),
         prisma.lesson.findUnique({
           where: { id: lessonId },
+          omit: { hlsKeyHex: false },
           include: {
             module: {
               include: {
@@ -332,6 +356,14 @@ export class StudentPlayerController {
 
       if (!lesson) {
         throw new NotFoundError('Lesson not found');
+      }
+
+      // Protected streams: one device at a time; also feeds the viewing log
+      if (streamService.isHls(lesson)) {
+        const delta = Array.isArray(playedIntervals)
+          ? playedIntervals.reduce((n: number, iv: any) => n + Math.max(0, Number(iv?.[1]) - Number(iv?.[0]) || 0), 0)
+          : 0;
+        await streamService.heartbeat(studentId, req.user!.sid, lessonId, delta);
       }
 
       const existingSegments = (existingProgress?.watchedSegments as [number, number][]) || [];

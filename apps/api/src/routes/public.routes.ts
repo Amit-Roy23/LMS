@@ -1,3 +1,6 @@
+import { instructorService } from '../services/instructor.service.js';
+import { streamService } from '../services/stream.service.js';
+import { billingController } from '../controllers/billing.controller.js';
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller.js';
 import { courseController } from '../controllers/course.controller.js';
@@ -32,7 +35,11 @@ router.get('/health', (req, res) => {
 });
 
 // Authentication
+router.post('/auth/register/request-otp', authRateLimiter, authController.requestRegistrationOtp);
 router.post('/auth/register', authRateLimiter, validateBody(registerSchema), authController.register);
+router.post('/auth/login/verify-otp', authRateLimiter, authController.verifyLoginOtp);
+router.post('/auth/forgot-password/otp', authRateLimiter, authController.forgotPasswordOtp);
+router.post('/auth/reset-password/otp', authRateLimiter, authController.resetPasswordOtp);
 router.post('/auth/login', authRateLimiter, validateBody(loginSchema), authController.login);
 router.post('/auth/forgot-password', authRateLimiter, validateBody(forgotPasswordSchema), authController.forgotPassword);
 router.post('/auth/reset-password', authRateLimiter, validateBody(resetPasswordSchema), authController.resetPassword);
@@ -49,13 +56,56 @@ router.get('/courses', courseController.listPublicCourses);
 router.get('/courses/:slug', optionalAuthenticate, courseController.getCourseBySlug);
 
 // Public Inquiries & Lead Generation
-router.post('/inquiries', validateBody(createInquirySchema), adminStudentController.createInquiry);
+router.post('/inquiries', authRateLimiter, validateBody(createInquirySchema), adminStudentController.createInquiry);
+
+// Public instructor profiles
+router.get('/instructors', async (req, res, next) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
+    res.json({ success: true, data: await instructorService.listPublic() });
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/instructors/:slug', async (req, res, next) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
+    res.json({ success: true, data: await instructorService.getPublic(String(req.params.slug)) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Public Certificate Verification
 router.get('/certificates/verify/:certificateId', certificateController.verifyCertificate);
 
 // Webhook status stubs
 router.post('/webhooks/whatsapp', notificationController.webhookWhatsApp);
+router.post('/webhooks/razorpay', billingController.razorpayWebhook);
+router.get('/payments/config', billingController.checkoutConfig);
+
+// Protected HLS: signed playlist and decryption key (the link itself authenticates)
+router.get('/stream/lessons/:id/playlist.m3u8', async (req, res, next) => {
+  try {
+    const body = await streamService.playlist(req, String(req.params.id), String(req.query.t || ''));
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.send(body);
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/stream/lessons/:id/key', async (req, res, next) => {
+  try {
+    const key = await streamService.key(req, String(req.params.id), String(req.query.t || ''));
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.end(key);
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/invoices/:id/pdf', billingController.publicInvoicePdf);
 router.post('/webhooks/sms', notificationController.webhookSms);
 
 export { router as publicRouter };

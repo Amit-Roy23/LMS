@@ -2,27 +2,80 @@ import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service.js';
 import { sendSuccess } from '../lib/utils.js';
 import { UnauthorizedError } from '../lib/errors.js';
+import { deviceService } from '../services/device.service.js';
+
+function setSessionCookies(res: Response, tokens: { accessToken: string; refreshToken: string }) {
+  res.cookie('refreshToken', tokens.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+  res.cookie('accessToken', tokens.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 15 * 60 * 1000,
+  });
+}
 
 export class AuthController {
+  async requestRegistrationOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      return sendSuccess(res, await authService.requestRegistrationOtp(req.body || {}));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async verifyLoginOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { user, tokens, signedOut } = await authService.verifyLoginOtp(req.body || {}, req);
+      setSessionCookies(res, tokens);
+      return sendSuccess(res, { user, accessToken: tokens.accessToken, signedOut });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async forgotPasswordOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      return sendSuccess(res, await authService.forgotPasswordOtp(req.body?.identifier));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async resetPasswordOtp(req: Request, res: Response, next: NextFunction) {
+    try {
+      return sendSuccess(res, await authService.resetPasswordWithOtp(req.body || {}));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async listDevices(req: Request, res: Response, next: NextFunction) {
+    try {
+      const devices = await deviceService.list(req.user!.userId);
+      return sendSuccess(res, devices.map((d) => ({ ...d, isCurrent: d.id === req.user!.sid })));
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async revokeDevice(req: Request, res: Response, next: NextFunction) {
+    try {
+      await deviceService.revokeForUser(req.user!.userId, String(req.params.id), 'Signed out by the account owner');
+      return sendSuccess(res, { message: 'Device signed out' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async register(req: Request, res: Response, next: NextFunction) {
     try {
-      const { user, tokens } = await authService.register(req.body);
-
-      // Set refresh token in httpOnly cookie
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.cookie('accessToken', tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
-      });
-
+      const { user, tokens } = await authService.register(req.body, req);
+      setSessionCookies(res, tokens);
       return sendSuccess(res, { user, accessToken: tokens.accessToken }, 201);
     } catch (err) {
       next(err);
@@ -31,23 +84,14 @@ export class AuthController {
 
   async login(req: Request, res: Response, next: NextFunction) {
     try {
-      const { user, tokens } = await authService.login(req.body);
-
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.cookie('accessToken', tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
-      });
-
-      return sendSuccess(res, { user, accessToken: tokens.accessToken });
+      const result = await authService.login(req.body, req);
+      if (result.otpRequired) {
+        // New device: the client shows the OTP step, then calls /auth/login/verify-otp
+        const { otpRequired, reason, challengeId, channel, maskedTarget, expiresAt, devCode } = result;
+        return sendSuccess(res, { otpRequired, reason, challengeId, channel, maskedTarget, expiresAt, devCode });
+      }
+      setSessionCookies(res, result.tokens);
+      return sendSuccess(res, { user: result.user, accessToken: result.tokens.accessToken, signedOut: result.signedOut });
     } catch (err) {
       next(err);
     }
@@ -90,20 +134,7 @@ export class AuthController {
     try {
       const token = req.cookies?.refreshToken || req.body?.refreshToken;
       const { user, tokens } = await authService.refreshToken(token);
-
-      res.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.cookie('accessToken', tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000,
-      });
+      setSessionCookies(res, tokens);
 
       return sendSuccess(res, { user, accessToken: tokens.accessToken });
     } catch (err) {

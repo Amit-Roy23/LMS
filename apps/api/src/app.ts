@@ -42,12 +42,20 @@ export function createApp() {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Device-Id', 'X-Step-Up-Token'],
     })
   );
 
   // Parsers
-  app.use(express.json({ limit: '10mb' }));
+  // Keep the raw body for webhook signature checks (Razorpay signs the exact bytes)
+  app.use(
+    express.json({
+      limit: '10mb',
+      verify: (req: any, _res, buf) => {
+        if (req.originalUrl?.includes('/webhooks/')) req.rawBody = buf;
+      },
+    })
+  );
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(cookieParser());
 

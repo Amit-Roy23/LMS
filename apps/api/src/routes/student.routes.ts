@@ -16,6 +16,8 @@ import { authenticate, requirePasswordChanged } from '../middleware/auth.middlew
 import { validateBody } from '../middleware/validate.middleware.js';
 import { prisma } from '../lib/prisma.js';
 import { sendSuccess } from '../lib/utils.js';
+import { billingController } from '../controllers/billing.controller.js';
+import { changeRequestService } from '../services/change-request.service.js';
 import {
   updateLessonProgressSchema,
   submitQuizAttemptSchema,
@@ -51,19 +53,21 @@ router.use(authenticate);
 router.get('/auth/me', authController.getMe);
 router.post('/auth/change-password', validateBody(changePasswordSchema), authController.changePassword);
 router.post('/auth/logout-everywhere', authController.logoutEverywhere);
+router.get('/auth/devices', authController.listDevices);
+router.delete('/auth/devices/:id', authController.revokeDevice);
 
 // Student Profile Management
 router.put('/student/profile', validateBody(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId;
-    const { name, phone, whatsappNumber, address, city, education, avatar } = req.body;
+    // The registered mobile number is changed only through an approved change request
+    const { name, whatsappNumber, address, city, education, avatar } = req.body;
 
     const [updatedUser, updatedProfile] = await prisma.$transaction([
       prisma.user.update({
         where: { id: userId },
         data: {
           ...(name ? { name } : {}),
-          ...(phone ? { phone } : {}),
           ...(avatar ? { avatar } : {}),
         },
       }),
@@ -71,7 +75,6 @@ router.put('/student/profile', validateBody(updateProfileSchema), async (req: Re
         where: { userId },
         create: {
           userId,
-          phone: phone || null,
           whatsappNumber: whatsappNumber || null,
           address: address || null,
           city: city || null,
@@ -79,7 +82,6 @@ router.put('/student/profile', validateBody(updateProfileSchema), async (req: Re
           avatar: avatar || null,
         },
         update: {
-          ...(phone !== undefined ? { phone } : {}),
           ...(whatsappNumber !== undefined ? { whatsappNumber } : {}),
           ...(address !== undefined ? { address } : {}),
           ...(city !== undefined ? { city } : {}),
@@ -98,6 +100,36 @@ router.put('/student/profile', validateBody(updateProfileSchema), async (req: Re
   }
 });
 
+// Mobile number change (OTP to the new number, then admin approval)
+router.get('/student/phone-change', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await changeRequestService.myRequests(req.user!.userId));
+  } catch (err) {
+    next(err);
+  }
+});
+router.post('/student/phone-change/otp', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await changeRequestService.requestPhoneOtp(req.user!.userId, req.body?.newPhone));
+  } catch (err) {
+    next(err);
+  }
+});
+router.post('/student/phone-change', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await changeRequestService.submitPhoneChange(req.user!.userId, req.body || {}), 201);
+  } catch (err) {
+    next(err);
+  }
+});
+router.delete('/student/phone-change/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await changeRequestService.cancel(req.user!.userId, String(req.params.id)));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Student Receipts
 router.get('/student/receipts', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -107,7 +139,7 @@ router.get('/student/receipts', async (req: Request, res: Response, next: NextFu
     const [payments, registrations] = await Promise.all([
       prisma.payment.findMany({
         where: { studentId: userId },
-        include: { course: true },
+        include: { course: true, invoice: { select: { id: true, invoiceNumber: true, issuedAt: true } } },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.registration.findMany({
@@ -128,6 +160,10 @@ router.get('/student/receipts', async (req: Request, res: Response, next: NextFu
     next(err);
   }
 });
+
+// GST tax invoices
+router.get('/student/invoices', billingController.myInvoices);
+router.get('/student/invoices/:id/pdf', billingController.myInvoicePdf);
 
 // ==========================================
 // Guard: Force Password Change before Accessing Courses

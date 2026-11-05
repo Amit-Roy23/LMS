@@ -36,6 +36,9 @@ export const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   phone: z.string().optional().nullable(),
   role: z.nativeEnum(Role).default(Role.STUDENT),
+  /** OTP challenge from /auth/register/request-otp and the code the student received */
+  challengeId: z.string().optional(),
+  otpCode: z.string().optional(),
 });
 
 export const loginSchema = z
@@ -399,6 +402,15 @@ export const checkoutEnrollmentSchema = z.object({
   batchId: z.string().uuid().optional().nullable(),
   mode: z.nativeEnum(DeliveryMode).default(DeliveryMode.RECORDED),
   paymentProvider: z.nativeEnum(PaymentProvider).default(PaymentProvider.MOCK),
+  /** Billing details printed on the GST invoice */
+  billing: z
+    .object({
+      name: z.string().max(120).optional(),
+      state: z.string().max(60).optional(),
+      gstin: z.string().max(20).optional(),
+      address: z.string().max(300).optional(),
+    })
+    .optional(),
 });
 
 export const submitMockTestSchema = z.object({

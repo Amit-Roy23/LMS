@@ -2,7 +2,9 @@ import { prisma } from '../lib/prisma.js';
 import { PaymentStatus, CertificateStatus, SubmissionStatus } from '@academy/shared';
 
 export class ReportService {
-  async getAdminAnalytics() {
+  /** Academy-wide figures, or only the given courses (instructors see their own courses). */
+  async getAdminAnalytics(courseIds: string[] | null = null) {
+    const inCourses = courseIds ? { courseId: { in: courseIds } } : {};
     const [
       totalUsers,
       totalStudents,
@@ -17,19 +19,26 @@ export class ReportService {
       enrollmentRows,
       courses,
     ] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { role: 'STUDENT' } }),
-      prisma.user.count({ where: { role: 'INSTRUCTOR' } }),
-      prisma.course.count({ where: { deletedAt: null } }),
-      prisma.enrollment.count(),
-      prisma.certificate.count({ where: { status: CertificateStatus.VALID } }),
-      prisma.assignmentSubmission.count({ where: { status: SubmissionStatus.PENDING } }),
-      prisma.projectSubmission.count({ where: { status: SubmissionStatus.PENDING } }),
+      courseIds ? prisma.enrollment.findMany({ where: inCourses, distinct: ['studentId'], select: { studentId: true } }).then((r) => r.length) : prisma.user.count(),
+      courseIds
+        ? prisma.enrollment.findMany({ where: inCourses, distinct: ['studentId'], select: { studentId: true } }).then((r) => r.length)
+        : prisma.user.count({ where: { role: 'STUDENT' } }),
+      courseIds ? Promise.resolve(1) : prisma.user.count({ where: { role: 'INSTRUCTOR' } }),
+      prisma.course.count({ where: { deletedAt: null, ...(courseIds ? { id: { in: courseIds } } : {}) } }),
+      prisma.enrollment.count({ where: inCourses }),
+      prisma.certificate.count({ where: { status: CertificateStatus.VALID, ...inCourses } }),
+      prisma.assignmentSubmission.count({
+        where: { status: SubmissionStatus.PENDING, ...(courseIds ? { assignment: { module: { courseId: { in: courseIds } } } } : {}) },
+      }),
+      prisma.projectSubmission.count({
+        where: { status: SubmissionStatus.PENDING, ...(courseIds ? { project: { courseId: { in: courseIds } } } : {}) },
+      }),
       prisma.payment.findMany({
-        where: { status: PaymentStatus.COMPLETED },
+        where: { status: PaymentStatus.COMPLETED, ...inCourses },
         select: { amount: true, currency: true, createdAt: true, courseId: true },
       }),
       prisma.enrollment.findMany({
+        where: inCourses,
         take: 5,
         orderBy: { enrolledAt: 'desc' },
         include: {
@@ -37,8 +46,8 @@ export class ReportService {
           course: { select: { title: true, price: true } },
         },
       }),
-      prisma.enrollment.findMany({ select: { courseId: true, enrolledAt: true } }),
-      prisma.course.findMany({ where: { deletedAt: null }, select: { id: true, title: true, slug: true } }),
+      prisma.enrollment.findMany({ where: inCourses, select: { courseId: true, enrolledAt: true } }),
+      prisma.course.findMany({ where: { deletedAt: null, ...(courseIds ? { id: { in: courseIds } } : {}) }, select: { id: true, title: true, slug: true } }),
     ]);
 
     const totalRevenue = payments.reduce((acc, p) => acc + p.amount, 0);

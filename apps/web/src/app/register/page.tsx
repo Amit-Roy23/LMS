@@ -4,7 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { useAuth } from '../../providers/auth-provider';
+import { useAuth, OtpChallenge } from '../../providers/auth-provider';
+import { OtpStep } from '../../components/auth/otp-step';
+import { apiClient } from '../../lib/api';
+import { track } from '../../lib/analytics';
 import { useToast } from '../../providers/toast-provider';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { BrandLogo } from '../../components/common/brand-logo';
@@ -25,23 +28,41 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [otp, setOtp] = useState<OtpChallenge | null>(null);
 
+  const requestOtp = () =>
+    apiClient<OtpChallenge>('/auth/register/request-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, phone }),
+    });
+
+  // Step 1: check the details and text a code to the mobile number
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       toastError('Missing Fields', 'Please complete all required fields.');
+      return;
+    }
+    if (password.length < 8) {
+      toastError('Weak password', 'Use at least 8 characters.');
       return;
     }
 
     try {
       setIsLoading(true);
-      await register({ name, email, password, phone });
-      success('Account Created!', `Welcome to ${BRAND.name}.`);
+      setOtp(await requestOtp());
     } catch (err: any) {
-      toastError('Registration Failed', err.message || 'Could not create your account.');
+      toastError('Could not continue', err.message || 'Please check your details.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Step 2: create the account once the mobile number is verified
+  const verifyAndCreate = async (code: string) => {
+    await register({ name, email, password, phone, challengeId: otp!.challengeId, otpCode: code });
+    track('sign_up', { method: 'mobile_otp' });
+    success('Account Created!', `Welcome to ${BRAND.name}.`);
   };
 
   return (
@@ -79,16 +100,29 @@ export default function RegisterPage() {
             <p className="text-slate-400">It takes less than a minute.</p>
           </div>
 
+          {otp ? (
+            <OtpStep
+              challenge={otp}
+              title="Verify your mobile number"
+              description="One account per student: we sent a 6-digit code"
+              submitLabel="Verify & create account"
+              onVerify={verifyAndCreate}
+              onResend={requestOtp}
+              onCancel={() => setOtp(null)}
+            />
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Full name" autoComplete="name" placeholder="e.g. Riya Sharma" value={name} onChange={(e) => setName(e.target.value)} required />
             <Input label="Email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <Input label="Password" type="password" autoComplete="new-password" placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            <Input label="Phone (optional)" type="tel" autoComplete="tel" placeholder="+91 98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input label="Mobile number" type="tel" inputMode="tel" autoComplete="tel" placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+            <Input label="Password" type="password" autoComplete="new-password" placeholder="At least 8 characters" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <p className="text-xs text-slate-500">We'll text a code to verify your mobile number. Your mobile number is your login and can only be changed with academy approval.</p>
 
             <Button type="submit" variant="primary" size="lg" isLoading={isLoading} className="w-full">
-              Create account <ArrowRight className="w-4 h-4" />
+              Continue <ArrowRight className="w-4 h-4" />
             </Button>
           </form>
+          )}
 
           <p className="text-center text-sm text-slate-400">
             Already have an account?{' '}

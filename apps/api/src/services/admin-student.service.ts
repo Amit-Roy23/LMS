@@ -29,7 +29,7 @@ export class AdminStudentService {
 
     // Role-based scoping: Instructors only see students in their own batches
     if (params.role === Role.INSTRUCTOR && params.instructorId) {
-      enrollmentWhere.batch = { instructorId: params.instructorId };
+      enrollmentWhere.course = { instructorId: params.instructorId };
     }
 
     if (params.courseId) enrollmentWhere.courseId = params.courseId;
@@ -163,7 +163,7 @@ export class AdminStudentService {
     const where: any = {};
     if (params.courseId) where.courseId = params.courseId;
     if (params.role === Role.INSTRUCTOR && params.instructorId) {
-      where.instructorId = params.instructorId;
+      where.OR = [{ instructorId: params.instructorId }, { course: { instructorId: params.instructorId } }];
     }
 
     return prisma.batch.findMany({

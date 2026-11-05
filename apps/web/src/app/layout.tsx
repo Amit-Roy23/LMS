@@ -3,11 +3,30 @@ import type { Metadata, Viewport } from 'next';
 import { ToastProvider } from '../providers/toast-provider';
 import { QueryProvider } from '../providers/query-provider';
 import { AuthProvider } from '../providers/auth-provider';
+import { AnalyticsScripts } from '../components/common/analytics-scripts';
+import { SITE_URL } from '../lib/site';
+
+const DESCRIPTION =
+  'ADSIGN Skill Academy: job-ready online courses in design, development, marketing and AI with live classes, mentor-reviewed projects and verifiable certificates.';
 
 export const metadata: Metadata = {
-  title: 'ADSIGN Skill Academy | Modern LMS & Certification',
-  description:
-    'Master modern software engineering, AI engineering, and full-stack development with industry-recognized verifiable certificates.',
+  metadataBase: new URL(SITE_URL),
+  title: { default: 'ADSIGN Skill Academy | Creative & IT courses with certificates', template: '%s | ADSIGN Skill Academy' },
+  description: DESCRIPTION,
+  applicationName: 'ADSIGN Skill Academy',
+  keywords: ['online courses', 'graphic design course', 'UI UX course', 'web development course', 'digital marketing course', 'India', 'certificate'],
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    siteName: 'ADSIGN Skill Academy',
+    title: 'ADSIGN Skill Academy',
+    description: DESCRIPTION,
+    url: '/',
+    images: [{ url: '/brand/og.png', width: 1200, height: 630, alt: 'ADSIGN Skill Academy' }],
+    locale: 'en_IN',
+  },
+  twitter: { card: 'summary_large_image', title: 'ADSIGN Skill Academy', description: DESCRIPTION, images: ['/brand/og.png'] },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
@@ -37,6 +56,7 @@ export default function RootLayout({
             <ToastProvider>
               {children}
             </ToastProvider>
+            <AnalyticsScripts />
           </AuthProvider>
         </QueryProvider>
       </body>

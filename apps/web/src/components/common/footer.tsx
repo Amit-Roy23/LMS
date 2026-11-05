@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone } from 'lucide-react';
 import { BrandLogo } from './brand-logo';
 import { BRAND } from '../../lib/brand';
+import { ACADEMY } from '../legal/policy-page';
 
 const COLUMNS = [
   {
@@ -28,8 +29,16 @@ const COLUMNS = [
     title: 'Academy',
     links: [
       { href: '/about', label: 'About us' },
+      { href: '/instructors', label: 'Our instructors' },
       { href: '/contact', label: 'Admissions & contact' },
-      { href: '/api/docs', label: 'Developer API (Swagger)' },
+    ],
+  },
+  {
+    title: 'Policies',
+    links: [
+      { href: '/terms', label: 'Terms & conditions' },
+      { href: '/privacy', label: 'Privacy policy' },
+      { href: '/refund-policy', label: 'Refund & cancellation' },
     ],
   },
 ];
@@ -46,7 +55,7 @@ export function Footer() {
     <footer className="relative bg-night-950 text-night-400 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-brand-gradient opacity-60" aria-hidden />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
           <div className="col-span-2 space-y-5">
             <Link href="/" className="flex items-center gap-3">
               <BrandLogo tone="dark" size="lg" caption="Skill Academy · Creative | Digital | Studio" />
@@ -56,12 +65,19 @@ export function Footer() {
               certificates that employers can verify in seconds.
             </p>
             <div className="space-y-1.5 text-sm">
-              <p className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-indigo-500" /> admissions@creativeit.academy
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-indigo-500" /> +91 98765 43210
-              </p>
+              {ACADEMY.email && (
+                <a href={`mailto:${ACADEMY.email}`} className="flex items-center gap-2 hover:text-white">
+                  <Mail className="w-4 h-4 text-indigo-500" /> {ACADEMY.email}
+                </a>
+              )}
+              {ACADEMY.phone && (
+                <a href={`tel:${ACADEMY.phone}`} className="flex items-center gap-2 hover:text-white">
+                  <Phone className="w-4 h-4 text-indigo-500" /> {ACADEMY.phone}
+                </a>
+              )}
+              <Link href="/contact" className="flex items-center gap-2 hover:text-white">
+                <Mail className="w-4 h-4 text-indigo-500" /> Send an enquiry
+              </Link>
             </div>
             <div className="flex items-center gap-2">
               {SOCIALS.map(({ icon: Icon, label }) => (

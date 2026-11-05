@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { EnquiryForm } from '../../../components/marketing/enquiry-form';
+import { track } from '../../../lib/analytics';
 import { useParams } from 'next/navigation';
 import { Navbar } from '../../../components/common/navbar';
 import { Footer } from '../../../components/common/footer';
@@ -59,6 +61,7 @@ export default function CourseDetailPage() {
       .then((data) => {
         setCourse(data);
         if (data.modules?.length) setExpanded({ [data.modules[0].id]: true });
+        track('view_item', { item_id: data.id, item_name: data.title, value: data.price, currency: data.currency || 'INR' });
       })
       .catch(() => setCourse(null))
       .finally(() => setIsLoading(false));
@@ -210,7 +213,13 @@ export default function CourseDetailPage() {
               </span>
               <span className="text-sm">
                 <span className="block text-night-400">Created by</span>
-                <span className="block font-semibold text-white">{course.instructor?.name}</span>
+                {course.instructor?.instructorProfile?.isPublic ? (
+                  <Link href={`/instructors/${course.instructor.instructorProfile.slug}`} className="block font-semibold text-white hover:text-sky-800 underline-offset-4 hover:underline">
+                    {course.instructor?.name}
+                  </Link>
+                ) : (
+                  <span className="block font-semibold text-white">{course.instructor?.name}</span>
+                )}
               </span>
             </div>
           </div>
@@ -338,11 +347,25 @@ export default function CourseDetailPage() {
               </div>
             </Reveal>
           )}
+
+          {/* Mobile: ask an advisor */}
+          <div className="lg:hidden rounded-2xl bg-white border border-[#e2e8f0] p-5 shadow-card">
+            <h2 className="font-bold text-ink">Questions about this course?</h2>
+            <p className="text-sm text-slate-400 mt-1 mb-4">Leave your number and an advisor will call you.</p>
+            <EnquiryForm courseId={course.id} courseTitle={course.title} source="COURSE_PAGE" compact />
+          </div>
         </div>
 
         {/* Desktop sticky enrol card */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 z-10 -mt-64">{EnrollCard}</div>
+          <div className="sticky top-24 z-10 -mt-64 space-y-6">
+            {EnrollCard}
+            <div className="rounded-2xl bg-white border border-[#e2e8f0] p-5 shadow-card">
+              <h3 className="font-bold text-ink">Questions about this course?</h3>
+              <p className="text-sm text-slate-400 mt-1 mb-4">Leave your number and an advisor will call you.</p>
+              <EnquiryForm courseId={course.id} courseTitle={course.title} source="COURSE_PAGE" compact />
+            </div>
+          </div>
         </aside>
       </main>
 

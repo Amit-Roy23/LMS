@@ -4,6 +4,8 @@ import { prisma } from '../lib/prisma.js';
 import { courseService } from '../services/course.service.js';
 import { progressionService } from '../services/progression.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
+import { recordAudit, changedFields } from '../lib/audit.js';
+import { isInstructor } from '../lib/access.js';
 
 /** Removes `isCorrect` from every question option in a course payload. */
 function stripAnswerKeys<T>(course: T): T {
@@ -59,6 +61,8 @@ export class CourseController {
         page,
         limit,
         search,
+        // Instructors see only the courses they teach
+        instructorId: isInstructor(req) ? req.user!.userId : undefined,
       });
 
       return sendPaginated(res, result.items, result.total, result.page, result.limit);
@@ -83,7 +87,7 @@ export class CourseController {
     try {
       const id = req.params.id as string;
       const course = await courseService.getCourseById(id);
-      const isStaff = req.user?.role === Role.ADMIN || req.user?.role === Role.INSTRUCTOR;
+      const isStaff = req.user?.role === Role.ADMIN || req.user?.role === Role.STAFF || req.user?.role === Role.INSTRUCTOR;
       // Students may see questions and options, but never which option is correct
       return sendSuccess(res, isStaff ? course : stripAnswerKeys(course));
     } catch (err) {
@@ -93,7 +97,11 @@ export class CourseController {
 
   async createCourse(req: Request, res: Response, next: NextFunction) {
     try {
-      const course = await courseService.createCourse(req.body, req.user!.userId);
+      // Admins may assign the course to an instructor; everyone else creates their own
+      const { instructorId, ...data } = req.body;
+      const owner = req.user!.role === Role.ADMIN && instructorId ? instructorId : req.user!.userId;
+      const course = await courseService.createCourse(data, owner);
+      await recordAudit(req, { action: 'COURSE_CREATED', entityType: 'Course', entityId: course.id, after: { title: course.title } });
       return sendSuccess(res, course, 201);
     } catch (err) {
       next(err);
@@ -103,7 +111,14 @@ export class CourseController {
   async updateCourse(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      const course = await courseService.updateCourse(id, req.body);
+      const data = { ...req.body };
+      if (req.user!.role !== Role.ADMIN) delete data.instructorId; // only admins reassign courses
+      const existing = await prisma.course.findUnique({ where: { id } });
+      const course = await courseService.updateCourse(id, data);
+      const diff = changedFields(existing, data);
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'COURSE_UPDATED', entityType: 'Course', entityId: id, ...diff, details: { title: course.title } });
+      }
       return sendSuccess(res, course);
     } catch (err) {
       next(err);
@@ -113,8 +128,9 @@ export class CourseController {
   async deleteCourse(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      await courseService.deleteCourse(id);
-      return sendSuccess(res, { message: 'Course deleted successfully' });
+      const course = await courseService.deleteCourse(id);
+      await recordAudit(req, { action: 'COURSE_DELETED', entityType: 'Course', entityId: id, details: { title: course.title } });
+      return sendSuccess(res, { message: 'Course moved to trash. It can be restored from the activity log.' });
     } catch (err) {
       next(err);
     }
@@ -141,6 +157,7 @@ export class CourseController {
         courseId,
         ...req.body,
       });
+      await recordAudit(req, { action: 'MODULE_CREATED', entityType: 'Module', entityId: mod.id, after: { title: mod.title } });
       return sendSuccess(res, mod, 201);
     } catch (err) {
       next(err);
@@ -150,7 +167,12 @@ export class CourseController {
   async updateModule(req: Request, res: Response, next: NextFunction) {
     try {
       const moduleId = req.params.moduleId as string;
+      const existing = await prisma.module.findUnique({ where: { id: moduleId } });
       const mod = await courseService.updateModule(moduleId, req.body);
+      const diff = changedFields(existing, req.body);
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'MODULE_UPDATED', entityType: 'Module', entityId: moduleId, ...diff, details: { title: mod.title } });
+      }
       return sendSuccess(res, mod);
     } catch (err) {
       next(err);
@@ -160,7 +182,8 @@ export class CourseController {
   async deleteModule(req: Request, res: Response, next: NextFunction) {
     try {
       const moduleId = req.params.moduleId as string;
-      await courseService.deleteModule(moduleId);
+      const mod = await courseService.deleteModule(moduleId);
+      await recordAudit(req, { action: 'MODULE_DELETED', entityType: 'Module', entityId: moduleId, details: { title: mod.title } });
       return sendSuccess(res, { message: 'Module deleted' });
     } catch (err) {
       next(err);
@@ -175,6 +198,7 @@ export class CourseController {
         moduleId,
         ...req.body,
       });
+      await recordAudit(req, { action: 'LESSON_CREATED', entityType: 'Lesson', entityId: lesson.id, after: { title: lesson.title } });
       return sendSuccess(res, lesson, 201);
     } catch (err) {
       next(err);
@@ -184,8 +208,14 @@ export class CourseController {
   async updateLesson(req: Request, res: Response, next: NextFunction) {
     try {
       const lessonId = req.params.lessonId as string;
-      const lesson = await courseService.updateLesson(lessonId, req.body);
-      return sendSuccess(res, lesson);
+      const { hlsKeyHex, ...patch } = req.body; // stream keys are managed by the video pipeline only
+      const existing = await prisma.lesson.findUnique({ where: { id: lessonId } });
+      const lesson = await courseService.updateLesson(lessonId, patch);
+      const diff = changedFields(existing, patch);
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'LESSON_UPDATED', entityType: 'Lesson', entityId: lessonId, ...diff, details: { title: lesson.title } });
+      }
+      return sendSuccess(res, { ...lesson, hlsKeyHex: undefined });
     } catch (err) {
       next(err);
     }
@@ -194,7 +224,8 @@ export class CourseController {
   async deleteLesson(req: Request, res: Response, next: NextFunction) {
     try {
       const lessonId = req.params.lessonId as string;
-      await courseService.deleteLesson(lessonId);
+      const lesson = await courseService.deleteLesson(lessonId);
+      await recordAudit(req, { action: 'LESSON_DELETED', entityType: 'Lesson', entityId: lessonId, details: { title: lesson.title } });
       return sendSuccess(res, { message: 'Lesson deleted' });
     } catch (err) {
       next(err);
@@ -250,6 +281,7 @@ export class CourseController {
           sizeBytes: sizeBytes || null,
         },
       });
+      await recordAudit(req, { action: 'LESSONRESOURCE_CREATED', entityType: 'LessonResource', entityId: resource.id, after: { title } });
       return sendSuccess(res, resource, 201);
     } catch (err) {
       next(err);
@@ -259,7 +291,8 @@ export class CourseController {
   async deleteLessonResource(req: Request, res: Response, next: NextFunction) {
     try {
       const resourceId = req.params.resourceId as string;
-      await prisma.lessonResource.delete({ where: { id: resourceId } });
+      const snapshot = await prisma.lessonResource.delete({ where: { id: resourceId } });
+      await recordAudit(req, { action: 'LESSONRESOURCE_DELETED', entityType: 'LessonResource', entityId: resourceId, before: snapshot, details: { title: snapshot.title } });
       return sendSuccess(res, { message: 'Resource deleted' });
     } catch (err) {
       next(err);
@@ -281,6 +314,7 @@ export class CourseController {
           order: order || 1,
         },
       });
+      await recordAudit(req, { action: 'PRACTICETASK_CREATED', entityType: 'PracticeTask', entityId: task.id, after: { title } });
       return sendSuccess(res, task, 201);
     } catch (err) {
       next(err);
@@ -290,10 +324,15 @@ export class CourseController {
   async updatePracticeTask(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
+      const existing = await prisma.practiceTask.findUnique({ where: { id } });
       const task = await prisma.practiceTask.update({
         where: { id },
         data: req.body,
       });
+      const diff = changedFields(existing, req.body);
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'PRACTICETASK_UPDATED', entityType: 'PracticeTask', entityId: id, ...diff, details: { title: task.title } });
+      }
       return sendSuccess(res, task);
     } catch (err) {
       next(err);
@@ -303,7 +342,8 @@ export class CourseController {
   async deletePracticeTask(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      await prisma.practiceTask.delete({ where: { id } });
+      const snapshot = await prisma.practiceTask.delete({ where: { id } });
+      await recordAudit(req, { action: 'PRACTICETASK_DELETED', entityType: 'PracticeTask', entityId: id, before: snapshot, details: { title: snapshot.title } });
       return sendSuccess(res, { message: 'Practice task deleted' });
     } catch (err) {
       next(err);
@@ -319,6 +359,7 @@ export class CourseController {
           startsAt: new Date(req.body.startsAt),
         },
       });
+      await recordAudit(req, { action: 'LIVESESSION_CREATED', entityType: 'LiveSession', entityId: session.id, after: { title: session.title } });
       return sendSuccess(res, session, 201);
     } catch (err) {
       next(err);
@@ -328,6 +369,7 @@ export class CourseController {
   async updateLiveSession(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
+      const existing = await prisma.liveSession.findUnique({ where: { id } });
       const session = await prisma.liveSession.update({
         where: { id },
         data: {
@@ -335,6 +377,10 @@ export class CourseController {
           ...(req.body.startsAt ? { startsAt: new Date(req.body.startsAt) } : {}),
         },
       });
+      const diff = changedFields(existing, { ...req.body, ...(req.body.startsAt ? { startsAt: new Date(req.body.startsAt).toISOString() } : {}) });
+      if (Object.keys(diff.after).length) {
+        await recordAudit(req, { action: 'LIVESESSION_UPDATED', entityType: 'LiveSession', entityId: id, ...diff, details: { title: session.title } });
+      }
       return sendSuccess(res, session);
     } catch (err) {
       next(err);
@@ -344,7 +390,8 @@ export class CourseController {
   async deleteLiveSession(req: Request, res: Response, next: NextFunction) {
     try {
       const id = req.params.id as string;
-      await prisma.liveSession.delete({ where: { id } });
+      const snapshot = await prisma.liveSession.delete({ where: { id } });
+      await recordAudit(req, { action: 'LIVESESSION_DELETED', entityType: 'LiveSession', entityId: id, before: snapshot, details: { title: snapshot.title } });
       return sendSuccess(res, { message: 'Live session deleted' });
     } catch (err) {
       next(err);

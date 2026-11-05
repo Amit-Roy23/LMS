@@ -40,9 +40,53 @@ export const config = {
     razorpay: {
       keyId: process.env.RAZORPAY_KEY_ID || '',
       keySecret: process.env.RAZORPAY_KEY_SECRET || '',
+      webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     },
   },
+  /** Seller details printed on GST tax invoices. */
+  invoice: {
+    sellerName: process.env.INVOICE_SELLER_NAME || 'ADSIGN Skill Academy',
+    gstin: process.env.INVOICE_GSTIN || '',
+    address: process.env.INVOICE_ADDRESS || '',
+    state: process.env.INVOICE_STATE || 'West Bengal',
+    stateCode: process.env.INVOICE_STATE_CODE || '19',
+    email: process.env.INVOICE_EMAIL || '',
+    phone: process.env.INVOICE_PHONE || '',
+    /** SAC 999293: commercial training and coaching services */
+    sacCode: process.env.INVOICE_SAC || '999293',
+    gstRate: parseFloat(process.env.INVOICE_GST_RATE || '18'),
+    prefix: process.env.INVOICE_PREFIX || 'ADS',
+  },
   redisUrl: process.env.REDIS_URL || '',
+  security: {
+    /** Secret for OTP hashes, step-up tokens and signed video tokens. */
+    signingSecret:
+      process.env.APP_SIGNING_SECRET || process.env.JWT_SECRET || 'academy_signing_secret_development_key_24680',
+    /**
+     * When no real SMS gateway is configured the OTP is also returned to the browser so the
+     * demo can be tried end to end. Set OTP_DEMO_MODE=false in production once SMS is live.
+     */
+    otpDemoMode:
+      process.env.OTP_DEMO_MODE !== undefined
+        ? process.env.OTP_DEMO_MODE === 'true'
+        : (process.env.SMS_PROVIDER || 'LOG').toUpperCase() === 'LOG',
+    /** Ask for an OTP when an account signs in from a browser/phone it has not used before. */
+    requireOtpNewDevice: process.env.REQUIRE_OTP_NEW_DEVICE !== 'false',
+    /** Ask new students to verify their mobile number with an OTP when registering. */
+    requireOtpRegistration: process.env.REQUIRE_OTP_REGISTRATION !== 'false',
+    /** Channel used for OTPs to a phone number: SMS (default) or WHATSAPP. */
+    otpPhoneChannel: (process.env.OTP_PHONE_CHANNEL || 'SMS').toUpperCase(),
+    /** Verified devices a student may keep signed in at once, per kind. */
+    deviceLimitMobile: parseInt(process.env.DEVICE_LIMIT_MOBILE || '1', 10),
+    deviceLimitDesktop: parseInt(process.env.DEVICE_LIMIT_DESKTOP || '1', 10),
+    /** Maximum number of main administrators. */
+    maxAdmins: parseInt(process.env.MAX_ADMINS || '3', 10),
+    /** Comma-separated origins allowed to play protected video (besides CLIENT_URL). */
+    allowedVideoOrigins: (process.env.ALLOWED_VIDEO_ORIGINS || '')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  },
   notifications: {
     channelsRegistration: (process.env.NOTIFY_CHANNELS_REGISTRATION || 'email,whatsapp,sms')
       .split(',')
@@ -50,6 +94,9 @@ export const config = {
       .filter(Boolean),
     credentialDelivery: (process.env.CREDENTIAL_DELIVERY || 'setup_link') as 'password' | 'setup_link',
     fallbackEnabled: process.env.NOTIFY_FALLBACK !== 'false',
+    /** Where new website enquiries are announced (defaults to all active admins and staff). */
+    admissionsEmails: (process.env.ADMISSIONS_EMAILS || '').split(',').map((e) => e.trim()).filter(Boolean),
+    admissionsWhatsapp: process.env.ADMISSIONS_WHATSAPP || '',
     smtp: {
       host: process.env.SMTP_HOST || '',
       port: parseInt(process.env.SMTP_PORT || '587', 10),

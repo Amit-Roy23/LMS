@@ -206,7 +206,8 @@ Use the **⚡ 1-Click Demo Login** button on the navbar/login page, or log in ma
 
 | Role | Email | Password | Pre-configured State |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@creativeit.academy` | `Admin@123` | Full access to users, batches, content management & certificates |
+| **Admin** | `admin@creativeit.academy` | `Admin@123` | Main admin. Security PIN for protected actions: `2580` (the OTP is shown on screen in demo mode) |
+| **Office Staff** | `staff@creativeit.academy` | `Staff@123` | Admissions, enquiries, content and schedules; no deletes, prices, refunds or roles |
 | **Instructor** | `instructor@creativeit.academy` | `Instructor@123` | Access to assigned batches, review queue & student progression |
 | **Student 1** | `student1@creativeit.academy` | `Student@123` | Active paid enrollment (Recorded Track), Module 1 completed, Module 2 in progress |
 | **Student 2** | `student2@creativeit.academy` | `Student@123` | Active paid enrollment (Live Evening Cohort Alpha), Certified Graduate |
@@ -215,6 +216,10 @@ Use the **⚡ 1-Click Demo Login** button on the navbar/login page, or log in ma
 | **Student Pending** | `student_pending@creativeit.academy` | `Student@123` | Applicant with pending payment (`PAYMENT_PENDING` 403 guard) |
 | **Design Instructor** | `priya.design@creativeit.academy` | `Instructor@123` | Teaches the UI/UX and Graphic Design courses |
 | **Demo learners (16)** | `<first>.<last>@demo.creativeit.academy` (e.g. `aarav.patel@demo.creativeit.academy`) | `Student@123` | Enrolled across the catalogue at different stages, some certified |
+
+Seeded demo accounts skip the new-device OTP and the device limit so one-click logins keep working.
+**Register a new student** to see the full flow: mobile OTP, one account per mobile number, new-device
+OTP, the one-phone-plus-one-computer limit and one video stream at a time.
 
 The seed also builds **7 published courses** (Full-Stack & AI, Python Data Science, UI/UX, Digital Marketing,
 Cloud DevOps, React Native, Cybersecurity, Graphic Design) with lessons, quizzes, assignments, mock tests,
@@ -229,8 +234,36 @@ database exactly (needed for the 90% watch threshold). To change lesson content 
 ```bash
 pip install pillow numpy          # plus ffmpeg with libx264 on PATH
 python3 scripts/demo-media/render_media.py --only ui-ux-product-design   # or --force for everything
+python3 scripts/demo-media/build_hls.py   # package as AES-128 encrypted HLS (keeps preview MP4s only)
 npm run db:seed
 ```
+
+Non-preview lessons stream as **encrypted HLS**: the player gets a 10-minute signed link bound to the
+student, lesson and device, and the decryption key is served only to the academy's own site and the
+account's single active stream. Demo keys live in `prisma/demo-content/hls-keys.json`; in production,
+generate keys at upload time and keep them only in the database.
+
+## 🛡️ Security, payments and operations
+
+| Area | What is in place |
+|---|---|
+| Accounts | OTP on registration, new devices and password reset; one account per mobile; 1 phone + 1 computer per student; mobile changes need admin approval |
+| Console roles | Main admin (max 3), Office staff, Instructor (own courses only); PIN + OTP for prices, refunds, roles, deletions, settings |
+| Audit | Every console change logged with before/after; admins undo edits and restore deleted items (Activity log) |
+| Payments | Razorpay Orders + Checkout with server-side signature and payment verification, signed webhook backup, refunds |
+| Invoices | GST tax invoices (CGST+SGST / IGST, SAC 999293), PDF download and email |
+| Video | Encrypted HLS, signed expiring links, domain lock, watermark, one stream per account, viewing log |
+| Website | Enquiry form with email/WhatsApp alerts, instructor profiles, policy pages, sitemap, structured data, GA4 / Ads / Meta Pixel |
+
+Key environment variables (see [`deploy/vps/env.production.example`](deploy/vps/env.production.example)):
+`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SMS_PROVIDER` + `MSG91_*`,
+`OTP_DEMO_MODE=false` in production, `SMTP_*`, `ADMISSIONS_EMAILS`, `INVOICE_GSTIN` / `INVOICE_STATE`,
+`APP_SIGNING_SECRET`, `NEXT_PUBLIC_GA_ID` / `NEXT_PUBLIC_META_PIXEL_ID`.
+
+Guides:
+- [Deploying on a Hostinger VPS](docs/DEPLOYMENT-VPS.md): server hardening, HTTPS, Razorpay, backups and restore
+- [Console guide](docs/ADMIN-MANUAL.md): for admins, staff and instructors
+- [Acceptance testing checklist](docs/UAT-CHECKLIST.md)
 
 ## 🚀 Deploying on Vercel (fast & reliable)
 

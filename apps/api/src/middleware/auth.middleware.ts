@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/env.js';
 import { UnauthorizedError, ForbiddenError } from '../lib/errors.js';
 import { Role } from '@academy/shared';
+import { deviceService } from '../services/device.service.js';
+import { AppError } from '../lib/errors.js';
 
 export interface AuthUser {
   userId: string;
@@ -11,6 +13,8 @@ export interface AuthUser {
   name: string;
   studentId?: string | null;
   mustChangePassword?: boolean;
+  /** UserDevice id of this session */
+  sid?: string | null;
 }
 
 declare global {
@@ -21,7 +25,7 @@ declare global {
   }
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   try {
     let token: string | undefined;
 
@@ -41,11 +45,15 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
     }
 
     const payload = jwt.verify(token, config.jwt.accessSecret) as AuthUser;
+    // A device signed out elsewhere (device limit, "sign out device", password reset) loses access at once
+    if (payload.sid && !(await deviceService.isActive(payload.sid))) {
+      throw new AppError('You were signed out on this device. Please sign in again.', 401, 'SESSION_REVOKED');
+    }
     req.user = payload;
     next();
   } catch (error: any) {
     if (error instanceof jwt.TokenExpiredError) {
-      next(new UnauthorizedError('Access token expired. Please refresh your token.'));
+      next(new AppError('Access token expired. Please refresh your token.', 401, 'TOKEN_EXPIRED'));
     } else if (error instanceof jwt.JsonWebTokenError) {
       next(new UnauthorizedError('Invalid access token.'));
     } else {
