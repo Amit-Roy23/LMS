@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Clock,
   Lock,
+  MonitorSmartphone,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -36,6 +37,11 @@ export interface VideoPlayerProps {
   isCompleted?: boolean;
   onProgressUpdate?: (percent: number, isCompleted: boolean) => void;
   onComplete?: () => void;
+  posterUrl?: string;
+  /** Set when this account is already streaming on another device. */
+  streamConflict?: { deviceLabel: string } | null;
+  /** Moves the account's stream to this device (reloads the lesson with takeover). */
+  onTakeover?: () => void;
 }
 
 /** Formats seconds as m:ss (or h:mm:ss) like a media player clock. */
@@ -60,6 +66,9 @@ export function VideoPlayer({
   isCompleted = false,
   onProgressUpdate,
   onComplete,
+  posterUrl: posterProp,
+  streamConflict,
+  onTakeover,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,7 +91,53 @@ export function VideoPlayer({
   const [reloadKey, setReloadKey] = useState(0);
 
   // Rendered demo videos ship with a poster frame next to the MP4
-  const posterUrl = videoUrl && /^\/media\/.+\.mp4$/.test(videoUrl) ? videoUrl.replace(/\.mp4$/, '.jpg') : undefined;
+  const posterUrl = posterProp || (videoUrl && /^\/media\/.+\.mp4$/.test(videoUrl) ? videoUrl.replace(/\.mp4$/, '.jpg') : undefined);
+  const isHls = !!videoUrl && videoUrl.includes('.m3u8');
+  const [stoppedElsewhere, setStoppedElsewhere] = useState(false);
+
+  // Encrypted HLS: native on Safari/iOS, hls.js elsewhere (keys are fetched with the signed link)
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !isHls) return;
+    let hls: any = null;
+    let cancelled = false;
+    setStoppedElsewhere(false);
+    const native = el.canPlayType('application/vnd.apple.mpegurl') && !/Chrome|Android/.test(navigator.userAgent);
+    if (native) {
+      el.src = videoUrl;
+    } else {
+      import('hls.js').then(({ default: Hls }) => {
+        if (cancelled || !videoRef.current) return;
+        if (!Hls.isSupported()) {
+          setLoadError(true);
+          return;
+        }
+        hls = new Hls({ enableWorker: true, lowLatencyMode: false, fragLoadingMaxRetry: 3, manifestLoadingMaxRetry: 2 });
+        let recoveries = 0;
+        const fail = () => {
+          setIsBuffering(false);
+          setLoadError(true);
+          hls?.destroy();
+          hls = null;
+        };
+        hls.on(Hls.Events.ERROR, (_evt: any, data: any) => {
+          // Media errors (decode/append) can usually be recovered once; anything else, or repeats, stops playback
+          if (data?.type === Hls.ErrorTypes.MEDIA_ERROR && (data.fatal || data.details === 'bufferAppendError')) {
+            if (recoveries++ < 1) hls.recoverMediaError();
+            else fail();
+          } else if (data?.fatal) {
+            fail();
+          }
+        });
+        hls.loadSource(videoUrl);
+        hls.attachMedia(videoRef.current);
+      });
+    }
+    return () => {
+      cancelled = true;
+      if (hls) hls.destroy();
+    };
+  }, [videoUrl, isHls, reloadKey]);
 
   // Played interval tracking for tamper-proof heartbeat
   const currentIntervalStartRef = useRef<number | null>(null);
@@ -173,8 +228,15 @@ export function VideoPlayer({
         }
 
         onProgressUpdate?.(res.percent, res.isCompleted);
-      } catch (err) {
-        console.warn('Heartbeat sync deferred', err);
+      } catch (err: any) {
+        if (err?.code === 'STREAM_ACTIVE_ELSEWHERE') {
+          // Another device took over this account's stream: stop here
+          videoRef.current?.pause();
+          setIsPlaying(false);
+          setStoppedElsewhere(true);
+        } else {
+          console.warn('Heartbeat sync deferred', err);
+        }
       } finally {
         setIsSaving(false);
       }
@@ -356,10 +418,13 @@ export function VideoPlayer({
         <video
           key={`${videoUrl}-${reloadKey}`}
           ref={videoRef}
-          src={videoUrl}
+          src={isHls ? undefined : videoUrl}
           poster={posterUrl}
           preload="metadata"
           playsInline
+          controlsList="nodownload noremoteplayback noplaybackrate"
+          disablePictureInPicture
+          onContextMenu={(e) => e.preventDefault()}
           muted={isMuted}
           onPlay={onPlay}
           onPause={onPause}
@@ -389,6 +454,30 @@ export function VideoPlayer({
           onClick={togglePlay}
           className="w-full h-full object-contain cursor-pointer bg-black"
         />
+      )}
+
+      {/* One stream per account: playing elsewhere */}
+      {(streamConflict || stoppedElsewhere) && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-night-950/95 text-center px-6">
+          <MonitorSmartphone className="w-10 h-10 text-sky-800" />
+          <p className="text-white font-semibold">
+            {stoppedElsewhere ? 'Playback moved to another device' : `You're already watching on ${streamConflict?.deviceLabel}`}
+          </p>
+          <p className="text-sm text-night-400 max-w-sm">
+            Your account can play one video at a time. Watching here will pause the other device.
+          </p>
+          {onTakeover && (
+            <button
+              onClick={() => {
+                setStoppedElsewhere(false);
+                onTakeover();
+              }}
+              className="mt-1 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-night-900 hover:bg-night-100"
+            >
+              <Play className="w-4 h-4" /> Watch here instead
+            </button>
+          )}
+        </div>
       )}
 
       {/* Buffering spinner */}

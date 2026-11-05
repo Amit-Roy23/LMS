@@ -8,7 +8,8 @@ import { certificateController } from '../controllers/certificate.controller.js'
 import { reportController, userController, consoleUserController } from '../controllers/misc.controller.js';
 import { billingController } from '../controllers/billing.controller.js';
 import { consoleController } from '../controllers/console.controller.js';
-import { CONSOLE_ROLES, ownCourse, ownStudent, courseOf } from '../lib/access.js';
+import { CONSOLE_ROLES, ownCourse, ownStudent, courseOf, scopedCourseIds } from '../lib/access.js';
+import { streamService } from '../services/stream.service.js';
 import { requireStepUp } from '../services/step-up.service.js';
 import { adminStudentController } from '../controllers/admin-student.controller.js';
 import { notificationController } from '../controllers/notification.controller.js';
@@ -190,6 +191,20 @@ router.post('/admin/payments/:id/refund', requireStepUp('refund a payment'), bil
 
 // Reports & Analytics
 router.get('/admin/reports/analytics', reportController.getAnalytics);
+
+// Video viewing log (who watched what, from which device and network)
+router.get('/admin/video-activity', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rows = await streamService.viewLog({
+      courseIds: await scopedCourseIds(req),
+      userId: req.query.userId as string,
+      take: parseInt(req.query.take as string) || 100,
+    });
+    return sendSuccess(res, rows);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // ==========================================
 // Main-Admin Only Routes (ADMIN role; sensitive ones need PIN + OTP)

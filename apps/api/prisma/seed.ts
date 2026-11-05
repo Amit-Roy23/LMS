@@ -40,6 +40,17 @@ import { seedDemoCatalog } from './seed-catalog';
 
 const prisma = new PrismaClient();
 
+function loadHlsKeys(): Record<string, string> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const fs = require('fs');
+    const path = require('path');
+    return JSON.parse(fs.readFileSync(path.join(__dirname, 'demo-content/hls-keys.json'), 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
 async function main() {
   console.log('🌱 Starting comprehensive database seed for ADSIGN Skill Academy...');
 
@@ -1459,6 +1470,22 @@ async function main() {
     const phone = u.phone ? '+' + u.phone.replace(/\D/g, '') : null;
     await prisma.user.update({ where: { id: u.id }, data: { isDemo: true, phone } });
   }
+  // Protected streaming: non-preview lessons play as AES-128 encrypted HLS (see scripts/demo-media/build_hls.py)
+  const hlsKeys = loadHlsKeys();
+  const videoLessons = await prisma.lesson.findMany({ where: { videoProvider: 'MP4', isPreview: false }, select: { id: true, videoUrl: true } });
+  let hlsCount = 0;
+  for (const l of videoLessons) {
+    const m = l.videoUrl.match(/^\/media\/lessons\/([^/]+)\/([^/]+)\.mp4$/);
+    const key = m && hlsKeys[`${m[1]}/${m[2]}`];
+    if (!m || !key) continue;
+    await prisma.lesson.update({
+      where: { id: l.id },
+      data: { videoProvider: 'HLS', videoUrl: `/media/hls/${m[1]}/${m[2]}/index.m3u8`, hlsKeyHex: key },
+    });
+    hlsCount++;
+  }
+  console.log(`✅ ${hlsCount} lessons switched to encrypted HLS streaming`);
+
   // GST tax invoices for every completed demo payment
   const { invoiceService } = await import('../src/services/invoice.service');
   const completed = await prisma.payment.findMany({ where: { status: 'COMPLETED' }, orderBy: { createdAt: 'asc' }, select: { id: true } });

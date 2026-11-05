@@ -66,14 +66,19 @@ export default function LessonPlayerPage() {
   const [practiceTasks, setPracticeTasks] = useState<any[]>([]);
 
   // Load lesson & curriculum
-  const loadLessonAndCurriculum = useCallback(async () => {
+  /**
+   * mode 'refresh' updates progress without restarting the video stream;
+   * mode 'takeover' moves this account's stream to this device.
+   */
+  const loadLessonAndCurriculum = useCallback(async (mode: 'load' | 'refresh' | 'takeover' = 'load') => {
     try {
-      setIsLoading(true);
+      if (mode !== 'refresh') setIsLoading(true);
       setAccessError(null);
 
+      const qs = mode === 'refresh' ? '?refresh=1' : mode === 'takeover' ? '?takeover=1' : '';
       const [curriculumRes, lessonRes] = await Promise.all([
         apiClient<any>(`/student/courses/${courseId}/curriculum`),
-        apiClient<any>(`/student/lessons/${lessonId}`).catch((err) => {
+        apiClient<any>(`/student/lessons/${lessonId}${qs}`).catch((err) => {
           if (err?.code || err?.details?.reasonCode) {
             setAccessError({
               reasonCode: err?.details?.reasonCode || err?.code || 'FORBIDDEN',
@@ -100,7 +105,10 @@ export default function LessonPlayerPage() {
       if (lessonRes) {
         // The API wraps the lesson as { lesson: {...} }
         const lesson = lessonRes.lesson || lessonRes;
-        setLessonData(lesson);
+        // A progress refresh keeps the stream the player is already using
+        setLessonData((prev: any) =>
+          lesson.stream?.reuse && prev?.id === lesson.id ? { ...lesson, playableUrl: prev.playableUrl, stream: prev.stream } : lesson
+        );
         setIsBookmarked(!!lesson.isBookmarked);
         setPracticeTasks(lesson.practiceTasks || []);
 
@@ -127,7 +135,7 @@ export default function LessonPlayerPage() {
     try {
       await apiClient(`/student/lessons/${lessonId}/complete`, { method: 'POST' });
       success('Lesson Completed', 'Great job! Your progression has been updated.');
-      loadLessonAndCurriculum();
+      loadLessonAndCurriculum('refresh');
     } catch (err: any) {
       toastError('Cannot Complete', err.message || 'Complete the required watch threshold first.');
     }
@@ -368,7 +376,10 @@ export default function LessonPlayerPage() {
           {/* Player Wrapper */}
           <VideoPlayer
             lessonId={lessonId}
-            videoUrl={lessonData?.playableUrl || lessonData?.videoUrl}
+            videoUrl={lessonData?.playableUrl || ''}
+            posterUrl={lessonData?.posterUrl || undefined}
+            streamConflict={lessonData?.stream?.conflict}
+            onTakeover={() => loadLessonAndCurriculum('takeover')}
             videoProvider={lessonData?.videoProvider}
             title={lessonData?.title}
             studentId={user?.studentId || user?.email || 'Student'}
@@ -379,7 +390,7 @@ export default function LessonPlayerPage() {
             onProgressUpdate={(pct, isComp) => {
               // Keep the lesson details in sync with the player
               setLessonData((prev: any) => (prev ? { ...prev, progress: { ...prev.progress, percent: pct } } : prev));
-              if (isComp) loadLessonAndCurriculum();
+              if (isComp) loadLessonAndCurriculum('refresh');
             }}
           />
 

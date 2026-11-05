@@ -1,3 +1,4 @@
+import { streamService } from '../services/stream.service.js';
 import { billingController } from '../controllers/billing.controller.js';
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller.js';
@@ -63,6 +64,28 @@ router.get('/certificates/verify/:certificateId', certificateController.verifyCe
 router.post('/webhooks/whatsapp', notificationController.webhookWhatsApp);
 router.post('/webhooks/razorpay', billingController.razorpayWebhook);
 router.get('/payments/config', billingController.checkoutConfig);
+
+// Protected HLS: signed playlist and decryption key (the link itself authenticates)
+router.get('/stream/lessons/:id/playlist.m3u8', async (req, res, next) => {
+  try {
+    const body = await streamService.playlist(req, String(req.params.id), String(req.query.t || ''));
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.send(body);
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/stream/lessons/:id/key', async (req, res, next) => {
+  try {
+    const key = await streamService.key(req, String(req.params.id), String(req.query.t || ''));
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.end(key);
+  } catch (err) {
+    next(err);
+  }
+});
 router.get('/invoices/:id/pdf', billingController.publicInvoicePdf);
 router.post('/webhooks/sms', notificationController.webhookSms);
 
