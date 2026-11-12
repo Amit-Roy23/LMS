@@ -25,7 +25,14 @@ export function errorHandler(
   let message = err?.message || 'An unexpected error occurred. Please try again later.';
   const details = err?.details;
 
-  // 2. Handle Prisma known request errors
+  // 2. Upload errors (file too large, too many files) are the client's to fix
+  if (err?.name === 'MulterError') {
+    statusCode = 400;
+    code = 'UPLOAD_REJECTED';
+    message = err.code === 'LIMIT_FILE_SIZE' ? 'The file is too large.' : 'The upload was rejected.';
+  }
+
+  // 3. Handle Prisma known request errors
   if (err?.code === 'P2002') {
     statusCode = 409;
     code = 'CONFLICT';

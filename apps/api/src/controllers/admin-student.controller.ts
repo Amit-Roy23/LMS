@@ -7,6 +7,7 @@ import { BadRequestError, NotFoundError } from '../lib/errors.js';
 import { normalizePhone } from '../lib/phone.js';
 import { logger } from '../lib/logger.js';
 import { config } from '../config/env.js';
+import { siteService } from '../services/site.service.js';
 import { notificationService } from '../services/notification/notification.service.js';
 import { NotificationChannel } from '@academy/shared';
 
@@ -28,9 +29,11 @@ async function alertAdmissionsTeam(inquiry: { id: string; name: string; phone: s
   for (const to of recipients) {
     await notificationService.enqueueNotification({ to, channel: NotificationChannel.EMAIL, templateKey: 'inquiry_alert', variables, idempotencyKey: `inquiry_${inquiry.id}_${to}` });
   }
-  if (config.notifications.admissionsWhatsapp) {
+  // Number is editable in the console (Website settings); falls back to env, then the academy's default
+  const whatsapp = await siteService.admissionsWhatsapp();
+  if (whatsapp) {
     await notificationService.enqueueNotification({
-      to: config.notifications.admissionsWhatsapp,
+      to: whatsapp,
       channel: NotificationChannel.WHATSAPP,
       templateKey: 'inquiry_alert',
       variables,

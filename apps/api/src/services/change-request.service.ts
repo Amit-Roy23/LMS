@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma.js';
+import { Prisma } from '@prisma/client';
 import { config } from '../config/env.js';
 import { BadRequestError, ConflictError, NotFoundError } from '../lib/errors.js';
 import { normalizePhone } from '../lib/phone.js';
@@ -67,6 +68,7 @@ export class ChangeRequestService {
   async decide(id: string, reviewerId: string, approve: boolean, note?: string) {
     const request = await prisma.changeRequest.findUnique({ where: { id }, include: { user: true } });
     if (!request || request.status !== 'PENDING') throw new NotFoundError('Pending request not found');
+    if (request.type === 'SOCIAL_LINKS') return this.decideSocialLinks(request, reviewerId, approve, note);
 
     if (approve) {
       const taken = await prisma.user.findUnique({ where: { phone: request.newValue }, select: { id: true } });
@@ -115,6 +117,66 @@ export class ChangeRequestService {
       .catch((err) => logger.error({ err }, 'Failed to send phone change decision'));
 
     return updated;
+  }
+
+  /**
+   * Instructor social links: approve all, or only the links listed in `keys`; the rest are
+   * dropped. Approved links appear on the public profile at once.
+   */
+  private async decideSocialLinks(request: any, reviewerId: string, approve: boolean, note?: string, keys?: string[]) {
+    const pending: Record<string, string> = JSON.parse(request.newValue || '{}');
+    const profile = await prisma.instructorProfile.findUnique({ where: { userId: request.userId } });
+    const live = { ...((profile?.socials as Record<string, string>) || {}) };
+    const picked = approve ? Object.fromEntries(Object.entries(pending).filter(([k]) => !keys || keys.includes(k))) : {};
+    await prisma.$transaction(async (tx) => {
+      if (profile) {
+        await tx.instructorProfile.update({
+          where: { userId: request.userId },
+          data: { socials: { ...live, ...picked }, pendingSocials: Prisma.DbNull },
+        });
+      }
+      await tx.changeRequest.update({
+        where: { id: request.id },
+        data: {
+          status: approve && Object.keys(picked).length ? 'APPROVED' : 'REJECTED',
+          reviewNote: note || (approve && keys && keys.length < Object.keys(pending).length ? `Approved: ${Object.keys(picked).join(', ')}` : null),
+          reviewedById: reviewerId,
+          reviewedAt: new Date(),
+        },
+      });
+      await tx.auditLog.create({
+        data: {
+          userId: reviewerId,
+          actorRole: 'ADMIN',
+          action: approve ? 'SOCIAL_LINKS_APPROVED' : 'SOCIAL_LINKS_REJECTED',
+          entityType: 'InstructorProfile',
+          entityId: profile?.id || null,
+          before: live,
+          after: approve ? { ...live, ...picked } : undefined,
+          details: { requestId: request.id, links: Object.keys(picked) },
+        },
+      });
+      await tx.notification.create({
+        data: {
+          userId: request.userId,
+          title: approve && Object.keys(picked).length ? 'Social links approved' : 'Social links not approved',
+          message:
+            approve && Object.keys(picked).length
+              ? `These links are now on your public profile: ${Object.keys(picked).join(', ')}.`
+              : `Your submitted links were not approved.${note ? ` Note: ${note}` : ''}`,
+          type: 'SYSTEM' as any,
+          link: '/admin/profile',
+        },
+      });
+    });
+    return prisma.changeRequest.findUnique({ where: { id: request.id } });
+  }
+
+  async decideWithKeys(id: string, reviewerId: string, keys: string[] | undefined, note?: string) {
+    const request = await prisma.changeRequest.findUnique({ where: { id }, include: { user: true } });
+    if (!request || request.status !== 'PENDING') throw new NotFoundError('Pending request not found');
+    if (request.type !== 'SOCIAL_LINKS') return this.decide(id, reviewerId, true, note);
+    return this.decideSocialLinks(request, reviewerId, true, note, keys);
   }
 }
 

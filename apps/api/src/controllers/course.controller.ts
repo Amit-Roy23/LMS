@@ -5,6 +5,8 @@ import { courseService } from '../services/course.service.js';
 import { progressionService } from '../services/progression.service.js';
 import { sendSuccess, sendPaginated } from '../lib/utils.js';
 import { recordAudit, changedFields } from '../lib/audit.js';
+import { fileService, FILE_URL_PREFIX } from '../services/file.service.js';
+import { BadRequestError } from '../lib/errors.js';
 import { isInstructor } from '../lib/access.js';
 
 /** Removes `isCorrect` from every question option in a course payload. */
@@ -114,7 +116,20 @@ export class CourseController {
       const data = { ...req.body };
       if (req.user!.role !== Role.ADMIN) delete data.instructorId; // only admins reassign courses
       const existing = await prisma.course.findUnique({ where: { id } });
+      if (data.settings) data.settings = { ...((existing?.settings as object) || {}), ...data.settings };
       const course = await courseService.updateCourse(id, data);
+      // Keep the mock test and final exam pass marks in line with the course settings
+      if (data.settings) {
+        const st = data.settings as Record<string, any>;
+        await Promise.all([
+          st.mockTestPassingPercent !== undefined &&
+            prisma.mockTest.updateMany({ where: { courseId: id }, data: { passingScorePercent: Number(st.mockTestPassingPercent) } }),
+          st.finalAssessmentPassingPercent !== undefined &&
+            prisma.finalAssessment.updateMany({ where: { courseId: id }, data: { passingScorePercent: Number(st.finalAssessmentPassingPercent) } }),
+          st.passingQuizScorePercent !== undefined &&
+            prisma.quiz.updateMany({ where: { module: { courseId: id } }, data: { passingScorePercent: Number(st.passingQuizScorePercent), passPercentage: Number(st.passingQuizScorePercent) } }),
+        ]);
+      }
       const diff = changedFields(existing, data);
       if (Object.keys(diff.after).length) {
         await recordAudit(req, { action: 'COURSE_UPDATED', entityType: 'Course', entityId: id, ...diff, details: { title: course.title } });
@@ -280,6 +295,34 @@ export class CourseController {
           url,
           sizeBytes: sizeBytes || null,
         },
+      });
+      await recordAudit(req, { action: 'LESSONRESOURCE_CREATED', entityType: 'LessonResource', entityId: resource.id, after: { title } });
+      return sendSuccess(res, resource, 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** Upload a study material file (PDF, ZIP, slides, documents) to a lesson. */
+  async uploadLessonResource(req: Request, res: Response, next: NextFunction) {
+    try {
+      const lessonId = req.params.lessonId as string;
+      const file = (req as any).file as Express.Multer.File | undefined;
+      if (!file) throw new BadRequestError('Choose a file to upload');
+      const lesson = await prisma.lesson.findUnique({ where: { id: lessonId }, select: { id: true } });
+      if (!lesson) throw new BadRequestError('Lesson not found');
+      const stored = await fileService.save({
+        purpose: 'MATERIAL',
+        buffer: file.buffer,
+        filename: file.originalname,
+        mimetype: file.mimetype,
+        uploadedById: req.user!.userId,
+      });
+      const ext = file.originalname.toLowerCase().split('.').pop() || '';
+      const type = ext === 'pdf' ? 'PDF' : ext === 'zip' ? 'ZIP' : ['png', 'jpg', 'jpeg'].includes(ext) ? 'IMAGE' : 'CODE';
+      const title = String(req.body?.title || '').trim() || file.originalname.replace(/\.[^.]+$/, '');
+      const resource = await prisma.lessonResource.create({
+        data: { lessonId, title: title.slice(0, 200), type: type as any, url: `${FILE_URL_PREFIX}${stored.id}`, sizeBytes: stored.size },
       });
       await recordAudit(req, { action: 'LESSONRESOURCE_CREATED', entityType: 'LessonResource', entityId: resource.id, after: { title } });
       return sendSuccess(res, resource, 201);

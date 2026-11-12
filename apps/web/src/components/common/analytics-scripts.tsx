@@ -5,10 +5,17 @@ import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { ANALYTICS } from '../../lib/analytics';
 
-/** Loads GA4 / Google Ads / Meta Pixel when configured and reports page views on navigation. */
-export function AnalyticsScripts() {
+const safe = (v?: string) => (v && /^[A-Za-z0-9-]{4,30}$/.test(v) ? v : '');
+
+/**
+ * Loads GA4 / Google Ads / Meta Pixel when configured and reports page views on navigation.
+ * IDs come from the admin console (SEO & analytics), falling back to the NEXT_PUBLIC_* env values.
+ */
+export function AnalyticsScripts({ ids }: { ids?: { gaId?: string; adsId?: string; pixelId?: string } }) {
   const pathname = usePathname();
-  const { gaId, adsId, pixelId } = ANALYTICS;
+  const gaId = safe(ids?.gaId) || ANALYTICS.gaId;
+  const adsId = safe(ids?.adsId) || ANALYTICS.adsId;
+  const pixelId = safe(ids?.pixelId) || ANALYTICS.pixelId;
   const gtagId = gaId || adsId;
 
   useEffect(() => {

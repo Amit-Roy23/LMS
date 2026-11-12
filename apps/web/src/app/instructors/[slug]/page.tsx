@@ -6,6 +6,7 @@ import { Footer } from '../../../components/common/footer';
 import { CourseCard } from '../../../components/course/course-card';
 import { fetchPublic } from '../../../lib/api';
 import { SITE_URL } from '../../../lib/site';
+import { withSeo } from '../../../lib/site-server';
 import { Star, Users, BookOpen, Briefcase, Linkedin, Github, Globe, Youtube, Instagram } from 'lucide-react';
 
 export const revalidate = 60;
@@ -22,12 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const p = await getInstructor(slug);
   if (!p) return { title: 'Instructor' };
-  return {
+  return withSeo(`instructor:${slug}`, {
     title: `${p.name}, ${p.headline}`,
     description: String(p.bio).slice(0, 160),
     alternates: { canonical: `/instructors/${slug}` },
-    openGraph: { type: 'profile', title: p.name, description: p.headline, url: `/instructors/${slug}` },
-  };
+    openGraph: { type: 'profile', title: p.name, description: p.headline, url: `/instructors/${slug}`, ...(p.avatar ? { images: [{ url: p.avatar, width: 512, height: 512 }] } : {}) },
+  });
 }
 
 export default async function InstructorProfilePage({ params }: Props) {

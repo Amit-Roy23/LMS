@@ -6,6 +6,7 @@ import { config } from '../config/env.js';
 import { BadRequestError, NotFoundError, UnauthorizedError, ForbiddenError } from '../lib/errors.js';
 import { Role, UserStatus } from '@academy/shared';
 import {
+  generateStudentId,
   generateVerificationToken,
   hashToken,
   maskRecipient,
@@ -148,8 +149,12 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(params.password, 10);
-    const user = await prisma.user.create({
+    // Every student gets an official ID (ADS-2026-000123) at registration; it also works as a login
+    const user = await prisma.$transaction(async (tx) => {
+      const studentId = await generateStudentId(tx);
+      return tx.user.create({
       data: {
+        studentId,
         name: params.name,
         email: normalizedEmail,
         passwordHash,
@@ -161,6 +166,7 @@ export class AuthService {
         studentProfile: { create: { phone } },
       },
       select: USER_SELECT,
+      });
     });
 
     const deviceId = req ? getDeviceId(req) : null;

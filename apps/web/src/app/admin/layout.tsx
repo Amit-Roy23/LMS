@@ -23,6 +23,9 @@ import {
   PlayCircle,
   Receipt,
   UserRound,
+  FileText,
+  Search,
+  LifeBuoy,
 } from 'lucide-react';
 import { StepUpProvider } from '../../components/admin/step-up-provider';
 
@@ -85,8 +88,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { href: '/admin/users', label: 'Users & Roles', icon: UserCheck },
         ]
       : []),
+    ...(is(Role.ADMIN, Role.STAFF)
+      ? [
+          { href: '/admin/website', label: 'Website & Pages', icon: FileText },
+          { href: '/admin/seo', label: 'SEO & Analytics', icon: Search },
+        ]
+      : []),
     ...(is(Role.ADMIN, Role.INSTRUCTOR) ? [{ href: '/admin/profile', label: 'Public Profile', icon: UserRound }] : []),
     { href: '/admin/security', label: 'My Security', icon: ShieldCheck },
+    { href: '/admin/help', label: 'Help', icon: LifeBuoy },
   ];
 
   return (
@@ -96,12 +106,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       user={user}
       onLogout={logout}
       headerActions={
-        <Link
-          href="/student/dashboard"
-          className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-semibold text-slate-300 bg-white border border-[#e2e8f0] hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-        >
-          <Eye className="w-4 h-4" /> Student view
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/help"
+            aria-label="Help: console guide"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-semibold text-slate-300 bg-white border border-[#e2e8f0] hover:border-indigo-500 hover:text-indigo-400 transition-colors"
+          >
+            <LifeBuoy className="w-4 h-4" /> <span className="hidden sm:inline">Help</span>
+          </Link>
+          <Link
+            href="/student/dashboard"
+            className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-semibold text-slate-300 bg-white border border-[#e2e8f0] hover:border-indigo-500 hover:text-indigo-400 transition-colors"
+          >
+            <Eye className="w-4 h-4" /> Student view
+          </Link>
+        </div>
       }
     >
       <StepUpProvider>{children}</StepUpProvider>

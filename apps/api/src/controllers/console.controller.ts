@@ -50,7 +50,8 @@ export const consoleController = {
     sendSuccess(res, await changeRequestService.list(req.query.status as string));
   }),
   approveChangeRequest: wrap(async (req, res) => {
-    sendSuccess(res, await changeRequestService.decide(String(req.params.id), req.user!.userId, true, req.body?.note));
+    const keys = Array.isArray(req.body?.keys) ? req.body.keys.map(String) : undefined;
+    sendSuccess(res, await changeRequestService.decideWithKeys(String(req.params.id), req.user!.userId, keys, req.body?.note));
   }),
   rejectChangeRequest: wrap(async (req, res) => {
     sendSuccess(res, await changeRequestService.decide(String(req.params.id), req.user!.userId, false, req.body?.note));

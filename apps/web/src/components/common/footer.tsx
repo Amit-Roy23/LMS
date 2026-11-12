@@ -1,9 +1,11 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone } from 'lucide-react';
+import { Github, Twitter, Linkedin, Youtube, ShieldCheck, Mail, Phone, MessageCircle } from 'lucide-react';
 import { BrandLogo } from './brand-logo';
 import { BRAND } from '../../lib/brand';
-import { ACADEMY } from '../legal/policy-page';
+import { useSiteConfig, contactFrom, whatsappLink } from '../../lib/site-config';
 
 const COLUMNS = [
   {
@@ -51,6 +53,7 @@ const SOCIALS = [
 ];
 
 export function Footer() {
+  const contact = contactFrom(useSiteConfig().settings);
   return (
     <footer className="relative bg-night-950 text-night-400 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-brand-gradient opacity-60" aria-hidden />
@@ -65,14 +68,19 @@ export function Footer() {
               certificates that employers can verify in seconds.
             </p>
             <div className="space-y-1.5 text-sm">
-              {ACADEMY.email && (
-                <a href={`mailto:${ACADEMY.email}`} className="flex items-center gap-2 hover:text-white">
-                  <Mail className="w-4 h-4 text-indigo-500" /> {ACADEMY.email}
+              {contact.email && (
+                <a href={`mailto:${contact.email}`} className="flex items-center gap-2 hover:text-white">
+                  <Mail className="w-4 h-4 text-indigo-500" /> {contact.email}
                 </a>
               )}
-              {ACADEMY.phone && (
-                <a href={`tel:${ACADEMY.phone}`} className="flex items-center gap-2 hover:text-white">
-                  <Phone className="w-4 h-4 text-indigo-500" /> {ACADEMY.phone}
+              {contact.phone && (
+                <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-white">
+                  <Phone className="w-4 h-4 text-indigo-500" /> {contact.phone}
+                </a>
+              )}
+              {contact.whatsapp && (
+                <a href={whatsappLink(contact.whatsapp)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white">
+                  <MessageCircle className="w-4 h-4 text-emerald-500" /> WhatsApp {contact.whatsapp}
                 </a>
               )}
               <Link href="/contact" className="flex items-center gap-2 hover:text-white">

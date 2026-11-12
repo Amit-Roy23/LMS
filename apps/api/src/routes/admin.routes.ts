@@ -12,6 +12,8 @@ import { CONSOLE_ROLES, ownCourse, ownStudent, courseOf, scopedCourseIds } from 
 import { streamService } from '../services/stream.service.js';
 import { instructorService } from '../services/instructor.service.js';
 import { recordAudit } from '../lib/audit.js';
+import { siteService } from '../services/site.service.js';
+import { fileService, FILE_URL_PREFIX } from '../services/file.service.js';
 import { requireStepUp } from '../services/step-up.service.js';
 import { adminStudentController } from '../controllers/admin-student.controller.js';
 import { notificationController } from '../controllers/notification.controller.js';
@@ -39,6 +41,8 @@ import {
 } from '@academy/shared';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+// Study materials and photos (size and type are checked again by the file service)
+const fileUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 26 * 1024 * 1024, files: 1 } });
 
 const router = Router();
 
@@ -91,9 +95,47 @@ router.get('/admin/instructor-profile', teaching, async (req: Request, res: Resp
 });
 router.put('/admin/instructor-profile', teaching, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const profile = await instructorService.upsertOwn(req.user!.userId, req.body || {});
+    // Main admins' own links go live directly; instructors' new links wait for approval
+    const profile = await instructorService.upsertOwn(req.user!.userId, req.body || {}, { autoApproveLinks: req.user!.role === ADMIN });
     await recordAudit(req, { action: 'INSTRUCTORPROFILE_UPDATED', entityType: 'InstructorProfile', entityId: profile.id, details: { slug: profile.slug } });
     return sendSuccess(res, profile);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/admin/instructor-profile/photo', teaching, fileUpload.single('photo'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: 'Choose a photo to upload' } });
+    const profile = await instructorService.setPhoto(req.user!.userId, file);
+    await recordAudit(req, { action: 'INSTRUCTORPHOTO_UPDATED', entityType: 'InstructorProfile', entityId: profile.id });
+    return sendSuccess(res, { avatar: profile.avatar });
+  } catch (err) {
+    next(err);
+  }
+});
+router.delete('/admin/instructor-profile/photo', teaching, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await instructorService.removePhoto(req.user!.userId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Instructors' live social links: admins and staff can review, main admins can hide one
+router.get('/admin/instructor-links', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await instructorService.listLiveLinks());
+  } catch (err) {
+    next(err);
+  }
+});
+router.delete('/admin/instructor-links/:userId/:key', authorizeRoles(ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const removed = await instructorService.hideLink(String(req.params.userId), String(req.params.key));
+    await recordAudit(req, { action: 'SOCIAL_LINK_HIDDEN', entityType: 'InstructorProfile', entityId: String(req.params.userId), details: removed });
+    return sendSuccess(res, removed);
   } catch (err) {
     next(err);
   }
@@ -110,6 +152,43 @@ router.post('/admin/change-requests/:id/reject', authorizeRoles(ADMIN), consoleC
 
 // Courses Management
 router.get('/admin/courses', courseController.listAdminCourses);
+router.get('/admin/courses/:id/editor', ownCourse(courseOf.courseParam()), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const course = await prisma.course.findUnique({
+      where: { id: req.params.id as string },
+      include: {
+        instructor: { select: { id: true, name: true } },
+        modules: {
+          where: { deletedAt: null },
+          orderBy: { order: 'asc' },
+          include: {
+            lessons: { where: { deletedAt: null }, orderBy: { order: 'asc' }, include: { lessonResources: { orderBy: { createdAt: 'asc' } } } },
+            quiz: { select: { id: true, title: true, passingScorePercent: true } },
+            assignment: { select: { id: true, title: true, maxScore: true } },
+          },
+        },
+        batches: {
+          orderBy: { startDate: 'desc' },
+          include: { liveSessions: { orderBy: { startsAt: 'desc' }, take: 50 } },
+        },
+        mockTest: { select: { id: true, title: true, passingScorePercent: true } },
+        finalAssessment: { select: { id: true, title: true, passingScorePercent: true } },
+      },
+    });
+    if (!course || course.deletedAt) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Course not found' } });
+    // Materials stored with us open through a short-lived link for the person editing
+    for (const m of course.modules) {
+      for (const l of m.lessons) {
+        for (const r of l.lessonResources as any[]) {
+          r.downloadUrl = r.url.startsWith(FILE_URL_PREFIX) ? fileService.signedDownloadUrl(r.url.slice(FILE_URL_PREFIX.length), req.user!.userId) : r.url;
+        }
+      }
+    }
+    return sendSuccess(res, course);
+  } catch (err) {
+    next(err);
+  }
+});
 router.post('/admin/courses', validateBody(createCourseSchema), courseController.createCourse);
 router.put('/admin/courses/:id', ownCourse(courseOf.courseParam()), guardPriceChange, validateBody(updateCourseSchema), courseController.updateCourse);
 router.delete('/admin/courses/:id', requireStepUp('delete a course'), courseController.deleteCourse);
@@ -128,6 +207,7 @@ router.post('/admin/lessons/reorder', ownCourse(courseOf.reorderLessons()), cour
 
 // Lesson Resources
 router.post('/admin/lessons/:lessonId/resources', ownCourse(courseOf.lesson()), courseController.createLessonResource);
+router.post('/admin/lessons/:lessonId/resources/upload', ownCourse(courseOf.lesson()), fileUpload.single('file'), courseController.uploadLessonResource);
 router.delete('/admin/resources/:resourceId', teaching, ownCourse(courseOf.resource()), courseController.deleteLessonResource);
 
 // Practice Tasks Management
@@ -235,6 +315,105 @@ router.post('/admin/users', requireStepUp('create a staff, instructor or admin a
 router.get('/admin/users/:id', ownStudent('id'), userController.getUser);
 router.put('/admin/users/:id/status', requireStepUp('suspend or reactivate an account'), userController.updateUserStatus);
 router.put('/admin/users/:id/role', requireStepUp('change a role'), consoleUserController.updateRole);
+
+// ==========================================
+// Website: contact details, alert numbers, SEO, analytics and editable pages
+// ==========================================
+router.get('/admin/site/settings', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await siteService.getSettings(req.user!.role === ADMIN));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/admin/site/settings', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { settings, changes } = await siteService.updateSettings(req.body?.values || {}, req.user!.role);
+    if (changes.length) {
+      await recordAudit(req, {
+        action: 'SITE_SETTINGS_UPDATED',
+        entityType: 'Setting',
+        before: Object.fromEntries(changes.map((c) => [c.key, c.before])),
+        after: Object.fromEntries(changes.map((c) => [c.key, c.after])),
+      });
+    }
+    if (req.user!.role !== ADMIN) delete settings['notify.admissionsWhatsapp'];
+    return sendSuccess(res, { settings, changed: changes.map((c) => c.key) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/admin/site/seo', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [entries, courses, instructors] = await Promise.all([
+      siteService.listSeo(),
+      prisma.course.findMany({ where: { deletedAt: null }, select: { slug: true, title: true, status: true }, orderBy: { title: 'asc' } }),
+      prisma.instructorProfile.findMany({ select: { slug: true, isPublic: true, user: { select: { name: true } } }, orderBy: { displayOrder: 'asc' } }),
+    ]);
+    return sendSuccess(res, {
+      entries,
+      courses,
+      instructors: instructors.map((i) => ({ slug: i.slug, name: i.user.name, isPublic: i.isPublic })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/admin/site/seo', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const key = String(req.body?.key || '');
+    const { entry, before } = await siteService.saveSeo(key, req.body || {}, req.user!.userId);
+    await recordAudit(req, { action: 'SEO_UPDATED', entityType: 'SeoEntry', entityId: key, before: before ?? undefined, after: entry ?? { cleared: true } });
+    return sendSuccess(res, entry);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/admin/site/pages', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    return sendSuccess(res, await siteService.listPages());
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/admin/site/pages/:slug', office, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const slug = String(req.params.slug);
+    const [page, versions] = await Promise.all([siteService.getPage(slug), siteService.versions(slug)]);
+    return sendSuccess(res, { ...page, versions });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/admin/site/pages/:slug', authorizeRoles(ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const slug = String(req.params.slug);
+    const result = await siteService.savePage(slug, req.body || {}, req.user!.userId);
+    if (result.changed) {
+      await recordAudit(req, { action: 'SITEPAGE_UPDATED', entityType: 'SitePage', entityId: slug, before: result.before ? { title: result.before.title } : undefined, after: { title: result.page.title } });
+    }
+    return sendSuccess(res, { ...result.page, changed: result.changed });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/admin/site/pages/:slug/versions/:versionId/restore', authorizeRoles(ADMIN), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const slug = String(req.params.slug);
+    const result = await siteService.restore(slug, String(req.params.versionId), req.user!.userId);
+    await recordAudit(req, { action: 'SITEPAGE_RESTORED', entityType: 'SitePage', entityId: slug, details: { versionId: req.params.versionId } });
+    return sendSuccess(res, result.page);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // System Settings Management
 router.get('/admin/settings', authorizeRoles(ADMIN), async (req: Request, res: Response, next: NextFunction) => {

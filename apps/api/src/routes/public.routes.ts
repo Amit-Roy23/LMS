@@ -1,3 +1,6 @@
+import { fileService } from '../services/file.service.js';
+import { siteService } from '../services/site.service.js';
+import { sendSuccess } from '../lib/utils.js';
 import { instructorService } from '../services/instructor.service.js';
 import { streamService } from '../services/stream.service.js';
 import { billingController } from '../controllers/billing.controller.js';
@@ -23,6 +26,25 @@ const router = Router();
 // ==========================================
 // Layer 1: Public Marketing & Auth Routes
 // ==========================================
+
+// Website settings (contact details, SEO, analytics IDs) and editable pages
+router.get('/site-config', async (req, res, next) => {
+  try {
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return sendSuccess(res, await siteService.publicConfig());
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/site-pages/:slug', async (req, res, next) => {
+  try {
+    const page = await siteService.getPage(String(req.params.slug));
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return sendSuccess(res, { slug: page.slug, title: page.title, content: page.content, updatedAt: page.updatedAt });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Health Check
 router.get('/health', (req, res) => {
@@ -83,6 +105,34 @@ router.get('/certificates/verify/:certificateId', certificateController.verifyCe
 router.post('/webhooks/whatsapp', notificationController.webhookWhatsApp);
 router.post('/webhooks/razorpay', billingController.razorpayWebhook);
 router.get('/payments/config', billingController.checkoutConfig);
+
+// Uploaded files: public profile photos, and study materials behind a per-student signed link
+router.get('/files/:id', async (req, res, next) => {
+  try {
+    const { file, bytes } = await fileService.read(String(req.params.id));
+    if (!file.isPublic) return res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'File not found' } });
+    res.setHeader('Content-Type', file.mimetype);
+    res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.end(bytes);
+  } catch (err) {
+    next(err);
+  }
+});
+router.get('/files/:id/download', async (req, res, next) => {
+  try {
+    const id = String(req.params.id);
+    fileService.verifyDownload(id, String(req.query.u || ''), String(req.query.exp || ''), String(req.query.sig || ''));
+    const { file, bytes } = await fileService.read(id);
+    res.setHeader('Content-Type', file.mimetype);
+    res.setHeader('Content-Disposition', `attachment; filename="${file.filename.replace(/"/g, '')}"`);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.end(bytes);
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Protected HLS: signed playlist and decryption key (the link itself authenticates)
 router.get('/stream/lessons/:id/playlist.m3u8', async (req, res, next) => {

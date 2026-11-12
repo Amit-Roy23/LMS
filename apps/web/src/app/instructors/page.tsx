@@ -3,15 +3,18 @@ import Link from 'next/link';
 import { Navbar } from '../../components/common/navbar';
 import { Footer } from '../../components/common/footer';
 import { fetchPublic } from '../../lib/api';
+import { withSeo } from '../../lib/site-server';
 import { Users, BookOpen, ArrowRight } from 'lucide-react';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: 'Instructors',
-  description: 'Meet the ADSIGN Skill Academy instructors: practising designers, engineers and marketers who teach through real projects.',
-  alternates: { canonical: '/instructors' },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return withSeo('page:/instructors', {
+    title: 'Instructors',
+    description: 'Meet the ADSIGN Skill Academy instructors: practising designers, engineers and marketers who teach through real projects.',
+    alternates: { canonical: '/instructors' },
+  });
+}
 
 interface Instructor {
   slug: string;

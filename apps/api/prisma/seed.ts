@@ -272,7 +272,8 @@ async function main() {
         maxQuizAttempts: 3,
         sequentialLessonsLock: true,
         lessonCompletionThresholdPercent: 90,
-        mockTestPassingPercent: 75,
+        mockTestPassingPercent: 80,
+        assignmentPassingPercent: 80,
         finalAssessmentPassingPercent: 80,
         timeGatedByLiveSession: false,
       },
@@ -302,7 +303,8 @@ async function main() {
         maxQuizAttempts: 3,
         sequentialLessonsLock: true,
         lessonCompletionThresholdPercent: 90,
-        mockTestPassingPercent: 75,
+        mockTestPassingPercent: 80,
+        assignmentPassingPercent: 80,
         finalAssessmentPassingPercent: 80,
       },
     },
@@ -842,9 +844,9 @@ async function main() {
     data: {
       courseId: course1.id,
       title: 'Comprehensive Final Mock Examination',
-      description: 'A timed 20-minute simulated examination testing your full-stack knowledge across all modules. Passing threshold: 75%.',
+      description: 'A timed 20-minute simulated examination testing your full-stack knowledge across all modules. Passing threshold: 80%.',
       durationMinutes: 20,
-      passingScorePercent: 75,
+      passingScorePercent: 80,
       maxAttempts: 3,
     },
   });
@@ -1470,6 +1472,54 @@ async function main() {
     const phone = u.phone ? '+' + u.phone.replace(/\D/g, '') : null;
     await prisma.user.update({ where: { id: u.id }, data: { isDemo: true, phone } });
   }
+  // Every student has an official ID (demo learners created without one get theirs here)
+  const { generateStudentId } = await import('../src/lib/student-id');
+  const withoutId = await prisma.user.findMany({ where: { role: 'STUDENT', studentId: null }, orderBy: { createdAt: 'asc' }, select: { id: true } });
+  for (const u of withoutId) {
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: u.id }, data: { studentId: await generateStudentId(tx) } });
+    });
+  }
+
+  // Study materials: a lesson-notes PDF for every lesson and a worksheet per module
+  const { seedStudyMaterials } = await import('./seed-materials');
+  await seedStudyMaterials(prisma);
+
+  // Always-open practice room on every live batch, so the live-class flow can be demonstrated at any time
+  const liveBatches = await prisma.batch.findMany({ where: { mode: DeliveryMode.LIVE }, select: { id: true } });
+  for (const b of liveBatches) {
+    await prisma.liveSession.create({
+      data: {
+        batchId: b.id,
+        title: 'Demo: open practice room (always open)',
+        startsAt: new Date(Date.now() - 10 * 60 * 1000),
+        durationMinutes: 365 * 24 * 60, // stays joinable for a year after seeding
+        provider: LiveProvider.OTHER,
+        joinUrl: 'https://meet.jit.si/ADSIGN-Demo-Classroom',
+        status: LiveSessionStatus.LIVE,
+      },
+    });
+  }
+  console.log(`✅ Open demo live class on ${liveBatches.length} live batches`);
+
+  // Website pages (version 1 of each) and website settings
+  const { DEFAULT_PAGES } = await import('../src/services/site-defaults');
+  await prisma.sitePageVersion.deleteMany();
+  await prisma.sitePage.deleteMany();
+  for (const [slug, page] of Object.entries(DEFAULT_PAGES)) {
+    await prisma.sitePage.create({ data: { slug, title: page.title, content: page.content, updatedById: admin.id } });
+    await prisma.sitePageVersion.create({ data: { slug, title: page.title, content: page.content, createdById: admin.id } });
+  }
+  const siteSettings: [string, string, string][] = [
+    ['notify.admissionsWhatsapp', '+919681386103', 'WhatsApp number for new-enquiry alerts'],
+    ['contact.whatsapp', '+91 96813 86103', 'WhatsApp chat number'],
+    ['contact.hours', 'Monday to Saturday, 10am – 7pm IST', 'Office hours'],
+  ];
+  for (const [key, value, description] of siteSettings) {
+    await prisma.setting.upsert({ where: { key }, create: { key, value, description, category: key.split('.')[0].toUpperCase() }, update: {} });
+  }
+  console.log(`✅ Website pages (${Object.keys(DEFAULT_PAGES).length}) and settings`);
+
   // Public instructor profiles
   try {
     const fs = require('fs');

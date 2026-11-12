@@ -438,6 +438,14 @@ export class ProvisioningService {
       throw new NotFoundError(`User ${event.studentId} not found`);
     }
 
+    // Students who registered themselves get their official ID with their first admission
+    if (!student.studentId) {
+      await prisma.$transaction(async (tx) => {
+        const studentId = await generateStudentId(tx);
+        await tx.user.update({ where: { id: student.id }, data: { studentId } });
+      });
+    }
+
     // Upsert enrollment & module progress
     await prisma.$transaction(async (tx) => {
       await tx.enrollment.upsert({

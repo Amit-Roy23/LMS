@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { progressionService, mergeWatchedIntervals } from '../services/progression.service.js';
+import { fileService, FILE_URL_PREFIX } from '../services/file.service.js';
 import { streamService } from '../services/stream.service.js';
 import { storageService } from '../services/storage.service.js';
 import { eventBus } from '../events/event-bus.js';
@@ -233,7 +234,10 @@ export class StudentPlayerController {
         id: resItem.id,
         title: resItem.title,
         type: resItem.type,
-        url: storageService.getSignedUrl(resItem.url),
+        // Our own files get a 15-minute download link made for this student only
+        url: resItem.url.startsWith(FILE_URL_PREFIX)
+          ? fileService.signedDownloadUrl(resItem.url.slice(FILE_URL_PREFIX.length), studentId)
+          : storageService.getSignedUrl(resItem.url),
         sizeBytes: resItem.sizeBytes,
         createdAt: resItem.createdAt.toISOString(),
       }));

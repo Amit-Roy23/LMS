@@ -96,7 +96,8 @@ export const courseSettingsSchema = z.object({
   maxQuizAttempts: z.number().min(1).max(20).default(3),
   sequentialLessonsLock: z.boolean().default(true),
   lessonCompletionThresholdPercent: z.number().min(50).max(100).default(90),
-  mockTestPassingPercent: z.number().min(0).max(100).default(75),
+  mockTestPassingPercent: z.number().min(0).max(100).default(80),
+  assignmentPassingPercent: z.number().min(0).max(100).default(80),
   finalAssessmentPassingPercent: z.number().min(0).max(100).default(80),
   timeGatedByLiveSession: z.boolean().default(false),
   requirePracticeDone: z.boolean().default(false),
@@ -111,7 +112,11 @@ export const createCourseSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  thumbnail: z.string().url().optional().nullable(),
+  thumbnail: z
+    .string()
+    .refine((v) => v === '' || v.startsWith('/') || /^https?:\/\//.test(v), 'Thumbnail must be a web address or a site path')
+    .optional()
+    .nullable(),
   price: z.number().min(0, 'Price must be non-negative').default(0),
   recordedPrice: z.number().min(0).optional().nullable(),
   livePrice: z.number().min(0).optional().nullable(),

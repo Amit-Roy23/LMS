@@ -212,8 +212,9 @@ export async function seedDemoCatalog(
       maxQuizAttempts: 3,
       sequentialLessonsLock: true,
       lessonCompletionThresholdPercent: 90,
-      mockTestPassingPercent: 75,
-      finalAssessmentPassingPercent: 75,
+      mockTestPassingPercent: 80,
+        assignmentPassingPercent: 80,
+      finalAssessmentPassingPercent: 80,
       timeGatedByLiveSession: false,
     };
 
@@ -323,9 +324,9 @@ export async function seedDemoCatalog(
       data: {
         courseId: course.id,
         title: 'Practice Mock Exam',
-        description: 'A timed practice exam covering every module. Score 75% or more to unlock the capstone.',
+        description: 'A timed practice exam covering every module. Score 80% or more to unlock the capstone.',
         durationMinutes: 15,
-        passingScorePercent: 75,
+        passingScorePercent: 80,
         maxAttempts: 3,
       },
     });
@@ -350,9 +351,9 @@ export async function seedDemoCatalog(
       data: {
         courseId: course.id,
         title: 'Final Certification Exam',
-        description: 'The final exam for your certificate. Score 75% or more to graduate.',
+        description: 'The final exam for your certificate. Score 80% or more to graduate.',
         durationMinutes: 20,
-        passingScorePercent: 75,
+        passingScorePercent: 80,
         maxAttempts: 3,
       },
     });

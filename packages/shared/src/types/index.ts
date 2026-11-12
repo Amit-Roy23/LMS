@@ -88,7 +88,9 @@ export interface CourseSettings {
   maxQuizAttempts: number; // e.g. 3
   sequentialLessonsLock: boolean; // default true
   lessonCompletionThresholdPercent: number; // default 90
-  mockTestPassingPercent: number; // e.g. 75
+  mockTestPassingPercent: number; // default 80
+  /** Minimum assignment grade, as a % of the assignment's marks, to pass (default 80) */
+  assignmentPassingPercent?: number;
   finalAssessmentPassingPercent: number; // e.g. 80
   requirePracticeDone?: boolean;
   watermarkEnabled?: boolean;

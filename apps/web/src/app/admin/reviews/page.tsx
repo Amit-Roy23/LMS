@@ -66,6 +66,11 @@ export default function AdminReviewsPage() {
     setGrade(95);
   };
 
+  // Assignment pass mark: course setting (default 80% of the assignment's marks)
+  const maxMarks = Number(selectedSubmission?.assignment?.maxScore || 100);
+  const passPercent = Number(selectedSubmission?.assignment?.module?.course?.settings?.assignmentPassingPercent ?? 80);
+  const requiredGrade = Math.ceil((passPercent / 100) * maxMarks * 100) / 100;
+
   const handleSaveReview = async () => {
     if (!feedback.trim()) {
       toastError('Feedback Required', 'Please provide constructive review feedback.');
@@ -79,7 +84,7 @@ export default function AdminReviewsPage() {
           ? `/reviews/assignments/${selectedSubmission.id}`
           : `/reviews/projects/${selectedSubmission.id}`;
 
-      await apiClient(endpoint, {
+      const result = await apiClient<any>(endpoint, {
         method: 'POST',
         body: JSON.stringify({
           status: reviewStatus,
@@ -88,7 +93,12 @@ export default function AdminReviewsPage() {
         }),
       });
 
-      if (reviewStatus === SubmissionStatus.APPROVED) {
+      if (result?.passMark?.belowPassMark) {
+        toastError(
+          'Below the pass mark',
+          `Grade ${grade}/${result.passMark.maxScore} is under ${result.passMark.percent}%, so it was sent back to the student to improve and resubmit.`
+        );
+      } else if (reviewStatus === SubmissionStatus.APPROVED) {
         confetti({ particleCount: 70, spread: 60 });
         success('Submission Approved!', 'Progress state machine has unlocked subsequent stages for the student.');
       } else {
@@ -288,13 +298,21 @@ export default function AdminReviewsPage() {
             </div>
 
             <Input
-              label="Awarded Grade / Score (0 to 100)"
+              label={`Grade (0 to ${maxMarks})`}
               type="number"
               min="0"
-              max="100"
+              max={maxMarks}
               value={grade}
               onChange={(e) => setGrade(parseInt(e.target.value) || 0)}
             />
+            {reviewType === 'assignment' && (
+              <p className={`text-xs font-semibold -mt-2 ${grade < requiredGrade ? 'text-amber-300' : 'text-emerald-300'}`}>
+                Pass mark {passPercent}% ({requiredGrade} of {maxMarks}).{' '}
+                {grade < requiredGrade && reviewStatus === SubmissionStatus.APPROVED
+                  ? 'This grade is below the pass mark: approving will send it back to the student to resubmit.'
+                  : 'Grades at or above the pass mark unlock the next step.'}
+              </p>
+            )}
 
             <Textarea
               label="Instructor Feedback & Critique"
