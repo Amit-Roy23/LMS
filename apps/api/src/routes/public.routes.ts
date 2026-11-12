@@ -5,6 +5,7 @@ import { instructorService } from '../services/instructor.service.js';
 import { streamService } from '../services/stream.service.js';
 import { billingController } from '../controllers/billing.controller.js';
 import { Router } from 'express';
+import { prisma } from '../lib/prisma.js';
 import { authController } from '../controllers/auth.controller.js';
 import { courseController } from '../controllers/course.controller.js';
 import { certificateController } from '../controllers/certificate.controller.js';
@@ -54,6 +55,40 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
   });
+});
+
+// Database check for the operator: reachable, schema up to date, demo data present (no secrets returned)
+router.get('/health/db', async (req, res) => {
+  const out: Record<string, unknown> = { database: 'unknown' };
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    out.database = 'ok';
+    const rows = await prisma.$queryRaw<{ t: string | null }[]>`SELECT to_regclass('"SitePage"')::text AS t`;
+    out.schemaUpToDate = !!rows[0]?.t;
+    out.users = await prisma.user.count();
+    out.demoAdmin = !!(await prisma.user.findFirst({ where: { email: 'admin@creativeit.academy' }, select: { id: true } }));
+    res.status(200).json(out);
+  } catch (err: any) {
+    out.database = 'error';
+    out.code = err?.code || err?.errorCode || err?.name;
+    res.status(503).json(out);
+  }
+});
+
+// Demo learners with their Student IDs, for the sign-in page (demo personas only, never real students)
+router.get('/demo-students', async (req, res, next) => {
+  try {
+    const rows = await prisma.user.findMany({
+      where: { isDemo: true, role: 'STUDENT', deletedAt: null, status: 'ACTIVE', studentId: { not: null } },
+      select: { name: true, email: true, studentId: true },
+      orderBy: { studentId: 'asc' },
+      take: 40,
+    });
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return sendSuccess(res, rows);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Authentication

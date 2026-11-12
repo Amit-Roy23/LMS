@@ -33,7 +33,7 @@ interface AuthContextType {
     otpCode?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
-  loginAsDemo: (role: DemoAccountKey) => Promise<void>;
+  loginAsDemo: (role: DemoAccountKey) => Promise<LoginOutcome>;
   refreshUser: () => Promise<void>;
   changePassword: (data: { currentPassword?: string; newPassword: string }) => Promise<void>;
 }
@@ -67,6 +67,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  // While signed in, check the session every 20 seconds (and when the tab regains focus), so a
+  // browser signed out by a newer sign-in elsewhere returns to the sign-in page promptly.
+  useEffect(() => {
+    if (!user) return;
+    const check = () => {
+      if (document.visibilityState === 'visible') apiClient('/auth/me').catch(() => undefined);
+    };
+    const timer = window.setInterval(check, 20_000);
+    window.addEventListener('focus', check);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', check);
+    };
+  }, [user]);
 
   // This device was signed out elsewhere (device limit or "sign out device"): return to sign-in
   useEffect(() => {
@@ -163,11 +178,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
-  const loginAsDemo = async (role: DemoAccountKey) => {
+  const loginAsDemo = async (role: DemoAccountKey): Promise<LoginOutcome> => {
     const target = getDemoAccount(role);
-    if (target) {
-      await login({ email: target.email, password: target.password });
-    }
+    if (!target) throw new Error('Unknown demo account');
+    return login({ identifier: target.email, password: target.password });
   };
 
   return (

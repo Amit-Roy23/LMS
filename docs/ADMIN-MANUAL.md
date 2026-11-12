@@ -89,8 +89,9 @@ If the item was changed again later, the system warns you before overwriting the
 
 ## Students' devices
 
-Students can stay signed in on **one phone and one computer**. Signing in on another device signs
-out the older one, and only one video can play at a time. Students see and sign out their devices on
+Students (including the demo students) can stay signed in on **one phone and one computer**. A new
+browser asks for a one-time code first. Signing in on another device signs
+out the older one, and only one video can play at a time, even across tabs of the same browser. Students see and sign out their devices on
 their profile page. If a student loses a phone, staff can sign that device out from support.
 
 ## Instructor public profile

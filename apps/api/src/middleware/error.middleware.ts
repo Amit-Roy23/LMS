@@ -41,6 +41,20 @@ export function errorHandler(
     statusCode = 404;
     code = 'NOT_FOUND';
     message = 'Requested record was not found.';
+  } else if (
+    err?.name === 'PrismaClientInitializationError' ||
+    ['P1000', 'P1001', 'P1002', 'P1008', 'P1017', 'P2024'].includes(err?.code) ||
+    /prepared statement|Can't reach database|connection pool|Authentication failed against database/i.test(String(err?.message || ''))
+  ) {
+    // Database down, unreachable, wrong credentials, or pool exhausted: say so instead of a generic 500
+    const ref = err?.code || err?.errorCode || err?.name || 'DB';
+    logger.error({ prismaCode: ref, errorMessage: err?.message, url: req.originalUrl }, 'Database unavailable');
+    return sendError(
+      res,
+      `The database is not reachable right now (${ref}). Check that the Supabase project is running and that DATABASE_URL / DIRECT_URL on the server are correct, then try again.`,
+      503,
+      'DB_UNAVAILABLE'
+    );
   } else if (err?.code === 'P2021' || err?.code === 'P2022') {
     // Table or column missing: the code was deployed but the database was not updated
     logger.error({ prismaCode: err.code, meta: err.meta, url: req.originalUrl }, 'Database schema is out of date');
@@ -82,9 +96,12 @@ export function errorHandler(
   );
 
   const isDev = process.env.NODE_ENV === 'development';
+  // A short reference (error type + id) lets the matching server log line be found without exposing details
+  const ref = `${String(err?.code || err?.name || 'ERR').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
+  logger.error({ ref }, 'Error reference');
   return sendError(
     res,
-    isDev ? message : 'An unexpected error occurred. Please try again later.',
+    isDev ? message : `An unexpected error occurred (ref ${ref}). Please try again later.`,
     500,
     'INTERNAL_SERVER_ERROR',
     isDev ? { stack: err?.stack, name: err?.name } : undefined

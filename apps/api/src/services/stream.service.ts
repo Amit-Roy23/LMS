@@ -85,11 +85,13 @@ export class StreamService {
    */
   async startStream(req: Request, lesson: { id: string; courseId: string }, takeover: boolean) {
     const userId = req.user!.userId;
-    const sid = req.user!.sid || `user-${userId}`;
+    const sid = playbackKey(req);
     const current = await prisma.streamSession.findUnique({ where: { userId } });
     if (current && current.deviceSid !== sid && Date.now() - current.lastBeatAt.getTime() < ACTIVE_WINDOW_MS && !takeover) {
-      const device = await prisma.userDevice.findUnique({ where: { id: current.deviceSid }, select: { label: true } }).catch(() => null);
-      return { conflict: { deviceLabel: device?.label || 'another device' } };
+      const [deviceRowId] = current.deviceSid.split('#');
+      const sameDevice = deviceRowId === sid.split('#')[0];
+      const device = sameDevice ? null : await prisma.userDevice.findUnique({ where: { id: deviceRowId }, select: { label: true } }).catch(() => null);
+      return { conflict: { deviceLabel: sameDevice ? 'another tab or window on this device' : device?.label || 'another device' } };
     }
 
     const ua = getUserAgent(req);
@@ -115,11 +117,11 @@ export class StreamService {
   }
 
   /** Heartbeat from the player: keeps this device's stream alive, or tells it another device took over. */
-  async heartbeat(userId: string, sid: string | null | undefined, lessonId: string, watchedDelta: number) {
+  async heartbeat(userId: string, key: string, lessonId: string, watchedDelta: number) {
     const session = await prisma.streamSession.findUnique({ where: { userId } });
-    const me = sid || `user-${userId}`;
+    const me = key;
     if (session && session.deviceSid !== me && Date.now() - session.lastBeatAt.getTime() < ACTIVE_WINDOW_MS) {
-      throw new AppError('Your account started playing on another device, so playback stopped here.', 409, 'STREAM_ACTIVE_ELSEWHERE');
+      throw new AppError('Your account started playing in another tab or on another device, so playback stopped here.', 409, 'STREAM_ACTIVE_ELSEWHERE');
     }
     await prisma.streamSession.upsert({
       where: { userId },
@@ -222,3 +224,13 @@ export class StreamService {
 }
 
 export const streamService = new StreamService();
+
+/**
+ * Identifies one player: the signed-in device plus the browser tab (X-Tab-Id), so only one
+ * video plays at a time per account, across devices and across tabs of the same browser.
+ */
+export function playbackKey(req: Request): string {
+  const device = req.user?.sid || `user-${req.user?.userId}`;
+  const tab = String(req.headers['x-tab-id'] || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  return tab ? `${device}#${tab}` : device;
+}

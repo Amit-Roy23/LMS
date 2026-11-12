@@ -258,8 +258,9 @@ export class AuthService {
     const deviceId = req ? getDeviceId(req) : null;
     const knownDevice = deviceId ? await deviceService.findActive(user.id, deviceId) : null;
 
-    // New browser/phone: confirm with an OTP before issuing a session (demo accounts are exempt)
-    if (config.security.requireOtpNewDevice && !user.isDemo && !knownDevice) {
+    // New browser/phone: confirm with an OTP before issuing a session. Demo staff accounts are
+    // exempt so reviewers can switch roles quickly; demo students follow the real student rules.
+    if (config.security.requireOtpNewDevice && !this.deviceRulesExempt(user) && !knownDevice) {
       if (!deviceId) {
         throw new BadRequestError('Device identifier missing. Please refresh the page and try again.', { reason: 'DEVICE_ID_REQUIRED' });
       }
@@ -283,12 +284,13 @@ export class AuthService {
     let signedOut: string[] = [];
     if (deviceId && req) {
       const trusted = await deviceService.trust(user.id, deviceId, req, {
-        enforceLimit: user.role === Role.STUDENT && !user.isDemo,
+        enforceLimit: user.role === Role.STUDENT,
       });
       sid = trusted.device.id;
       signedOut = trusted.signedOut;
     }
 
+    await this.ensureStudentId(user);
     const tokens = await this.startSession(user, sid);
     return { otpRequired: false as const, user: this.publicUser(user), tokens, signedOut };
   }
@@ -304,10 +306,28 @@ export class AuthService {
 
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
     const { device, signedOut } = await deviceService.trust(user.id, deviceId, req, {
-      enforceLimit: user.role === Role.STUDENT && !user.isDemo,
+      enforceLimit: user.role === Role.STUDENT,
     });
+    await this.ensureStudentId(user);
     const tokens = await this.startSession(user, device.id);
     return { user: this.publicUser(user), tokens, signedOut };
+  }
+
+  /** Only demo staff accounts skip the new-device OTP; students (demo or real) never do. */
+  private deviceRulesExempt(user: { isDemo?: boolean | null; role: any }) {
+    return !!user.isDemo && user.role !== Role.STUDENT;
+  }
+
+  /** Every student must have an official ID; older accounts without one get it on next sign-in. */
+  private async ensureStudentId(user: { id: string; role: any; studentId?: string | null }) {
+    if (user.role !== Role.STUDENT || user.studentId) return;
+    user.studentId = await prisma.$transaction(async (tx) => {
+      const fresh = await tx.user.findUnique({ where: { id: user.id }, select: { studentId: true } });
+      if (fresh?.studentId) return fresh.studentId;
+      const id = await generateStudentId(tx);
+      await tx.user.update({ where: { id: user.id }, data: { studentId: id } });
+      return id;
+    });
   }
 
   private publicUser(user: any) {
@@ -619,7 +639,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundError('User not found');
     }
-
+    await this.ensureStudentId(user);
     return user;
   }
 }

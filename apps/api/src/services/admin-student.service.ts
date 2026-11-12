@@ -57,6 +57,7 @@ export class AdminStudentService {
         { name: { contains: params.search, mode: 'insensitive' } },
         { email: { contains: params.search, mode: 'insensitive' } },
         { phone: { contains: params.search, mode: 'insensitive' } },
+        { studentId: { contains: params.search, mode: 'insensitive' } },
       ];
     }
 
@@ -112,6 +113,7 @@ export class AdminStudentService {
       const primaryEnrollment = s.enrollments[0];
       return {
         id: s.id,
+        studentId: s.studentId,
         name: s.name,
         email: s.email,
         phone: s.phone || s.studentProfile?.phone,
