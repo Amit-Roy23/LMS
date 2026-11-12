@@ -7,7 +7,8 @@ import { Input } from '../../components/ui/input';
 import { useAuth, OtpChallenge } from '../../providers/auth-provider';
 import { OtpStep } from '../../components/auth/otp-step';
 import { useToast } from '../../providers/toast-provider';
-import { DEMO_ACCOUNTS, DemoAccountKey } from '../../lib/demo-accounts';
+import { DEMO_ACCOUNTS, DemoAccountKey, getDemoAccount } from '../../lib/demo-accounts';
+import { apiClient } from '../../lib/api';
 import {
   ArrowRight,
   Sparkles,
@@ -75,7 +76,19 @@ export default function LoginPage() {
   const handleDemoLogin = async (key: DemoAccountKey, label: string) => {
     try {
       setDemoLoading(key);
-      await loginAsDemo(key);
+      const account = getDemoAccount(key);
+      // Kept in the form so "Resend code" on the OTP step works for demo sign-ins too
+      if (account) {
+        setIdentifier(account.email);
+        setPassword(account.password);
+      }
+      const outcome = await loginAsDemo(key);
+      if (outcome.otpRequired) {
+        setOtp(outcome);
+        info('New browser', 'Students confirm a new browser with a one-time code. In the demo the code is shown on screen.');
+        return;
+      }
+      announceSignedOut(outcome.signedOut);
       success('Signed in', `Exploring as ${label}`);
     } catch (err: any) {
       toastError('Login Failed', err.message || 'Could not authenticate. Please verify the backend is running.');
@@ -85,6 +98,41 @@ export default function LoginPage() {
   };
 
   const groups = ['Staff', 'Students'] as const;
+
+  // Demo learners and their Student IDs (all use the password Student@123)
+  const [demoStudents, setDemoStudents] = useState<{ name: string; email: string; studentId: string }[]>([]);
+  const [showAllStudents, setShowAllStudents] = useState(false);
+  const idByEmail = Object.fromEntries(demoStudents.map((d) => [d.email, d.studentId]));
+  useEffect(() => {
+    apiClient<{ name: string; email: string; studentId: string }[]>('/demo-students').then(setDemoStudents).catch(() => undefined);
+  }, []);
+
+  const signInAsStudentId = async (studentId: string) => {
+    setIdentifier(studentId);
+    setPassword('Student@123');
+    try {
+      setIsLoading(true);
+      const outcome = await login({ identifier: studentId, password: 'Student@123' });
+      if (outcome.otpRequired) {
+        setOtp(outcome);
+        return;
+      }
+      announceSignedOut(outcome.signedOut);
+      success('Signed in', `Signed in with Student ID ${studentId}`);
+    } catch (err: any) {
+      toastError('Login Failed', err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Navbar demo menu hands over here when a demo student needs the new-browser OTP
+  useEffect(() => {
+    const key = new URLSearchParams(window.location.search).get('demo') as DemoAccountKey | null;
+    const account = key ? getDemoAccount(key) : null;
+    if (account) handleDemoLogin(account.key, account.label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] bg-cream">
@@ -233,6 +281,9 @@ export default function LoginPage() {
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-semibold text-ink truncate">{account.label}</span>
                         <span className="block text-xs text-slate-500 truncate">{account.persona}</span>
+                        {idByEmail[account.email] && (
+                          <span className="block text-[11px] font-code font-semibold text-indigo-400">{idByEmail[account.email]}</span>
+                        )}
                       </span>
                       <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
                     </button>
@@ -240,6 +291,45 @@ export default function LoginPage() {
                 </div>
               </div>
             ))}
+
+            {demoStudents.length > 0 && (
+              <div className="rounded-xl border border-[#e2e8f0] bg-white">
+                <button
+                  type="button"
+                  onClick={() => setShowAllStudents(!showAllStudents)}
+                  aria-expanded={showAllStudents}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-ink"
+                >
+                  <span>All demo students with Student IDs ({demoStudents.length})</span>
+                  <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${showAllStudents ? 'rotate-90' : ''}`} />
+                </button>
+                {showAllStudents && (
+                  <div className="border-t border-[#e2e8f0]">
+                    <p className="px-4 pt-3 text-xs text-slate-500">
+                      Password for every demo student: <span className="font-code font-semibold text-ink">Student@123</span>. Click a row to sign in with the Student ID.
+                    </p>
+                    <ul className="max-h-72 overflow-y-auto divide-y divide-[#e2e8f0] mt-2">
+                      {demoStudents.map((d) => (
+                        <li key={d.studentId}>
+                          <button
+                            type="button"
+                            disabled={isLoading}
+                            onClick={() => signInAsStudentId(d.studentId)}
+                            className="w-full flex items-center justify-between gap-3 px-4 py-2.5 text-left hover:bg-indigo-50 disabled:opacity-60"
+                          >
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-ink truncate">{d.name}</span>
+                              <span className="block text-xs text-slate-500 truncate">{d.email}</span>
+                            </span>
+                            <span className="font-code text-xs font-bold text-indigo-400 shrink-0">{d.studentId}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
 
           <p className="text-center text-sm text-slate-400">

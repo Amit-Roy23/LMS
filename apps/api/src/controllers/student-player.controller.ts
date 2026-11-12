@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { progressionService, mergeWatchedIntervals } from '../services/progression.service.js';
 import { fileService, FILE_URL_PREFIX } from '../services/file.service.js';
-import { streamService } from '../services/stream.service.js';
+import { streamService, playbackKey } from '../services/stream.service.js';
 import { storageService } from '../services/storage.service.js';
 import { eventBus } from '../events/event-bus.js';
 import { sendSuccess } from '../lib/utils.js';
@@ -367,7 +367,7 @@ export class StudentPlayerController {
         const delta = Array.isArray(playedIntervals)
           ? playedIntervals.reduce((n: number, iv: any) => n + Math.max(0, Number(iv?.[1]) - Number(iv?.[0]) || 0), 0)
           : 0;
-        await streamService.heartbeat(studentId, req.user!.sid, lessonId, delta);
+        await streamService.heartbeat(studentId, playbackKey(req), lessonId, delta);
       }
 
       const existingSegments = (existingProgress?.watchedSegments as [number, number][]) || [];

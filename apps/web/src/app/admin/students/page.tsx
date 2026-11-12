@@ -111,7 +111,7 @@ export default function AdminStudentsPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by student name, email, or phone..."
+              placeholder="Search by name, Student ID, email or phone..."
               className="pl-9 bg-slate-950 border-slate-800 text-xs text-ink"
             />
           </div>
@@ -175,6 +175,9 @@ export default function AdminStudentsPage() {
                       <h4 className="text-sm font-bold text-ink">{st.name}</h4>
                       {getPerformanceBadge(st.performanceLevel)}
                     </div>
+                    {st.studentId && (
+                      <p className="text-xs font-code font-bold text-indigo-400 mt-0.5">{st.studentId}</p>
+                    )}
                     <p className="text-xs text-slate-400 font-mono mt-0.5">{st.email}</p>
                     {st.phone && (
                       <p className="text-[11px] text-slate-500 mt-0.5">📞 {st.phone}</p>

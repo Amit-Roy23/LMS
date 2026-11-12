@@ -75,6 +75,22 @@ router.get('/health/db', async (req, res) => {
   }
 });
 
+// Demo learners with their Student IDs, for the sign-in page (demo personas only, never real students)
+router.get('/demo-students', async (req, res, next) => {
+  try {
+    const rows = await prisma.user.findMany({
+      where: { isDemo: true, role: 'STUDENT', deletedAt: null, status: 'ACTIVE', studentId: { not: null } },
+      select: { name: true, email: true, studentId: true },
+      orderBy: { studentId: 'asc' },
+      take: 40,
+    });
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return sendSuccess(res, rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Authentication
 router.post('/auth/register/request-otp', authRateLimiter, authController.requestRegistrationOtp);
 router.post('/auth/register', authRateLimiter, validateBody(registerSchema), authController.register);

@@ -78,7 +78,9 @@ export function Navbar() {
   const demoLogin = async (key: DemoAccountKey) => {
     try {
       setDemoLoading(key);
-      await loginAsDemo(key);
+      const outcome = await loginAsDemo(key);
+      // Demo students confirm a new browser with an OTP, like real students: finish on the sign-in page
+      if (outcome.otpRequired) window.location.href = `/login?demo=${key}`;
       setDemoMenuOpen(false);
       setMobileMenuOpen(false);
     } catch (err: any) {

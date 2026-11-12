@@ -97,6 +97,20 @@ function currentStepUpToken(): string | null {
 }
 
 /** Headers every API call carries: JSON content type, bearer token and this browser's device id. */
+/** One id per browser tab (kept across reloads), so only one tab can play a video at a time. */
+function getTabId(): string {
+  try {
+    let id = sessionStorage.getItem('adsign-tab-id');
+    if (!id) {
+      id = Math.random().toString(36).slice(2, 12);
+      sessionStorage.setItem('adsign-tab-id', id);
+    }
+    return id;
+  } catch {
+    return '';
+  }
+}
+
 export function authHeaders(init?: HeadersInit, body?: BodyInit | null): Headers {
   const headers = new Headers(init || {});
   if (!headers.has('Content-Type') && !(body instanceof FormData)) {
@@ -109,6 +123,8 @@ export function authHeaders(init?: HeadersInit, body?: BodyInit | null): Headers
     }
     const deviceId = getDeviceId();
     if (deviceId) headers.set('X-Device-Id', deviceId);
+    const tabId = getTabId();
+    if (tabId) headers.set('X-Tab-Id', tabId);
     const stepUp = currentStepUpToken();
     if (stepUp && !headers.has('X-Step-Up-Token')) headers.set('X-Step-Up-Token', stepUp);
   }
