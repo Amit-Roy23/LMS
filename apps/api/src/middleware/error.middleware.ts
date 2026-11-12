@@ -82,9 +82,12 @@ export function errorHandler(
   }
 
   // 4. Handle Unexpected Server Errors (500+)
+  // A short reference (error type + id) ties what the user sees to this log line
+  const ref = `${String(err?.code || err?.name || 'ERR').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
   // Log safely without leaking passwords, tokens, cookies, or secrets
   logger.error(
     {
+      ref,
       errorName: err?.name || 'Error',
       errorMessage: err?.message || 'Internal server error',
       errorCode: err?.code || 'INTERNAL_SERVER_ERROR',
@@ -96,14 +99,25 @@ export function errorHandler(
   );
 
   const isDev = process.env.NODE_ENV === 'development';
-  // A short reference (error type + id) lets the matching server log line be found without exposing details
-  const ref = `${String(err?.code || err?.name || 'ERR').replace(/[^A-Za-z0-9_]/g, '').slice(0, 40)}-${Math.random().toString(36).slice(2, 8)}`;
-  logger.error({ ref }, 'Error reference');
+  // Main admins see the technical cause (connection strings and secrets removed) so problems can be fixed fast
+  const isMainAdmin = req.user?.role === 'ADMIN';
+  const detail = isMainAdmin ? technicalDetail(err) : '';
   return sendError(
     res,
-    isDev ? message : `An unexpected error occurred (ref ${ref}). Please try again later.`,
+    isDev ? message : `An unexpected error occurred (ref ${ref}). Please try again later.${detail ? ` Technical detail: ${detail}` : ''}`,
     500,
     'INTERNAL_SERVER_ERROR',
     isDev ? { stack: err?.stack, name: err?.name } : undefined
   );
+}
+
+/** Last meaningful line of an error message, with URLs, credentials and long tokens removed. */
+function technicalDetail(err: any): string {
+  const text = String(err?.message || '')
+    .replace(/\b[a-z]+:\/\/[^\s"']+/gi, '[url]')
+    .replace(/(password|secret|token|key)\s*[=:]\s*[^\s,"']+/gi, '$1=[hidden]')
+    .replace(/[A-Za-z0-9+/_-]{40,}/g, '[hidden]');
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const useful = lines.filter((l) => !/^Invalid `prisma|^→|^\d+\s/.test(l));
+  return (useful.slice(-2).join(' ') || lines.slice(-1)[0] || '').slice(0, 400);
 }
