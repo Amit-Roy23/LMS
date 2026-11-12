@@ -366,7 +366,7 @@ model Course {
   level         CourseLevel  @default(BEGINNER)
   category      String
   status        CourseStatus @default(DRAFT)
-  settings      Json         @default("{\"passingQuizScorePercent\":70,\"maxQuizAttempts\":3,\"sequentialLessonsLock\":true,\"lessonCompletionThresholdPercent\":90,\"mockTestPassingPercent\":75,\"finalAssessmentPassingPercent\":80,\"timeGatedByLiveSession\":false}")
+  settings      Json         @default("{\"passingQuizScorePercent\":70,\"maxQuizAttempts\":3,\"sequentialLessonsLock\":true,\"lessonCompletionThresholdPercent\":90,\"mockTestPassingPercent\":80,\"assignmentPassingPercent\":80,\"finalAssessmentPassingPercent\":80,\"timeGatedByLiveSession\":false}")
   
   instructorId String
   instructor   User        @relation("InstructorCourses", fields: [instructorId], references: [id])
@@ -920,7 +920,7 @@ model MockTest {
   title               String
   description         String?
   durationMinutes     Int      @default(30)
-  passingScorePercent Float    @default(75.0)
+  passingScorePercent Float    @default(80.0)
   maxAttempts         Int      @default(3)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -1315,7 +1315,10 @@ model InstructorProfile {
   skills          String[] @default([])
   experienceYears Int?
   avatar          String?
+  /// Social links shown publicly (approved by a main admin)
   socials         Json     @default("{}")
+  /// Links the instructor submitted that wait for admin approval (not shown publicly)
+  pendingSocials  Json?
   isPublic        Boolean  @default(true)
   displayOrder    Int      @default(0)
   createdAt       DateTime @default(now())
@@ -1395,4 +1398,59 @@ model StreamSession {
   lastBeatAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Uploaded files (instructor photos, study materials). Stored in the database by default
+/// (works on serverless hosting) or on disk when STORAGE_DRIVER=local (VPS).
+model StoredFile {
+  id         String   @id @default(uuid())
+  purpose    String
+  filename   String
+  mimetype   String
+  size       Int
+  /// Public files (profile photos) can be fetched by anyone; others need a signed link
+  isPublic   Boolean  @default(false)
+  data       Bytes?
+  diskPath   String?
+  uploadedById String?
+  createdAt  DateTime @default(now())
+
+  @@index([purpose])
+}
+
+/// Editable website pages (Terms, Privacy, Refund policy, Contact intro).
+model SitePage {
+  slug        String   @id
+  title       String
+  content     String
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  versions SitePageVersion[]
+}
+
+/// Every saved version of a site page, so an earlier wording can be restored.
+model SitePageVersion {
+  id          String   @id @default(uuid())
+  slug        String
+  title       String
+  content     String
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  page SitePage @relation(fields: [slug], references: [slug], onDelete: Cascade)
+
+  @@index([slug, createdAt])
+}
+
+/// SEO overrides for one page, course or instructor profile (key e.g. "page:/courses", "course:<slug>").
+model SeoEntry {
+  key         String   @id
+  title       String?
+  description String?
+  image       String?
+  noindex     Boolean  @default(false)
+  updatedById String?
+  updatedAt   DateTime @updatedAt
 }

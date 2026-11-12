@@ -6,7 +6,7 @@ function createClient() {
   return new PrismaClient({
     datasourceUrl: process.env.DATABASE_URL || config.databaseUrl,
     // Video decryption keys never leave the database by accident: queries must ask for them explicitly
-    omit: { lesson: { hlsKeyHex: true } },
+    omit: { lesson: { hlsKeyHex: true }, storedFile: { data: true } },
     log:
       process.env.NODE_ENV === 'development'
         ? [

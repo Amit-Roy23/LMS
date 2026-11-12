@@ -22,6 +22,15 @@ import {
 import { LiveProvider } from '@academy/shared';
 import { useToast } from '../../../providers/toast-provider';
 
+/** 90 -> "90 minutes", 150 -> "2h 30m", a week or more -> "Open all the time". */
+function formatDuration(mins?: number) {
+  const m = mins || 60;
+  if (m >= 7 * 24 * 60) return 'Open all the time';
+  if (m >= 24 * 60) return `${Math.round(m / (24 * 60))} days`;
+  if (m >= 120) return `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`;
+  return `${m} minutes`;
+}
+
 export default function StudentLiveSchedulePage() {
   const [sessions, setSessions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -232,7 +241,7 @@ export default function StudentLiveSchedulePage() {
 
                             <span className="flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5 text-purple-400" />
-                              {session.durationMinutes} Minutes
+                              {formatDuration(session.durationMinutes)}
                             </span>
 
                             {!isLiveNow && (
@@ -312,7 +321,7 @@ export default function StudentLiveSchedulePage() {
                       <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono">
                         <span>{formatDateTime(session.startsAt)}</span>
                         <span>•</span>
-                        <span>{session.durationMinutes} mins</span>
+                        <span>{formatDuration(session.durationMinutes)}</span>
                       </div>
                     </div>
 

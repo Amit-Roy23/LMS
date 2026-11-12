@@ -90,11 +90,16 @@ export default function AdminCoursesPage() {
                 </div>
                 <h3 className="text-base font-bold text-ink">{c.title}</h3>
                 <p className="text-xs text-slate-400">
-                  {formatCurrency(c.price, c.currency)} • {c.modulesCount || 3} Modules • {c.enrolledStudentsCount || 0} Enrolled Students
+                  {formatCurrency(c.price, c.currency)} • {c.lessonsCount ?? 0} lessons • {c.enrolledStudentsCount || 0} Enrolled Students
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
+                <Link href={`/admin/courses/${c.id}`}>
+                  <Button variant="primary" size="sm" className="text-xs gap-1">
+                    <Edit className="w-3.5 h-3.5" /> Manage
+                  </Button>
+                </Link>
                 <Link href={`/courses/${c.slug}`} target="_blank">
                   <Button variant="secondary" size="sm" className="text-xs gap-1">
                     <ExternalLink className="w-3.5 h-3.5" /> Public Page

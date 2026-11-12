@@ -93,7 +93,7 @@ stateDiagram-v2
 
     state PostCurriculum {
         [*] --> MockTest : All Modules Completed
-        MockTest --> FinalProject : Mock Test Passed (>= 75%)
+        MockTest --> FinalProject : Mock Test Passed (>= 80%)
         FinalProject --> FinalAssessment : Capstone Project Approved
         FinalAssessment --> CertificateIssued : Final Assessment Passed (>= 80%)
     }

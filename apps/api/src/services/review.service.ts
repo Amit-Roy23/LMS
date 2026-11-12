@@ -32,7 +32,7 @@ export class ReviewService {
             include: {
               module: {
                 include: {
-                  course: { select: { id: true, title: true, slug: true } },
+                  course: { select: { id: true, title: true, slug: true, settings: true } },
                 },
               },
             },
@@ -83,11 +83,34 @@ export class ReviewService {
       throw new ForbiddenError('You can only review submissions for courses you teach.');
     }
 
+    // Pass mark: an assignment passes only with a grade of at least the course's assignment
+    // pass mark (default 80% of its marks); a lower grade goes back to the student to resubmit
+    const settings = (submission.assignment.module.course.settings || {}) as Record<string, any>;
+    const passPercent = Number(settings.assignmentPassingPercent ?? 80);
+    const maxScore = submission.assignment.maxScore || 100;
+    const requiredGrade = Math.ceil((passPercent / 100) * maxScore * 100) / 100;
+    let status = params.status;
+    let feedback = params.feedback;
+    let belowPassMark = false;
+    if (status === SubmissionStatus.APPROVED) {
+      if (params.grade === undefined || params.grade === null || Number.isNaN(Number(params.grade))) {
+        throw new BadRequestError(`Enter a grade to approve (pass mark ${passPercent}%: ${requiredGrade} of ${maxScore}).`);
+      }
+      if (Number(params.grade) < requiredGrade) {
+        status = SubmissionStatus.CHANGES_REQUESTED;
+        belowPassMark = true;
+        feedback = `${feedback}\n\nGrade ${params.grade}/${maxScore} is below the pass mark of ${passPercent}% (${requiredGrade}). Please improve and resubmit.`.trim();
+      }
+    }
+    if (params.grade !== undefined && params.grade !== null && (Number(params.grade) < 0 || Number(params.grade) > maxScore)) {
+      throw new BadRequestError(`Grade must be between 0 and ${maxScore}.`);
+    }
+
     const updated = await prisma.assignmentSubmission.update({
       where: { id: params.submissionId },
       data: {
-        status: params.status,
-        feedback: params.feedback,
+        status,
+        feedback,
         grade: params.grade ?? null,
         reviewedById: params.reviewerId,
         reviewedAt: new Date(),
@@ -98,8 +121,10 @@ export class ReviewService {
     await prisma.notification.create({
       data: {
         userId: submission.studentId,
-        title: `Assignment Review: ${params.status.replace('_', ' ')}`,
-        message: `Your submission for "${submission.assignment.title}" has been reviewed by your instructor. Status: ${params.status}.`,
+        title: `Assignment Review: ${status.replace('_', ' ')}`,
+        message: belowPassMark
+          ? `Your submission for "${submission.assignment.title}" scored ${params.grade}/${maxScore}, below the ${passPercent}% pass mark. Please improve it and resubmit.`
+          : `Your submission for "${submission.assignment.title}" has been reviewed by your instructor. Status: ${status}.`,
         type: NotificationType.REVIEW_FEEDBACK,
         link: `/student/courses/${submission.assignment.module.courseId}/learn`,
       },
@@ -120,6 +145,7 @@ export class ReviewService {
     return {
       submission: updated,
       progression,
+      passMark: { percent: passPercent, requiredGrade, maxScore, belowPassMark },
     };
   }
 

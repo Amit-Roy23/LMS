@@ -20,7 +20,8 @@
     "db:generate": "npm run db:generate --workspace=apps/api",
     "db:push": "npm run db:push --workspace=apps/api",
     "db:seed": "npm run db:seed --workspace=apps/api",
-    "db:studio": "npm run db:studio --workspace=apps/api"
+    "db:studio": "npm run db:studio --workspace=apps/api",
+    "db:backfill-ids": "npm run db:backfill-ids --workspace=apps/api"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { fetchPublic } from '../../../lib/api';
 import { SITE_URL } from '../../../lib/site';
+import { withSeo } from '../../../lib/site-server';
 
 type Props = { params: Promise<{ slug: string }>; children: React.ReactNode };
 
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const course = await getCourse(slug);
   if (!course) return { title: 'Course' };
   const description = String(course.description || '').slice(0, 160);
-  return {
+  return withSeo(`course:${slug}`, {
     title: course.title,
     description,
     alternates: { canonical: `/courses/${slug}` },
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `/courses/${slug}`,
       images: [{ url: course.thumbnail || '/brand/og.png', width: 1200, height: 630, alt: course.title }],
     },
-  };
+  });
 }
 
 export default async function CourseLayout({ params, children }: Props) {
