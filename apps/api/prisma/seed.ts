@@ -1485,6 +1485,35 @@ async function main() {
   const { seedStudyMaterials } = await import('./seed-materials');
   await seedStudyMaterials(prisma);
 
+  // Course page content: "What you'll learn" from the real lesson titles, plus requirements and audience by level
+  const allCourses = await prisma.course.findMany({
+    include: { modules: { orderBy: { order: 'asc' }, include: { lessons: { orderBy: { order: 'asc' }, select: { title: true } } } } },
+  });
+  const REQUIREMENTS: Record<string, string[]> = {
+    BEGINNER: ['A laptop or desktop computer (Windows or Mac)', 'A stable internet connection', 'No prior experience needed: we start from the basics', 'About 5 to 6 hours a week to study and practise'],
+    INTERMEDIATE: ['A laptop or desktop computer (Windows or Mac)', 'A stable internet connection', 'Basic familiarity with the subject or a beginner course', 'About 6 to 8 hours a week for lessons and projects'],
+    ADVANCED: ['A laptop or desktop computer (8 GB RAM or more recommended)', 'A stable internet connection', 'Working knowledge of the fundamentals of this subject', 'About 8 to 10 hours a week for lessons and projects'],
+  };
+  for (const c of allCourses) {
+    const lessonTitles = c.modules.flatMap((m) => m.lessons.map((l) => l.title.replace(/^\d+(\.\d+)*\s+/, '')));
+    const outcomes = lessonTitles.slice(0, 8);
+    await prisma.course.update({
+      where: { id: c.id },
+      data: {
+        language: 'English, Bengali',
+        outcomes,
+        requirements: REQUIREMENTS[c.level] || REQUIREMENTS.BEGINNER,
+        audience: [
+          `Students and graduates who want a career in ${c.category}`,
+          'Working professionals who want to upskill or switch careers',
+          'Freelancers and business owners who want to do it themselves',
+          'Anyone who wants a portfolio and a certificate employers can verify',
+        ],
+      },
+    });
+  }
+  console.log(`✅ Course page content for ${allCourses.length} courses`);
+
   // Always-open practice room on every live batch, so the live-class flow can be demonstrated at any time
   const liveBatches = await prisma.batch.findMany({ where: { mode: DeliveryMode.LIVE }, select: { id: true } });
   for (const b of liveBatches) {

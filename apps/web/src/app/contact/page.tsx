@@ -16,7 +16,10 @@ export function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function ContactPage() {
+export default async function ContactPage({ searchParams }: { searchParams: Promise<{ plan?: string; topic?: string }> }) {
+  const sp = await searchParams;
+  const clean = (v?: string) => String(v || '').replace(/[^\w\s()&+.,-]/g, '').slice(0, 80);
+  const initialMessage = sp.plan ? `I'm interested in the ${clean(sp.plan)} plan. Please call me with the details.` : sp.topic ? `Please tell me more about ${clean(sp.topic)}.` : undefined;
   const [page, { settings }] = await Promise.all([getSitePage('contact'), getSiteConfig()]);
   const email = settings['contact.email'] || process.env.NEXT_PUBLIC_SUPPORT_EMAIL || '';
   const phone = settings['contact.phone'] || process.env.NEXT_PUBLIC_SUPPORT_PHONE || '';
@@ -67,7 +70,7 @@ export default async function ContactPage() {
         </div>
         <div className="rounded-2xl bg-white border border-[#e2e8f0] p-6 sm:p-8 shadow-card">
           <h2 className="text-xl font-bold text-ink mb-5">Send an enquiry</h2>
-          <EnquiryForm source="CONTACT_PAGE" />
+          <EnquiryForm source={sp.plan ? "PLAN_ENQUIRY" : "CONTACT_PAGE"} initialMessage={initialMessage} />
         </div>
       </main>
       <Footer />

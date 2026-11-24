@@ -43,20 +43,28 @@
   body {
     background-color: #F5F7FA;
     color: #171C24;
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
 
+  /* Client type system: Bricolage Grotesque headings, Montserrat body, Roboto buttons */
   h1,
   h2,
-  h3 {
-    letter-spacing: -0.02em;
+  h3,
+  h4 {
+    font-family: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', 'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.015em;
   }
 
   h1,
   h2 {
     font-weight: 800;
+  }
+
+  button,
+  .btn {
+    font-family: 'Roboto', ui-sans-serif, system-ui, sans-serif;
   }
 
   code,
@@ -73,20 +81,20 @@
 
 @layer utilities {
   .font-display {
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', 'Montserrat Variable', 'Montserrat', ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.025em;
   }
 
   /* Brand gradient text */
   .text-gradient {
-    background-image: linear-gradient(100deg, #E71E24 0%, #E93E08 100%);
+    background-image: linear-gradient(100deg, #DC290C 0%, #E4471F 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
   .bg-brand-gradient {
-    background-image: linear-gradient(120deg, #0063AD 0%, #0077BF 100%);
+    background-image: linear-gradient(120deg, #0064AE 0%, #0077BF 100%);
   }
 
   /* Deep navy hero with soft glowing colour mesh */
@@ -94,7 +102,7 @@
     background-color: #171C24;
     background-image:
       radial-gradient(60% 70% at 85% 10%, rgba(0, 119, 191, 0.42) 0%, transparent 60%),
-      radial-gradient(50% 60% at 10% 90%, rgba(233, 62, 8, 0.2) 0%, transparent 60%),
+      radial-gradient(50% 60% at 10% 90%, rgba(220, 41, 12, 0.2) 0%, transparent 60%),
       radial-gradient(35% 40% at 55% 55%, rgba(0, 99, 173, 0.2) 0%, transparent 70%);
   }
 
@@ -125,7 +133,7 @@
     background-color: #171C24;
     background-image:
       radial-gradient(55% 60% at 80% 0%, rgba(0, 119, 191, 0.45) 0%, transparent 60%),
-      radial-gradient(45% 55% at 0% 100%, rgba(233, 62, 8, 0.22) 0%, transparent 60%);
+      radial-gradient(45% 55% at 0% 100%, rgba(220, 41, 12, 0.22) 0%, transparent 60%);
   }
 
   .hero-stripes {
@@ -137,7 +145,7 @@
   /* Highlighted word inside a heading */
   .highlight-pill {
     display: inline-block;
-    background-image: linear-gradient(120deg, #E71E24, #E93E08);
+    background-image: linear-gradient(120deg, #DC290C, #E4471F);
     color: #ffffff;
     padding: 0 0.3em 0.05em;
     border-radius: 0.45em;
@@ -237,4 +245,13 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Partner logo strip on the home page */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[marquee_40s_linear_infinite\] { animation: none; }
 }

@@ -57,7 +57,10 @@ Open **Courses** and press **Manage** on a course. The course editor has four ta
   default), quiz attempts, video completion %, lesson order lock and watermark. Saving updates every
   test in the course.
 - **Course details:** title, description, category, level, publish status, image and price (a price
-  change needs a main admin's PIN + OTP).
+  change needs a main admin's PIN + OTP). Under **Course page content** you set the teaching
+  language and the lists shown on the public course page: **What you'll learn**, **Requirements** and
+  **Who this course is for** (one point per line). If "What you'll learn" is empty, the page lists
+  the lesson titles instead.
 - **Live classes:** schedule a class for a batch (topic, start time, length, Zoom/Meet/other link) and
   add the recording link afterwards. Students can join from 15 minutes before the start.
 

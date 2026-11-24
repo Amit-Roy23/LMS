@@ -14,12 +14,14 @@ interface EnquiryFormProps {
   /** Where the lead came from, shown in the admin inbox */
   source: string;
   compact?: boolean;
+  /** Pre-filled question, e.g. the plan a visitor chose */
+  initialMessage?: string;
 }
 
 /** Website enquiry form: saved to the admin Enquiries inbox and announced to the admissions team. */
-export function EnquiryForm({ courseId, courseTitle, source, compact }: EnquiryFormProps) {
+export function EnquiryForm({ courseId, courseTitle, source, compact, initialMessage }: EnquiryFormProps) {
   const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', courseId: courseId || '', message: '', website: '' });
+  const [form, setForm] = useState({ name: '', phone: '', email: '', courseId: courseId || '', message: initialMessage || '', website: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);

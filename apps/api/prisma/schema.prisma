@@ -366,6 +366,11 @@ model Course {
   level         CourseLevel  @default(BEGINNER)
   category      String
   status        CourseStatus @default(DRAFT)
+  /// Course page content: teaching language, "What you'll learn", "Requirements", "Who this course is for"
+  language      String       @default("English")
+  outcomes      String[]     @default([])
+  requirements  String[]     @default([])
+  audience      String[]     @default([])
   settings      Json         @default("{\"passingQuizScorePercent\":70,\"maxQuizAttempts\":3,\"sequentialLessonsLock\":true,\"lessonCompletionThresholdPercent\":90,\"mockTestPassingPercent\":80,\"assignmentPassingPercent\":80,\"finalAssessmentPassingPercent\":80,\"timeGatedByLiveSession\":false}")
   
   instructorId String

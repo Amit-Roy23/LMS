@@ -75,6 +75,94 @@ router.get('/health/db', async (req, res) => {
   }
 });
 
+// Real student reviews for the home page testimonials (4 and 5 stars with a written comment)
+router.get('/reviews/featured', async (req, res, next) => {
+  try {
+    const rows = await prisma.feedback.findMany({
+      where: { rating: { gte: 4 }, comment: { not: null }, course: { status: 'PUBLISHED', deletedAt: null } },
+      orderBy: [{ rating: 'desc' }, { createdAt: 'desc' }],
+      take: 12,
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        student: { select: { name: true, avatar: true } },
+        course: { select: { title: true, slug: true } },
+      },
+    });
+    // One review per student, longest comments first, so the three cards differ
+    const seen = new Set<string>();
+    const featured = rows
+      .filter((r) => (r.comment || '').trim().length >= 30)
+      .sort((a, b) => (b.comment || '').length - (a.comment || '').length)
+      .filter((r) => {
+        const keys = [r.student.name, (r.comment || '').trim().toLowerCase()];
+        if (keys.some((k) => seen.has(k))) return false;
+        keys.forEach((k) => seen.add(k));
+        return true;
+      })
+      .slice(0, 3);
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    return sendSuccess(res, featured);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Next scheduled live classes for the home page (published courses only; no join links)
+router.get('/live-sessions/upcoming', async (req, res, next) => {
+  try {
+    const sessions = await prisma.liveSession.findMany({
+      where: {
+        startsAt: { gt: new Date() },
+        durationMinutes: { lte: 24 * 60 },
+        status: { in: ['SCHEDULED', 'LIVE'] },
+        batch: { course: { status: 'PUBLISHED', deletedAt: null } },
+      },
+      orderBy: { startsAt: 'asc' },
+      take: 12,
+      select: {
+        id: true,
+        title: true,
+        startsAt: true,
+        durationMinutes: true,
+        provider: true,
+        batch: {
+          select: {
+            name: true,
+            mode: true,
+            course: { select: { title: true, slug: true, thumbnail: true, category: true, instructor: { select: { name: true } } } },
+          },
+        },
+      },
+    });
+    // The same class often runs for several batches at once: list it once
+    const seen = new Set<string>();
+    const unique = sessions.filter((s) => {
+      const key = `${s.title}|${s.startsAt.toISOString()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    return sendSuccess(
+      res,
+      unique.slice(0, 4).map((s) => ({
+        id: s.id,
+        title: s.title,
+        startsAt: s.startsAt,
+        durationMinutes: s.durationMinutes,
+        provider: s.provider,
+        batchName: s.batch.name,
+        course: s.batch.course,
+      }))
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Demo learners with their Student IDs, for the sign-in page (demo personas only, never real students)
 router.get('/demo-students', async (req, res, next) => {
   try {

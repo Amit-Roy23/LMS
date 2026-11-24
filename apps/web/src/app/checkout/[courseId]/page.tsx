@@ -104,7 +104,7 @@ export default function CheckoutPage() {
       await apiClient('/enrollments/verify', { method: 'POST', body: JSON.stringify(verifyBody) });
 
       track('purchase', { transaction_id: order.paymentId, value: price, currency: course?.currency || 'INR', items: [{ item_id: courseId, item_name: course?.title }] });
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0063AD', '#0077BF', '#E71E24', '#E93E08'] });
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#0064AE', '#0077BF', '#DC290C', '#E93E08'] });
       success('🎉 Admission confirmed!', 'Your GST invoice has been emailed to you.');
       router.push(`/student/courses/${courseId}`);
     } catch (err: any) {

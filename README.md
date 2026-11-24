@@ -394,3 +394,15 @@ See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for full matrix and open decisi
 - **R8 (Learning Flow & Toggles)**: Video → Quiz → Assignment → Review → Next Module → Final Stages with `requiresAssignment`, `requiresQuiz`, and `requirePracticeDone` toggles.
 
 
+
+
+## Website design and photos
+
+The public pages follow the client's design: Bricolage Grotesque headings, Montserrat body text and
+Roboto buttons (served from the site itself), brand blue `#0064AE` and red `#DC290C`.
+
+Home page text and photos are set in `apps/web/src/lib/home-content.ts`. To use the client's photos
+(exported from the PSD files as JPG or PNG), copy them to `apps/web/public/site/` and set the paths
+there, for example `hero: '/site/hero.jpg'`. Until a photo is set, a built-in brand graphic is shown.
+The partner logo strip and the student project showcase appear once their images are listed.
+Testimonials come from real student reviews; live classes from the scheduled sessions.
