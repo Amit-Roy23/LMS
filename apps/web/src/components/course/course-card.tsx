@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Star, Users, PlayCircle } from 'lucide-react';
+import { BookOpen, Star, Users, Clock3, Eye } from 'lucide-react';
 
 export interface CourseCardData {
   id: string;
@@ -14,17 +14,12 @@ export interface CourseCardData {
   currency?: string | null;
   modulesCount?: number;
   lessonsCount?: number;
+  totalDurationSeconds?: number;
   enrolledStudentsCount?: number;
   averageRating?: number | null;
   reviewsCount?: number;
   instructor?: { name?: string | null } | null;
 }
-
-const LEVEL_STYLES: Record<string, string> = {
-  BEGINNER: 'bg-emerald-50 text-emerald-300',
-  INTERMEDIATE: 'bg-amber-50 text-amber-300',
-  ADVANCED: 'bg-rose-50 text-rose-300',
-};
 
 export function formatPrice(amount?: number | null, currency?: string | null) {
   if (amount == null) return '';
@@ -40,71 +35,75 @@ export function formatPrice(amount?: number | null, currency?: string | null) {
   }
 }
 
+/** 27000 -> "7hrs 30mins", 3000 -> "50mins". */
+export function formatDurationShort(seconds?: number | null) {
+  const total = Math.round((seconds || 0) / 60);
+  if (!total) return '';
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return [h ? `${h}hr${h === 1 ? '' : 's'}` : '', m ? `${m}min${m === 1 ? '' : 's'}` : ''].filter(Boolean).join(' ');
+}
+
+const titleCase = (v: string) => v.charAt(0) + v.slice(1).toLowerCase();
+
+/** Course card from the client design: ribbon, category pill, level, rating, lessons, duration, red "View Course". */
 export function CourseCard({ course }: { course: CourseCardData }) {
   const level = (course.level || '').toUpperCase();
+  const free = !course.price;
+  const duration = formatDurationShort(course.totalDurationSeconds);
   return (
     <Link
       href={`/courses/${course.slug}`}
-      className="group flex flex-col h-full rounded-2xl bg-white border border-[#e2e8f0] overflow-hidden card-hover"
+      className="group flex flex-col h-full rounded-xl bg-white border border-grey3 overflow-hidden shadow-[0_2px_10px_rgba(15,23,42,0.06)] hover:shadow-[0_12px_28px_rgba(0,100,174,0.16)] hover:-translate-y-0.5 transition-all duration-300"
     >
-      <div className="relative aspect-[16/9] overflow-hidden bg-night-900">
+      <div className="relative aspect-[16/10] overflow-hidden bg-grey1">
         {course.thumbnail ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={course.thumbnail}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <img src={course.thumbnail} alt="" loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
           <div className="w-full h-full bg-brand-gradient" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-night-950/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-ink opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
-          <PlayCircle className="w-3.5 h-3.5 text-indigo-400" /> View course
+        <span className={`absolute top-3 left-0 px-3 py-1 text-[11px] font-button font-bold text-white rounded-r-md ${free ? 'bg-adred' : 'bg-adblue'}`}>
+          {free ? 'Free' : 'Paid'}
         </span>
       </div>
 
-      <div className="flex flex-col flex-1 p-5 gap-3">
-        <div className="flex items-center gap-2 flex-wrap">
-          {course.category && (
-            <span className="text-xs font-semibold text-indigo-400">{course.category}</span>
-          )}
-          {level && (
-            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${LEVEL_STYLES[level] || 'bg-cream-100 text-slate-300'}`}>
-              {level.charAt(0) + level.slice(1).toLowerCase()}
+      <div className="flex flex-col flex-1 p-4 gap-2.5">
+        <div className="flex items-center gap-2 text-[11px]">
+          {course.category && <span className="rounded-full bg-adblue px-2.5 py-0.5 font-semibold text-white truncate max-w-[60%]">{course.category}</span>}
+          {level && <span className="font-medium text-slate-500">{titleCase(level)}</span>}
+          <span className="ml-auto flex items-center gap-2 text-slate-500 shrink-0">
+            {course.averageRating != null && (
+              <span className="inline-flex items-center gap-0.5 font-semibold text-ink">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {course.averageRating.toFixed(1)}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-0.5" title="Learners">
+              <Users className="w-3.5 h-3.5" /> {course.enrolledStudentsCount ?? 0}
             </span>
-          )}
+          </span>
         </div>
 
-        <h3 className="text-[17px] font-bold leading-snug text-ink group-hover:text-indigo-300 transition-colors line-clamp-2">
-          {course.title}
-        </h3>
-        {course.description && <p className="text-sm text-slate-400 line-clamp-2">{course.description}</p>}
+        <h3 className="text-[17px] font-bold leading-snug text-adblue line-clamp-2">{course.title}</h3>
+        {course.description && <p className="text-xs leading-relaxed text-slate-400 line-clamp-3">{course.description}</p>}
 
         <div className="flex items-center gap-4 text-xs text-slate-500 mt-auto pt-1">
-          {course.averageRating != null && (
-            <span className="inline-flex items-center gap-1 font-semibold text-ink">
-              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-              {course.averageRating.toFixed(1)}
-              <span className="font-normal text-slate-500">({course.reviewsCount})</span>
+          <span className="inline-flex items-center gap-1">
+            <BookOpen className="w-3.5 h-3.5" /> {course.lessonsCount ?? 0} Lessons
+          </span>
+          {duration && (
+            <span className="inline-flex items-center gap-1">
+              <Clock3 className="w-3.5 h-3.5" /> {duration}
             </span>
           )}
-          <span className="inline-flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" />
-            {course.lessonsCount ?? 0} lessons
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            {course.enrolledStudentsCount ?? 0}
-          </span>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-[#e2e8f0]">
-          <span className="text-xs text-slate-500 truncate">
-            {course.instructor?.name ? `by ${course.instructor.name}` : ''}
+        <div className="flex items-center gap-2 pt-3 border-t border-grey3">
+          <span className="text-[11px] text-slate-500 truncate flex-1">{course.instructor?.name ? `by ${course.instructor.name}` : 'by Adsign Team'}</span>
+          <span className="inline-flex items-center gap-1 rounded bg-adred px-2.5 py-1 text-[11px] font-button font-bold text-white group-hover:brightness-110">
+            <Eye className="w-3.5 h-3.5" /> View Course
           </span>
-          <span className="text-base font-extrabold text-ink">{formatPrice(course.price, course.currency)}</span>
+          <span className="text-sm font-extrabold text-adblue">{formatPrice(course.price, course.currency)}</span>
         </div>
       </div>
     </Link>
@@ -113,9 +112,9 @@ export function CourseCard({ course }: { course: CourseCardData }) {
 
 export function CourseCardSkeleton() {
   return (
-    <div className="rounded-2xl bg-white border border-[#e2e8f0] overflow-hidden">
-      <div className="aspect-[16/9] skeleton" />
-      <div className="p-5 space-y-3">
+    <div className="rounded-xl bg-white border border-grey3 overflow-hidden">
+      <div className="aspect-[16/10] skeleton" />
+      <div className="p-4 space-y-3">
         <div className="h-3 w-24 rounded skeleton" />
         <div className="h-5 w-full rounded skeleton" />
         <div className="h-4 w-2/3 rounded skeleton" />

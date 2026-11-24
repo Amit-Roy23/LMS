@@ -65,7 +65,7 @@ export class CourseService {
 
     // Lesson counts and review stats for the course cards, fetched together in one round trip
     const ids = items.map((c) => c.id);
-    const [moduleLessonCounts, ratings] = await Promise.all([
+    const [moduleLessonCounts, ratings, lessonDurations] = await Promise.all([
       prisma.module.findMany({
         where: { courseId: { in: ids }, deletedAt: null },
         select: { courseId: true, _count: { select: { lessons: { where: { deletedAt: null } } } } },
@@ -76,7 +76,13 @@ export class CourseService {
         _avg: { rating: true },
         _count: { _all: true },
       }),
+      prisma.lesson.findMany({
+        where: { deletedAt: null, module: { courseId: { in: ids }, deletedAt: null } },
+        select: { durationSeconds: true, module: { select: { courseId: true } } },
+      }),
     ]);
+    const secondsByCourse = new Map<string, number>();
+    lessonDurations.forEach((l) => secondsByCourse.set(l.module.courseId, (secondsByCourse.get(l.module.courseId) || 0) + (l.durationSeconds || 0)));
     const lessonsByCourse = new Map<string, number>();
     moduleLessonCounts.forEach((m) =>
       lessonsByCourse.set(m.courseId, (lessonsByCourse.get(m.courseId) || 0) + m._count.lessons)
@@ -87,6 +93,7 @@ export class CourseService {
       ...c,
       modulesCount: c._count.modules,
       lessonsCount: lessonsByCourse.get(c.id) || 0,
+      totalDurationSeconds: secondsByCourse.get(c.id) || 0,
       enrolledStudentsCount: c._count.enrollments,
       averageRating: ratingByCourse.get(c.id)?._avg.rating ?? null,
       reviewsCount: ratingByCourse.get(c.id)?._count._all ?? 0,
@@ -100,7 +107,7 @@ export class CourseService {
       where: { slug },
       include: {
         // Public page: instructor's public profile, never their email
-        instructor: { select: { id: true, name: true, avatar: true, instructorProfile: { select: { slug: true, headline: true, isPublic: true } } } },
+        instructor: { select: { id: true, name: true, avatar: true, instructorProfile: { select: { slug: true, headline: true, bio: true, avatar: true, isPublic: true } } } },
         modules: {
           where: { deletedAt: null },
           orderBy: { order: 'asc' },

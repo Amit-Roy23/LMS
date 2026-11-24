@@ -1,3 +1,10 @@
+// Client fonts, served from this site (no Google Fonts request)
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/montserrat';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import '@fontsource/jetbrains-mono/400.css';
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { ToastProvider } from '../providers/toast-provider';
@@ -51,7 +58,7 @@ const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#171C24',
+  themeColor: '#0064AE',
 };
 
 export default async function RootLayout({
@@ -62,14 +69,6 @@ export default async function RootLayout({
   const { settings } = await getSiteConfig();
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body className="min-h-screen bg-cream text-ink antialiased selection:bg-indigo-500 selection:text-white">
         <QueryProvider>
           <AuthProvider>

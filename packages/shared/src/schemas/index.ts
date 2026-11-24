@@ -104,6 +104,12 @@ export const courseSettingsSchema = z.object({
   watermarkEnabled: z.boolean().default(true),
 });
 
+/** Bullet lists on the course page ("What you'll learn" etc.): blank lines dropped, up to 20 points. */
+const courseBulletsSchema = z
+  .array(z.string().trim().max(240, 'Each point can be up to 240 characters'))
+  .max(20, 'Up to 20 points')
+  .transform((list) => list.filter(Boolean));
+
 export const createCourseSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(200),
   slug: z
@@ -127,6 +133,11 @@ export const createCourseSchema = z.object({
   category: z.string().min(2),
   status: z.nativeEnum(CourseStatus).default(CourseStatus.DRAFT),
   settings: courseSettingsSchema.optional(),
+  /** Course page content */
+  language: z.string().trim().min(2).max(60).optional(),
+  outcomes: courseBulletsSchema.optional(),
+  requirements: courseBulletsSchema.optional(),
+  audience: courseBulletsSchema.optional(),
 });
 
 export const updateCourseSchema = createCourseSchema.partial();

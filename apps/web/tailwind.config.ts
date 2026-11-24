@@ -1,8 +1,8 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * ADSIGN brand theme: white surfaces on a light gray canvas, ADSIGN primary blue (#0063AD)
- * with supporting bright blue (#0077BF), ADSIGN red (#E71E24) and red-orange (#E93E08)
+ * ADSIGN brand theme: white surfaces on a light gray canvas, ADSIGN primary blue (#0064AE)
+ * with supporting bright blue (#0077BF), ADSIGN red (#DC290C) and red-orange (#E4471F)
  * accents, and charcoal (#171C24, the "night" scale) for hero sections, sidebars, the
  * footer and the video player.
  *
@@ -21,9 +21,9 @@ const indigo = {
   100: '#DCEEF9',
   200: '#003F70',
   300: '#00508C',
-  400: '#0063AD',
+  400: '#0064AE',
   500: '#0077BF',
-  600: '#0063AD',
+  600: '#0064AE',
   700: '#00528F',
   800: '#B9DBF1',
   900: '#DCEEF9',
@@ -33,12 +33,12 @@ const indigo = {
 const violet = {
   50: '#FFF2EE',
   100: '#FFE1D9',
-  200: '#8E1014',
-  300: '#B5161B',
-  400: '#E71E24',
-  500: '#E93E08',
-  600: '#E71E24',
-  700: '#C4161B',
+  200: '#8A1A07',
+  300: '#B02009',
+  400: '#DC290C',
+  500: '#E4471F',
+  600: '#DC290C',
+  700: '#B8220A',
   800: '#FBC4B5',
   900: '#FFE1D9',
   950: '#FFF2EE',
@@ -107,16 +107,22 @@ const config: Config = {
         foreground: 'hsl(var(--foreground))',
         // Main heading/body ink colour
         ink: '#171C24',
+        // Client palette (exact values from the style guide)
+        adblue: '#0064AE',
+        adred: '#DC290C',
+        grey1: '#F2F1EF',
+        grey2: '#F8FAFC',
+        grey3: '#D5D5D5',
         night,
-        brand: { DEFAULT: '#0063AD', dark: '#00528F', bright: '#0077BF', red: '#E71E24', orange: '#E93E08', ...indigo },
-        primary: { DEFAULT: '#0063AD', foreground: '#ffffff', ...indigo },
+        brand: { DEFAULT: '#0064AE', dark: '#00528F', bright: '#0077BF', red: '#DC290C', orange: '#E4471F', ...indigo },
+        primary: { DEFAULT: '#0064AE', foreground: '#ffffff', ...indigo },
         // Earlier theme token names, mapped onto the academy palette
         cream: { DEFAULT: '#F5F7FA', 50: '#FFFFFF', 100: '#F0F7FC', 200: '#E2E8F0' },
         plum: { ...night, DEFAULT: '#171C24', 500: '#222936' },
-        rust: { DEFAULT: '#0063AD', ...indigo },
+        rust: { DEFAULT: '#0064AE', ...indigo },
         peach: { DEFAULT: '#f59e0b', ...amber },
         coral: { DEFAULT: '#f59e0b', ...amber },
-        pink: { DEFAULT: '#E71E24', ...violet },
+        pink: { DEFAULT: '#DC290C', ...violet },
         surface: {
           dark: '#F5F7FA',
           card: '#ffffff',
@@ -173,10 +179,10 @@ const config: Config = {
           950: '#fff1f2',
         },
         accent: {
-          blue: '#0063AD',
+          blue: '#0064AE',
           emerald: '#059669',
           amber: '#d97706',
-          purple: '#E71E24',
+          purple: '#DC290C',
           rose: '#e11d48',
           cyan: '#0077BF',
         },
@@ -190,10 +196,12 @@ const config: Config = {
         '3xl': '1.5rem',
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        // Client type system: Montserrat body, Bricolage Grotesque headings, Roboto buttons/links
+        sans: ['"Montserrat Variable"', 'Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Bricolage Grotesque Variable"', '"Bricolage Grotesque"', '"Montserrat Variable"', 'Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        button: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         // Labels previously used a monospace "terminal" look; the theme keeps them friendly
-        mono: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"Montserrat Variable"', 'Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         code: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       boxShadow: {

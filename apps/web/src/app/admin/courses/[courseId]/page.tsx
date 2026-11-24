@@ -128,15 +128,27 @@ function DetailsTab({ course, onSaved }: { course: any; onSaved: () => void }) {
     status: course.status,
     thumbnail: course.thumbnail || '',
     price: course.price,
+    language: course.language || 'English',
+    outcomes: (course.outcomes || []).join('\n'),
+    requirements: (course.requirements || []).join('\n'),
+    audience: (course.audience || []).join('\n'),
   });
   const [busy, setBusy] = useState(false);
+  const lines = (v: string) => v.split('\n').map((l) => l.trim()).filter(Boolean);
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
       await apiClient(`/admin/courses/${course.id}`, {
         method: 'PUT',
-        body: JSON.stringify({ ...form, price: Number(form.price), thumbnail: form.thumbnail || null }),
+        body: JSON.stringify({
+          ...form,
+          price: Number(form.price),
+          thumbnail: form.thumbnail || null,
+          outcomes: lines(form.outcomes),
+          requirements: lines(form.requirements),
+          audience: lines(form.audience),
+        }),
       });
       success('Course saved', form.title);
       onSaved();
@@ -174,6 +186,20 @@ function DetailsTab({ course, onSaved }: { course: any; onSaved: () => void }) {
             <Input label="Price (₹, includes GST)" type="number" min={0} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
             <p className="text-xs text-slate-500 mt-1">Price changes need a main admin's PIN and OTP.</p>
           </div>
+        </div>
+
+        <div className="rounded-xl border border-[#e2e8f0] p-4 space-y-4">
+          <div>
+            <h3 className="font-bold text-ink">Course page content</h3>
+            <p className="text-xs text-slate-500">Shown on the public course page. Write one point per line.</p>
+          </div>
+          <Input label="Language" placeholder="e.g. English, Bengali" value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} maxLength={60} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Textarea label="What you'll learn" rows={7} placeholder={'Design a complete brand identity\nBuild a logo from sketch to final file'} value={form.outcomes} onChange={(e) => setForm({ ...form, outcomes: e.target.value })} />
+            <Textarea label="Requirements" rows={7} placeholder={'A laptop or desktop computer\nNo prior experience needed'} value={form.requirements} onChange={(e) => setForm({ ...form, requirements: e.target.value })} />
+            <Textarea label="Who this course is for" rows={7} placeholder={'Students who want a design career\nFreelancers'} value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })} />
+          </div>
+          <p className="text-xs text-slate-500">Up to 20 points each. If "What you'll learn" is empty, the page lists the lesson titles.</p>
         </div>
         <Button type="submit" variant="primary" isLoading={busy}><Save className="w-4 h-4" /> Save details</Button>
       </form>
